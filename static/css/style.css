@@ -1,0 +1,46 @@
+#image{
+	width: 250px;
+	height: 250px;
+	position: absolute;
+	top: 20%;
+	left: 75%;
+	margin: -125px 0 0 -1px;	
+}
+#btn {
+	width: 250px;
+	height: 250px;
+	position: absolute;
+	top: 20%;
+	left: 50%;
+	margin: -125px 0 0 -125px;
+}
+	
+.button-group {
+	list-style: none;
+	display: inline-block;
+	padding: 0px;
+	margin:10px;
+	text-align:center;
+}
+.button-group li a {
+	text-align:center;
+	font-family: calibri;
+	margin-top: 1.5px;
+	margin-bottom: 1.5px;
+	-webkit-appearance: button;
+	-moz-appearance: button;
+	appearance: button;
+	text-decoration: none;
+	background: green;
+	color: white;
+	padding: .7em 1.5em;
+	min-width: 180px;
+	min-height: 20px;
+}
+
+#banner {
+	position:relative;
+	color:white;
+	background:green;
+}
+
