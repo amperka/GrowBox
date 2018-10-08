@@ -1,50 +1,44 @@
 <html>
 <head>
     <title>Gauges as Components</title>
-        <script src="../static/js/gauge.min.js"></script>
+    <script src="../static/js/gauge.min.js"></script>
 </head>
 	<body>
-		<canvas data-type="radial-gauge"
-			data-width="300"
-			data-height="300"
-	    		data-title="pH"
-	        	data-min-value="0"
-		    	data-max-value="14"
-		        data-major-ticks="[0,1,2,3,4,5,6,7,8,9,10, 11, 12, 13, 14]"
-			data-minor-ticks="2"
-			data-stroke-ticks="true"
-			data-highlights='[ {"from": 0, "to": 7, "color": "rgba(0,0, 255, .3)"},{"from": 7, "to": 14, "color": "rgba(255, 0, 0, .3)"} ]'
-			data-ticks-angle="225"
-			data-start-angle="67.5"
-			data-color-major-ticks="#ddd"
-			data-color-minor-ticks="#ddd"
-			data-color-title="#eee"
-			data-color-units="#ccc"
-			data-color-numbers="#eee"
-			data-color-plate="#222"
-			data-borders="true"
-			data-needle-type="arrow"
-			data-needle-width="2"
-			data-needle-circle-size="7"
-			data-needle-circle-outer="true"
-			data-needle-circle-inner="false"
-			data-animation-duration="1500"
-			data-animation-rule="linear"
-			data-color-border-outer="#333"
-			data-color-border-outer-end="#111"
-			data-color-border-middle="#222"
-			data-color-border-middle-end="#111"
-			data-color-border-inner="#111"
-			data-color-border-inner-end="#333"
-			data-color-needle-shadow-down="#333"
-			data-color-needle-circle-outer="#333"
-			data-color-needle-circle-outer-end="#111"
-			data-color-needle-circle-inner="#111"
-			data-color-needle-circle-inner-end="#222"
-			data-value-box-border-radius="0"
-			data-color-value-box-rect="#222"
-			data-color-value-box-rect-end="#333"
-			>
-		</canvas>
+    <canvas data-type="linear-gauge"
+    data-width="500"
+    data-height="150"
+    data-title="pH"
+    data-min-value="0"
+    data-max-value="14"
+    data-major-ticks="[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]"
+    data-minor-ticks="5"
+    data-stroke-ticks="true"
+    data-ticks-width="15"
+    data-ticks-width-minor="7.5"
+    data-highlights='[ {"from": 0, "to": 0, "color": "rgba(0,0, 255, .3)"},
+                      {"from": 0, "to": 14, "color": "rgba(255, 0, 0, .3)"} ]'
+    data-color-major-ticks="#ffe66a"
+    data-color-minor-ticks="#ffe66a"
+    data-color-title="#eee"
+    data-color-units="#ccc"
+    data-color-numbers="#eee"
+    data-color-plate="#009a40"
+    data-color-plate-end="#009a40"
+    data-border-shadow-width="0"
+    data-borders="false"
+    data-border-radius="10"
+    data-needle-type="arrow"
+    data-needle-width="3"
+    data-animation-duration="1500"
+    data-animation-rule="linear"
+    data-color-needle="#222"
+    data-color-needle-end=""
+    data-color-bar-progress="#410000"
+    data-color-bar="#f5f5f5"
+    data-bar-stroke="0"
+    data-bar-width="8"
+    data-bar-begin-circle="false"
+    data-value = 7
+></canvas>
 	</body>
 	</html>

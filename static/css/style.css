@@ -4,7 +4,7 @@
 	position: absolute;
 	top: 20%;
 	left: 75%;
-	margin: -125px 0 0 -1px;	
+	margin: -125px 0 0 -1px;
 }
 #btn {
 	width: 250px;
@@ -14,7 +14,7 @@
 	left: 50%;
 	margin: -125px 0 0 -125px;
 }
-	
+
 .button-group {
 	list-style: none;
 	display: inline-block;
@@ -38,9 +38,8 @@
 	min-height: 20px;
 }
 
-#banner {
+.banner {
 	position:relative;
 	color:white;
 	background:green;
 }
-

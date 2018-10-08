@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 from flask import Flask, render_template, make_response, request
-import dht11_measurement
-import Adafruit_DHT
 import datetime
 from getDataFromDatabase import getData, getHistData
 
@@ -14,6 +12,16 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+#return setting of GrowBox
+@app.route("/settings")
+def settings():
+    return render_template("settings.html")
+
+#return measurement page
+@app.route("/measurements")
+def measurements():
+    return render_template("measurements.html")
+
 #return temperature page with dynamic measurements
 ###############################################
 @app.route("/temp")
@@ -25,19 +33,19 @@ def dynamicTemp():
 
 @app.route("/tempmeas")
 def temp_meas():
-    hum, temp = dht11_measurement.measurement(Adafruit_DHT.DHT11, 4)
+    hum, temp = (60, 30) #temporally
     return str(temp) + ' ' + str(hum)
 ################################################
 
-#return pH page 
+#return pH page
 @app.route("/ph")
 def ph():
     return render_template("ph.html")
 
-#return CO2 page 
+#return CO2 page
 @app.route("/co2")
 def co2():
-    return "There will be CO2 level"
+    return render_template("co2.html")
 
 @app.route("/info")
 def info():
@@ -55,8 +63,7 @@ def imagePlot():
     tempData = (getHistData(500))[1]
     humData = (getHistData(500))[2]
     templateData = {'labels':labels, 'temp':tempData, 'hum':humData}
-    return render_template("plot.html", **templateData)        
+    return render_template("plot.html", **templateData)
 
 if __name__ == "__main__":
-    app.run(host='192.168.88.150', debug=True)
-
+    app.run(host='127.0.0.1', debug=True)
