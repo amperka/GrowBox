@@ -1,8 +1,8 @@
 # GrowBox
-#Установка:
-git clone https://github.com/AlexErAmp/GrowBox.git
+<h2>Установка:</h2><br>
+<p>$ git clone https://github.com/AlexErAmp/GrowBox.git</p>
 
-#Запуск сервера:
+<h2>Запуск сервера:</h2>
 
-$ cd GrowBox
-$ python3 ./server.py
+<p>$ cd GrowBox</p>
+<p>$ python3 ./server.py</p>
