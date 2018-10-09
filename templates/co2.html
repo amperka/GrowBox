@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <title>Уровень СO2</title>
     <script src="../static/js/gauge.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../static/js/updatePage.js"></script>
   </head>
   <body>
-    <canvas data-type="radial-gauge"
+    <canvas class="canv"
+      data-type="radial-gauge"
 			data-width="300"
 			data-height="300"
 	    data-title="CO2"
@@ -30,7 +33,7 @@
 			data-needle-circle-size="7"
 			data-needle-circle-outer="true"
 			data-needle-circle-inner="false"
-			data-animation-duration="1500"
+			data-animation-duration="500"
 			data-animation-rule="linear"
 			data-color-border-outer="#333"
 			data-color-border-outer-end="#111"
@@ -46,8 +49,13 @@
 			data-value-box-border-radius="0"
 			data-color-value-box-rect="#222"
 			data-color-value-box-rect-end="#333"
+      data-value="0"
 			>
 		</canvas>
 
+    <script>
+    var url = "/co2meas";
+    getReading(url);
+    </script>
   </body>
 </html>

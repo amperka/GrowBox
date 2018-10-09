@@ -3,9 +3,30 @@
   <head>
     <meta charset="utf-8">
     <title>Влажность</title>
+    <script src="../static/js/gauge.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../static/js/updatePage.js"></script>
   </head>
 
   <body>
+    <canvas class="canv"
+	  	data-type="linear-gauge"
+			data-width="160"
+			data-height="600"
+			data-border-radius="20"
+			data-borders="0"
+			data-bar-stroke-width="20"
+			data-minor-ticks="10"
+			data-major-ticks="0,10,20,30,40,50,60,70,80,90,100"
+			data-value="0"
+			data-units="%"
+			data-color-value-box-shadow="false"
+		>
+		</canvas>
 
+    <script>
+    var url = "/hummeas";
+    getReading(url);
+    </script>
   </body>
 </html>

@@ -1,10 +1,14 @@
 <html>
 <head>
-    <title>Gauges as Components</title>
+    <meta charset="utf-8">
+    <title>Уровень pH</title>
     <script src="../static/js/gauge.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../static/js/updatePage.js"></script>
 </head>
 	<body>
-    <canvas data-type="linear-gauge"
+    <canvas class="canv"
+    data-type="linear-gauge"
     data-width="500"
     data-height="150"
     data-title="pH"
@@ -14,7 +18,7 @@
     data-minor-ticks="5"
     data-stroke-ticks="true"
     data-ticks-width="15"
-    data-ticks-width-minor="7.5"
+    data-ticks-width-minor="5"
     data-highlights='[ {"from": 0, "to": 0, "color": "rgba(0,0, 255, .3)"},
                       {"from": 0, "to": 14, "color": "rgba(255, 0, 0, .3)"} ]'
     data-color-major-ticks="#ffe66a"
@@ -29,7 +33,7 @@
     data-border-radius="10"
     data-needle-type="arrow"
     data-needle-width="3"
-    data-animation-duration="1500"
+    data-animation-duration="500"
     data-animation-rule="linear"
     data-color-needle="#222"
     data-color-needle-end=""
@@ -38,7 +42,14 @@
     data-bar-stroke="0"
     data-bar-width="8"
     data-bar-begin-circle="false"
-    data-value = 7
+    data-value = 0
+
+
 ></canvas>
+<script>
+  var url = "/phmeas";
+  getReading(url);
+</script>
+
 	</body>
 	</html>

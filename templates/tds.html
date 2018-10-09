@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <title>Уровень солей</title>
     <script src="../static/js/gauge.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../static/js/updatePage.js"></script>
   </head>
   <body>
-    <canvas data-type="linear-gauge"
+    <canvas class="canv"
+    data-type="linear-gauge"
     data-width="500"
     data-height="150"
     data-title="Уровень солей"
@@ -31,7 +34,7 @@
     data-border-radius="10"
     data-needle-type="arrow"
     data-needle-width="3"
-    data-animation-duration="1500"
+    data-animation-duration="500"
     data-animation-rule="linear"
     data-color-needle="#222"
     data-color-needle-end=""
@@ -40,7 +43,11 @@
     data-bar-stroke="0"
     data-bar-width="8"
     data-bar-begin-circle="false"
-    data-value = 300
+    data-value = 0
   ></canvas>
+  <script>
+  var url = "/tdsmeas";
+  getReading(url);
+  </script>
   </body>
 </html>

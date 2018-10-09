@@ -25,9 +25,9 @@
 			labels : [{% for item in labels %}
 					"{{item}}",
 					 {% endfor %}],
-			
+
 			datasets : [{
-		       		label : "Temperature",
+		    label : "Temperature",
 				fill : true,
 				backgroundColor: "rgba(75,192,192,0.4)",
 				borderColor: "rgba(75,192,192,1)",
@@ -50,15 +50,15 @@
 				spanGaps: false
 			}]
 		};
-		
+
 		var humCanv = document.getElementById("humChart").getContext('2d');
 		var humData = {
 			labels : [{% for item in labels %}
 					"{{item}}",
 					 {% endfor %}],
-			
+
 			datasets : [{
-		       		label : "Humidity",
+		    label : "Humidity",
 				fill : true,
 				backgroundColor: "rgba(75,192,192,0.4)",
 				borderColor: "rgba(75,192,192,1)",
@@ -81,14 +81,14 @@
 				spanGaps: false
 			}]
 		};
-	
+
 		var tempChart = new Chart(tempCanv, {
 			type: 'line',
 			data: tempData
 			});
 
 		var humChart = new Chart(humCanv, {
-			type: 'line', 
+			type: 'line',
 			data : humData
 			});
 
