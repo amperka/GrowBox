@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 from flask import Flask, render_template, make_response, request
-import datetime
+import datetime, random
 from getDataFromDatabase import getData, getHistData
+import serialPort, multiprocessing
 
 
 app = Flask(__name__)
@@ -15,11 +16,19 @@ def index():
 #return measurement page
 @app.route("/measurements")
 def measurements():
-    return render_template("measurements.html")
+    return render_template("measurements/measurements.html")
 #camera control
 @app.route("/camera")
 def camera():
-    return render_template("camera.html")
+    return render_template("camera/camera.html")
+
+@app.route("/camera/photo")
+def photo():
+    return render_template("camera/photo.html")
+
+@app.route("/camera/video")
+def video():
+    return render_template("camera/video.html")
 
 #return setting of GrowBox
 @app.route("/settings")
@@ -33,7 +42,21 @@ def net_settings():
 #return charts page
 @app.route("/charts")
 def charts():
-    return render_template("charts.html")
+    return render_template("charts/charts.html")
+
+@app.route("/charts/tempChart")
+def tempChart():
+    labels = [i for i in range(30)]
+    tempData = getHistData(30)[1]
+    templateData = {'labels' : labels, 'temp' : tempData}
+    return render_template("charts/tempChart.html", **templateData)
+
+@app.route("/charts/humChart")
+def humChart():
+    labels = [i for i in range(30)]
+    humData = getHistData(30)[2]
+    templateData = {'labels' : labels, 'hum' : humData}
+    return render_template("charts/humChart.html", **templateData)
 
 @app.route("/plot")
 def imagePlot():
@@ -45,64 +68,66 @@ def imagePlot():
 
 #return temperature page with dynamic measurements
 ###############################################
-@app.route("/temp")
+@app.route("/measurements/temp")
 def temp():
-    return render_template("temp.html")
+    return render_template("measurements/temp.html")
 @app.route("/dynamicCharts")
 def dynamicTemp():
     return render_template("dynamicCharts.html")
 
 @app.route("/tempmeas")
 def temp_meas():
-    temp = 45 #temporally
-    return str(temp)
+    tp = serialPort.getDataFromSerial(output_queue)[0]
+    return tp
 ################################################
 #return humidity renewTempPage
-@app.route("/humidity")
+@app.route("/measurements/humidity")
 def hum():
-    return render_template("humidity.html")
+    return render_template("measurements/humidity.html")
 @app.route("/hummeas")
 def hum_meas():
-    hum = 60 #temporally
-    return str(hum)
+    hum = serialPort.getDataFromSerial(output_queue)[1]
+    return hum
 
 #return pH page
-@app.route("/ph")
+@app.route("/measurements/ph")
 def ph():
-    return render_template("ph.html")
+    return render_template("measurements/ph.html")
 @app.route("/phmeas")
 def ph_meas():
-    ph = 5.5 #temporally
-    return str(ph)
+    ph = serialPort.getDataFromSerial(output_queue)[2]
+    return ph
 
 #return TDS updatePage
-@app.route("/tds")
+@app.route("/measurements/tds")
 def tds():
-    return render_template("tds.html")
+    return render_template("measurements/tds.html")
 @app.route("/tdsmeas")
 def tds_meas():
-    tds = 700
-    return str(tds)
+    tds = serialPort.getDataFromSerial(output_queue)[3]
+    return tds
 
 #return CO2 page
-@app.route("/co2")
+@app.route("/measurements/co2")
 def co2():
-    return render_template("co2.html")
+    return render_template("measurements/co2.html")
 @app.route("/co2meas")
 def co2_meas():
-    co2 = 1000
-    return str(1000)
+    co2 = serialPort.getDataFromSerial(output_queue)[4]
+    return co2
 
+#return return page about plants
 @app.route("/info")
 def info():
     return render_template("info.html")
 
-#@app.route("/tempDatabase")
-#def tempDatabase():
-#    time, temp, hum = getData()
-#    templateData = {'time':time, 'temp':temp, 'hum':hum}
-#    return render_template("tempDatabase.html", **templateData)
-
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', debug=True)
+    temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
+
+    output_queue = multiprocessing.Queue(5)
+    sp = serialPort.SerialProcess(output_queue, "COM6")
+    sp.daemon = True
+
+    sp.start()
+    app.run(host='127.0.0.1', debug=False)

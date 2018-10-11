@@ -6,7 +6,7 @@
 	<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
 </head>
 <body>
-	<h3> Данные с датчика температуры и влажности за 30 дней <h3>
+	<h3> График температуры за 30 дней <h3>
 
 	<canvas id="tempChart" width="600" height="400"></canvas>
 	<canvas id="humChart" width="600" height="400"></canvas>
@@ -15,13 +15,6 @@
 		Chart.defaults.global.responsive = false;
 		var tempCanv = document.getElementById("tempChart").getContext('2d');
 		var tempData = {
-			/*labels : (function(){
-					var x = [];
-					for (var i = 0; i < 31; i++) {
-						x.push(i);
-					}
-					return x;
-				})(),*/
 			labels : [{% for item in labels %}
 					"{{item}}",
 					 {% endfor %}],
