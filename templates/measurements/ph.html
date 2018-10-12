@@ -5,7 +5,8 @@
     <link rel="stylesheet" href="../static/css/style.css">
     <script src="../static/js/gauge.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../static/js/updatePage.js"></script>
+    <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+    <script src="../static/js/update_page.js"></script>
 </head>
 	<body>
     <h1 align="center" class="banner"> Текущий уровень pH </h1>
@@ -49,8 +50,10 @@
       >
     </canvas>
 </div>
+<canvas id="chartCanv" width="600" height="400" style="margin: 0 auto"></canvas> <!-- Chart-->
+<script src="../static/js/dynamic_chart.js"></script>
 <script>
-  var url = "/phmeas";
+  var url = "/ph_measure";
   getReading(url);
 </script>
 

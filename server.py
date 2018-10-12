@@ -1,8 +1,9 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request
 import datetime, random
-from getDataFromDatabase import getData, getHistData
-import serialPort, multiprocessing
+from get_data_from_database import get_hist_data
+import serial_port, multiprocessing
 
 
 app = Flask(__name__)
@@ -13,10 +14,59 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-#return measurement page
+#return measurements page
 @app.route("/measurements")
 def measurements():
     return render_template("measurements/measurements.html")
+
+#return temperature page with dynamic measurements
+###############################################
+@app.route("/measurements/temp")
+def temp():
+    return render_template("measurements/temp.html")
+
+@app.route("/temp_measure")
+def temp_meas():
+    tp = serial_port.get_data_from_serial(output_queue)[0]
+    return tp
+################################################
+#return humidity page with dynamic measurements
+@app.route("/measurements/humidity")
+def hum():
+    return render_template("measurements/humidity.html")
+@app.route("/hum_measure")
+def hum_meas():
+    hum = serial_port.get_data_from_serial(output_queue)[1]
+    return hum
+#################################################
+#return pH page
+@app.route("/measurements/ph")
+def ph():
+    return render_template("measurements/ph.html")
+@app.route("/ph_measure")
+def ph_meas():
+    ph = serial_port.get_data_from_serial(output_queue)[2]
+    return ph
+#################################################
+#return TDS updatePage
+@app.route("/measurements/tds")
+def tds():
+    return render_template("measurements/tds.html")
+@app.route("/tds_measure")
+def tds_meas():
+    tds = serial_port.get_data_from_serial(output_queue)[3]
+    return tds
+#################################################
+#return CO2 page
+@app.route("/measurements/co2")
+def co2():
+    return render_template("measurements/co2.html")
+@app.route("/co2_measure")
+def co2_meas():
+    co2 = serial_port.get_data_from_serial(output_queue)[4]
+    return co2
+##################################################
+
 #camera control
 @app.route("/camera")
 def camera():
@@ -34,6 +84,7 @@ def video():
 @app.route("/settings")
 def settings():
     return render_template("settings.html")
+
 #return net_settings
 @app.route("/net_settings")
 def net_settings():
@@ -44,89 +95,70 @@ def net_settings():
 def charts():
     return render_template("charts/charts.html")
 
-@app.route("/charts/tempChart")
-def tempChart():
+#return chart for 30 days
+@app.route("/charts/temp_chart")
+def temp_chart():
     labels = [i for i in range(30)]
-    tempData = getHistData(30)[1]
-    templateData = {'labels' : labels, 'temp' : tempData}
-    return render_template("charts/tempChart.html", **templateData)
+    data = get_hist_data(30)[1]
+    label = "Температура"
+    banner = "температуры"
+    template_data = {'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
+    return render_template("charts/month_chart.html", **template_data)
 
-@app.route("/charts/humChart")
-def humChart():
+@app.route("/charts/hum_chart")
+def hum_chart():
     labels = [i for i in range(30)]
-    humData = getHistData(30)[2]
-    templateData = {'labels' : labels, 'hum' : humData}
-    return render_template("charts/humChart.html", **templateData)
+    data = get_hist_data(30)[2]
+    label = "Влажность"
+    banner = "влажности"
+    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    return render_template("charts/month_chart.html", **template_data)
 
-@app.route("/plot")
-def imagePlot():
-    labels = [i for i in range(500)]
-    tempData = (getHistData(500))[1]
-    humData = (getHistData(500))[2]
-    templateData = {'labels':labels, 'temp':tempData, 'hum':humData}
-    return render_template("plot.html", **templateData)
+@app.route("/charts/ph_chart")
+def ph_chart():
+    labels = [i for i in range(30)]
+    data = [i for i in range(30)] #temporally
+    label = "Уровень pH"
+    banner = "уровня pH"
+    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    return render_template("charts/month_chart.html", **template_data)
 
-#return temperature page with dynamic measurements
-###############################################
-@app.route("/measurements/temp")
-def temp():
-    return render_template("measurements/temp.html")
-@app.route("/dynamicCharts")
-def dynamicTemp():
-    return render_template("dynamicCharts.html")
+@app.route("/charts/tds_chart")
+def tds_chart():
+    labels = [i for i in range(30)]
+    data = [i for i in range(30)] #temporally
+    label = "Уровень солей"
+    banner = "уровня солей"
+    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    return render_template("charts/month_chart.html", **template_data)
 
-@app.route("/tempmeas")
-def temp_meas():
-    tp = serialPort.getDataFromSerial(output_queue)[0]
-    return tp
-################################################
-#return humidity renewTempPage
-@app.route("/measurements/humidity")
-def hum():
-    return render_template("measurements/humidity.html")
-@app.route("/hummeas")
-def hum_meas():
-    hum = serialPort.getDataFromSerial(output_queue)[1]
-    return hum
+@app.route("/charts/co2_chart")
+def co2_chart():
+    labels = [i for i in range(30)]
+    data = [i for i in range(30)] #temporally
+    label = "Уровень CO2"
+    banner = "уровня CO2"
+    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    return render_template("charts/month_chart.html", **template_data)
 
-#return pH page
-@app.route("/measurements/ph")
-def ph():
-    return render_template("measurements/ph.html")
-@app.route("/phmeas")
-def ph_meas():
-    ph = serialPort.getDataFromSerial(output_queue)[2]
-    return ph
 
-#return TDS updatePage
-@app.route("/measurements/tds")
-def tds():
-    return render_template("measurements/tds.html")
-@app.route("/tdsmeas")
-def tds_meas():
-    tds = serialPort.getDataFromSerial(output_queue)[3]
-    return tds
 
-#return CO2 page
-@app.route("/measurements/co2")
-def co2():
-    return render_template("measurements/co2.html")
-@app.route("/co2meas")
-def co2_meas():
-    co2 = serialPort.getDataFromSerial(output_queue)[4]
-    return co2
 
 #return return page about plants
 @app.route("/info")
 def info():
     return render_template("info.html")
 
+@app.route("/dynamicCharts")
+def dynamicTemp():
+    return render_template("dynamicCharts.html")
+
 
 if __name__ == "__main__":
     temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
-
     output_queue = multiprocessing.Queue(5)
-    sp = serialPort.SerialProcess(output_queue, "COM6")
+
+    sp = serial_port.SerialProcess(output_queue, "COM6")
     sp.daemon = True
 
     sp.start()

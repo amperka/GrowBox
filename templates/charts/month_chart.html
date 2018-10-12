@@ -2,25 +2,25 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>График температуры</title>
+    <title>График {{banner}}</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
   </head>
   <body>
-    <h1 align="center" class="banner"> График температуры за 30 дней </h1>
+    <h1 align="center" class="banner"> График {{banner}} за 30 дней </h1>
 
-    <canvas id="tempChart" width="600" height="400"></canvas>
+    <canvas id="month_chart" width="600" height="400"></canvas>
 
     <script>
     Chart.defaults.global.responsive = false;
-    var tempCanv = document.getElementById("tempChart").getContext('2d');
-    var tempData = {
+    var Canv = document.getElementById("month_chart").getContext('2d');
+    var Data = {
       labels : [{% for item in labels %}
           "{{item}}",
            {% endfor %}],
 
       datasets : [{
-        label : "Temperature",
+        label : "{{label}}",
         fill : true,
         backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: "rgba(75,192,192,1)",
@@ -37,16 +37,17 @@
         pointHoverBorderWidth: 2,
         pointRadius: 1,
         pointHitRadius: 10,
-        data : [{% for item in temp %}
+        data : [{% for item in data %}
             {{item}},
             {% endfor %}],
         spanGaps: false
       }]
     };
-    var tempChart = new Chart(tempCanv, {
+    var chart = new Chart(Canv, {
 			type: 'line',
-			data: tempData
+			data: Data
 			});
     </script>
+
   </body>
 </html>

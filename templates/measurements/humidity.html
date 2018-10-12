@@ -6,12 +6,13 @@
     <link rel="stylesheet" href="../static/css/style.css">
     <script src="../static/js/gauge.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../static/js/updatePage.js"></script>
+    <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+    <script src="../static/js/update_page.js"></script>
   </head>
 
   <body>
     <h1 align="center" class="banner"> Текущая влажность </h1>
-    <div style="text-align:center">
+    <div style="margin-left:450px;height:100px; width:100px;">
       <canvas class="canv"
 	  	  data-type="linear-gauge"
 			  data-width="160"
@@ -24,7 +25,7 @@
 			  data-value="0"
 			  data-units="%"
 			  data-color-value-box-shadow="false"
-        data-color-value-box-shadow="true"
+        	  data-color-value-box-shadow="true"
 			  data-color-major-ticks="#ffe66a"
 			  data-color-minor-ticks="#ffe66a"
 			  data-color-title="#eee"
@@ -38,8 +39,10 @@
 		  >
 		  </canvas>
     </div>
+    <canvas id="chartCanv" width="600" height="400" style="margin: 0 auto"></canvas> <!-- Chart-->
+	<script src="../static/js/dynamic_chart.js"></script>
     <script>
-      var url = "/hummeas";
+      var url = "/hum_measure";
       getReading(url);
     </script>
   </body>

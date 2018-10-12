@@ -17,7 +17,7 @@ class SerialProcess(multiprocessing.Process):
     def close(self):
         self.sp.close()
 
-    def readSerial(self):
+    def read_serial(self):
         return self.sp.readline().decode('utf-8')
 
     def run(self):
@@ -26,15 +26,14 @@ class SerialProcess(multiprocessing.Process):
             while True:
                 # look for incoming serial data
                 if (self.sp.inWaiting() > 0):
-                    data = self.readSerial()
-                    # send it back
-                    self.output_queue.put(data)
+                    data = self.read_serial() #read data from serial port
+                    self.output_queue.put(data) #put data in Queue
                     print(self.output_queue.qsize()) #testing
         except KeyboardInterrupt:
             self.close()
             print("Interrupt by user")
 
-def getDataFromSerial(output_queue):
+def get_data_from_serial(output_queue):
     data = output_queue.get()
     dataList = data.split()
     return tuple(dataList)
@@ -49,5 +48,5 @@ if __name__ == "__main__":
     sp.start()
     while(True):
         if not output_queue.empty():
-            temp, hum, ph, tds, co2 = getDataFromSerial(output_queue)
+            temp, hum, ph, tds, co2 = get_data_from_serial(output_queue)
             print(temp, hum, ph, tds, co2)
