@@ -25,10 +25,15 @@ class SerialProcess(multiprocessing.Process):
         try:
             while True:
                 # look for incoming serial data
-                if (self.sp.inWaiting() > 0):
-                    data = self.read_serial() #read data from serial port
-                    self.output_queue.put(data) #put data in Queue
-                    print(self.output_queue.qsize()) #testing
+                while self.sp.inWaiting():
+                    if not self.output_queue.full():
+                        data = self.read_serial() #read data from serial port
+                        self.output_queue.put(data) #put data in Queue
+                        print(self.output_queue.qsize()) #testing
+                    else:
+                        self.sp.flushInput()
+                print('sleep') #testing   
+                time.sleep(0.5)
         except KeyboardInterrupt:
             self.close()
             print("Interrupt by user")

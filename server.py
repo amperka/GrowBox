@@ -4,6 +4,7 @@ from flask import Flask, render_template, make_response, request
 import datetime, random
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
+import json
 
 
 app = Flask(__name__)
@@ -23,7 +24,8 @@ def measurements():
 ###############################################
 @app.route("/measurements/temp")
 def temp():
-    return render_template("measurements/temp.html")
+    template_data = {'label' : "Температура"}
+    return render_template("measurements/temp.html", **template_data)
 
 @app.route("/temp_measure")
 def temp_meas():
@@ -33,7 +35,8 @@ def temp_meas():
 #return humidity page with dynamic measurements
 @app.route("/measurements/humidity")
 def hum():
-    return render_template("measurements/humidity.html")
+    template_data =  {'label' : "Влажность"}
+    return render_template("measurements/humidity.html", **template_data)
 @app.route("/hum_measure")
 def hum_meas():
     hum = serial_port.get_data_from_serial(output_queue)[1]
@@ -42,7 +45,8 @@ def hum_meas():
 #return pH page
 @app.route("/measurements/ph")
 def ph():
-    return render_template("measurements/ph.html")
+    template_data = {'label' : "Уровень pH"}
+    return render_template("measurements/ph.html", **template_data)
 @app.route("/ph_measure")
 def ph_meas():
     ph = serial_port.get_data_from_serial(output_queue)[2]
@@ -51,7 +55,8 @@ def ph_meas():
 #return TDS updatePage
 @app.route("/measurements/tds")
 def tds():
-    return render_template("measurements/tds.html")
+    template_data = {'label' : "Уровень солей"}
+    return render_template("measurements/tds.html", **template_data)
 @app.route("/tds_measure")
 def tds_meas():
     tds = serial_port.get_data_from_serial(output_queue)[3]
@@ -60,7 +65,8 @@ def tds_meas():
 #return CO2 page
 @app.route("/measurements/co2")
 def co2():
-    return render_template("measurements/co2.html")
+    template_data =  {'label' : "Уровень CO2"}
+    return render_template("measurements/co2.html", **template_data)
 @app.route("/co2_measure")
 def co2_meas():
     co2 = serial_port.get_data_from_serial(output_queue)[4]
@@ -156,10 +162,10 @@ def dynamicTemp():
 
 if __name__ == "__main__":
     temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
-    output_queue = multiprocessing.Queue(5)
+    output_queue = multiprocessing.Queue(2)
 
-    sp = serial_port.SerialProcess(output_queue, "COM6")
+    sp = serial_port.SerialProcess(output_queue, "/dev/ttyACM0")
     sp.daemon = True
 
     sp.start()
-    app.run(host='127.0.0.1', debug=False)
+    app.run(host='0.0.0.0', debug=False)
