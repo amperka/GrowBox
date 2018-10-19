@@ -2,9 +2,70 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Фотография</title>
+    <title>Фото</title>
+    <link rel="stylesheet" href="../../static/css/style.css"> 
   </head>
   <body>
-    
+  	<h1 align=center class="banner"> Фото </h1>
+  	<div>
+		<input type=button onclick="request_photo('/make_photo/img1', 'image1')" value="Сделать 1-ый снимок"/>
+  	</div>
+	<div>
+		<input type=button onclick="request_photo('/make_photo/img2', 'image2')" value="Сделать 2-ой снимок"/>
+	</div>
+  	<div>
+		<input type=button onclick="clear_photo()" value="Очистить фото"/>
+  	</div>
+
+	<div>
+		<img src= "../../static/img/loading.gif" alt="Фотография №1" id="image1"> 
+	</div>
+	<div>
+		<img src= "../../static/img/loading.gif" alt="Фотография №2" id="image2">
+	</div>
+
+	<script>
+		function request_photo(url, id) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', url, true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("OK");
+					var img = new Image(500, 500);
+					if (id == 'image1') {
+						img.src = "../../static/img/img1.jpg?" + Math.random();
+					} else if (id == 'image2') {
+						img.src = "../../static/img/img2.jpg?" + Math.random();
+					}
+					img.onload = function () {
+						document.getElementById(id).src = img.src;
+					}
+				}
+
+			}
+		}
+		
+		function clear_photo() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/clear_photo', true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("OK");
+					location.reload(true);
+				}
+			}
+
+		}
+	</script>
   </body>
 </html>

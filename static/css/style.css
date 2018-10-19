@@ -7,10 +7,7 @@
 }
 #btn {
 	width: 250px;
-	height: 250px;
-	position: absolute;
-	top: 15%;
-	left:38%;
+	margin: auto;
 }
 
 .button-group {

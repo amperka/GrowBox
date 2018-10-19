@@ -32,7 +32,7 @@ class SerialProcess(multiprocessing.Process):
                         print(self.output_queue.qsize()) #testing
                     else:
                         self.sp.flushInput()
-                print('sleep') #testing   
+                #print('sleep') #testing   
                 time.sleep(0.5)
         except KeyboardInterrupt:
             self.close()

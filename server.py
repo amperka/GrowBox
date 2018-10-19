@@ -4,7 +4,11 @@ from flask import Flask, render_template, make_response, request
 import datetime, random
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
-import json
+from picamera import PiCamera
+import os
+
+temp, hum, ph, tds, co2, lvl = (0, 0, 0, 0, 0, 0)
+output_queue = multiprocessing.Queue(2)
 
 
 app = Flask(__name__)
@@ -29,8 +33,9 @@ def temp():
 
 @app.route("/temp_measure")
 def temp_meas():
-    tp = serial_port.get_data_from_serial(output_queue)[0]
-    return tp
+    global temp
+    get()
+    return temp
 ################################################
 #return humidity page with dynamic measurements
 @app.route("/measurements/humidity")
@@ -39,17 +44,20 @@ def hum():
     return render_template("measurements/humidity.html", **template_data)
 @app.route("/hum_measure")
 def hum_meas():
-    hum = serial_port.get_data_from_serial(output_queue)[1]
+    global hum
+    get()
     return hum
 #################################################
 #return pH page
 @app.route("/measurements/ph")
 def ph():
+    global ph
     template_data = {'label' : "Уровень pH"}
     return render_template("measurements/ph.html", **template_data)
 @app.route("/ph_measure")
 def ph_meas():
-    ph = serial_port.get_data_from_serial(output_queue)[2]
+    global ph
+    get()
     return ph
 #################################################
 #return TDS updatePage
@@ -59,7 +67,8 @@ def tds():
     return render_template("measurements/tds.html", **template_data)
 @app.route("/tds_measure")
 def tds_meas():
-    tds = serial_port.get_data_from_serial(output_queue)[3]
+    global tds
+    get()
     return tds
 #################################################
 #return CO2 page
@@ -69,11 +78,13 @@ def co2():
     return render_template("measurements/co2.html", **template_data)
 @app.route("/co2_measure")
 def co2_meas():
-    co2 = serial_port.get_data_from_serial(output_queue)[4]
+    global c02
+    get()
     return co2
 ##################################################
 
 #camera control
+##################################################
 @app.route("/camera")
 def camera():
     return render_template("camera/camera.html")
@@ -82,19 +93,42 @@ def camera():
 def photo():
     return render_template("camera/photo.html")
 
+@app.route("/make_photo/<img>")
+def make_photo(img):
+    camera = PiCamera()
+    if img == "img1":
+        name = "img1.jpg"
+    elif img == "img2":
+        name = "img2.jpg"
+    camera.capture("./static/img/" + name, resize=(500, 300))
+    camera.close()
+    return render_template("camera/photo.html")
+
+@app.route("/clear_photo")
+def clear_photo():
+    os.system("rm -f ./static/img/img*")
+    return render_template("camera/photo.html")
+
 @app.route("/camera/video")
 def video():
     return render_template("camera/video.html")
 
+@app.route("/make_video")
+def make_video():
+    os.system("convert -delay 10 -loop 0 ./static/img/video_img/image* ./static/img/animation.gif")
+    return render_template("/camera/video.html")
+
+##################################################
+
 #return setting of GrowBox
 @app.route("/settings")
 def settings():
-    return render_template("settings.html")
+    return render_template("/settings/settings.html")
 
 #return net_settings
 @app.route("/net_settings")
 def net_settings():
-    return render_template("net_settings.html")
+    return render_template("/settings/net_settings.html")
 
 #return charts page
 @app.route("/charts")
@@ -148,8 +182,6 @@ def co2_chart():
     return render_template("charts/month_chart.html", **template_data)
 
 
-
-
 #return return page about plants
 @app.route("/info")
 def info():
@@ -159,10 +191,17 @@ def info():
 def dynamicTemp():
     return render_template("dynamicCharts.html")
 
+def get():
+    global temp, hum, ph, tds, co2
+    global output_queue
+    if not output_queue.empty():
+        temp, hum, ph, tds, co2, lvl = serial_port.get_data_from_serial(output_queue)
+
+
 
 if __name__ == "__main__":
-    temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
-    output_queue = multiprocessing.Queue(2)
+    #temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
+    #output_queue = multiprocessing.Queue(2)
 
     sp = serial_port.SerialProcess(output_queue, "/dev/ttyACM0")
     sp.daemon = True

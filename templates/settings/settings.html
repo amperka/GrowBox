@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Управление</title>
+    <link rel="stylesheet" href="../../static/css/style.css">
+    <link rel="stylesheet" href="../../static/css/settings_style.css">
+  </head>
+  <body>
+    <h1 align=center class="banner"> Управление </h1>
+    <div id="settings-block">
+    	<table id=setting-table>
+    		<tr>
+    			<td>
+    				<h3>Лампа</h3>
+    			</td>
+    			<td>
+    				<div class="switch">
+    					<input type="checkbox" id="lamp-switch" class="switch-check">
+    						<label for="lamp-switch" class="switch-label">
+    							<span class="switch-slider switch-slider-on"></span>
+        						<span class="switch-slider switch-slider-off"></span>
+    						</label>
+					</div>          
+    			</td>
+    			<td> 
+    				<input type="radio" id=lamp-value1>
+    				<label for="lamp-value1">18/6</label>
+    				<input type="radio" id=lamp-value2>
+    				<label for="lamp-value2">12/12</label>
+    			</td>
+    		</tr>
+    		<tr>
+    			<td>
+    				<h3>Вентилятор</h3>
+    			</td>
+    			<td>
+    				<div class="switch">
+    					<input type="checkbox" id="fan-switch" class="switch-check">
+    						<label for="fan-switch" class="switch-label">
+    							<span class="switch-slider switch-slider-on"></span>
+        						<span class="switch-slider switch-slider-off"></span>
+    						</label>
+					</div>
+    			</td>
+    			<td>
+    				<input type="radio" id="fan-value1">
+    				<label for="fan-value1">1 m</label>
+    				<input type="radio" id="fan-value2">
+    				<label for="fan-value2">2 m</label>
+    				<input type="radio" id="fan-value3">
+    				<label for="fan-value3">5 m</label>
+    				<input type="radio" id="fan-value4">
+    				<label for="fan-value4">10 m</label>
+    			</td>
+    		</tr>
+    		<tr>
+    			<td>
+    				<h3>Компрессор</h3>
+    			</td>
+    			<td>
+    				<div class="switch">
+    					<input type="checkbox" id="compressor-switch" class="switch-check">
+    						<label for="compressor-switch" class="switch-label">
+    							<span class="switch-slider switch-slider-on"></span>
+        						<span class="switch-slider switch-slider-off"></span>
+    						</label>
+					</div>
+    			</td>
+    			<td>
+    			</td>
+    		</tr>
+    	</table>
+    </div>
+    <input type="button" value="Настроить" onclick="setChanges()">
+    <script>
+	function setChanges() {
+		var lamp = document.querySelector('#lamp-switch');
+		var fan = document.querySelector("#fan-switch");
+		var compressor = document.querySelector("#compressor-switch");
+		
+		var request = {
+			lamp : 0,
+			fan : 0,
+			compressor : 0
+		}	
+		if (lamp.checked) {
+			request.lamp = 1;
+		}
+		if (fan.checked) {
+			request.fan = 1;
+		}
+		if (compressor.checked) {
+			request.compressor = 1;
+		}
+		console.log(request); //TODO send data to server
+	}
+
+    </script>
+  </body>
+</html>
