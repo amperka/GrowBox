@@ -3,8 +3,45 @@
   <head>
     <meta charset="utf-8">
     <title>Видео</title>
+    <link rel="stylesheet" href="../static/css/style.css">
   </head>
   <body>
+	<h1 align=center class="banner"> Видео </h1>
+	<div>
+		<input type=button onclick="make_video()" value="Смонтировать видео"/>
+  	</div>
+	<div>
+		<input type=button onclick="watch_video()" value="Смотреть видео"/>
+	</div>
+	
+	<div id="image_place" width=500 height=500>
+	</div>
+	
+	<script>
+		function make_video() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/make_video', true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("OK");
+				}
+			}
+		}
+		
+		function watch_video() {
+			var img = new Image(500, 500);
+			img.src = "../static/img/animation.gif"
+			img.onload = function() {
+				   document.getElementById('image_place').appendChild(img);
+			}
+
+		}
+	</script>
 
   </body>
 </html>

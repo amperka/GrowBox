@@ -3,16 +3,16 @@
 	height: 250px;
 	position: absolute;
 	top: 20%;
-	left: 75%;
-	margin: -125px 0 0 -1px;
+	left: 72%;
 }
+
 #btn {
 	width: 250px;
-	height: 250px;
-	position: absolute;
-	top: 20%;
-	left: 50%;
-	margin: -125px 0 0 -125px;
+	margin: auto;
+}
+
+a {
+	text-decoration: none;
 }
 
 .button-group {
@@ -39,7 +39,16 @@
 }
 
 .banner {
-	position:relative;
 	color:white;
 	background:green;
+	font-size: 30px;
+}
+
+div.banner div {
+	position: relative;
+	#float: right;
+}
+
+div.banner a {
+	color: #FFF
 }

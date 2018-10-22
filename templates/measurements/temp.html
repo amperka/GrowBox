@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Температура</title>
-	<meta charset="utf-8"></meta>
-	<link rel="stylesheet" href="../static/css/style.css">
-	<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
-	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-	<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-	<script src="../static/js/update_page.js"></script>
+{% extends "base.html" %}
+{% block headerScript %}
+<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+<script src="../static/js/update_page.js"></script>
+{% endblock %}
 
-</head>
-<body>
-	<h1 align="center" class="banner"> Текущая температура </h1>
+{% block content %}
 	<!-- Injecting linear gauge -->
-	<div style="margin-left:450px;height:100px; width:100px;">
+	<div style="margin-left:45px;height:100px; width:100px;">
 		<canvas class="canv"
 	  		data-type="linear-gauge"
-			data-width="160"
-			data-height="600"
+			data-width="150"
+			data-height="500"
 			data-border-radius="20"
 			data-borders="0"
 			data-bar-stroke-width="2"
@@ -40,13 +35,41 @@
 		</canvas>
 		
 	</div>
-	<canvas id="chartCanv" width="600" height="400" style="margin: 0 auto"></canvas> <!-- Chart-->
-	<script src="../static/js/dynamic_chart.js"></script>
+	<canvas id="chartCanv" width="600" height="400" style="margin-left: 300px; margin-top: -100px;"></canvas> <!-- Chart-->
+	<!--	<script src="../static/js/dynamic_chart.js"></script> -->
 	<script>
+		Chart.defaults.global.responsive = false;
+    		var Data = {
+        		labels : [],
+        		datasets : [{
+			label : "{{label}}",
+        		fill : true,
+        		backgroundColor: "rgba(75,192,192,0.4)",
+        		borderColor: "rgba(75,192,192,1)",
+        		borderCapStyle: 'butt',
+        		borderDash: [],
+        		borderDashOffset: 0.0,
+        		borderJoinStyle: 'miter',
+        		pointBorderColor: "rgba(75,192,192,1)",
+        		pointBackgroundColor: "#fff",
+        		pointBorderWidth: 1,
+        		pointHoverRadius: 5,
+        		pointHoverBackgroundColor: "rgba(75,192,192,1)",
+        		pointHoverBorderColor: "rgba(220,220,220,1)",
+        		pointHoverBorderWidth: 2,
+        		pointRadius: 1,
+        		pointHitRadius: 10,
+        		data : [],
+        		spanGaps: false
+        		}]
+    		};
+
+    		var Canv = document.getElementById('chartCanv').getContext('2d');
+    		var chart = new Chart(Canv, {
+            			type: 'line',
+            			data: Data
+    				});
 		var url = "/temp_measure";
 		getReading(url);
 	</script>
-
-
-</body>
-</html>
+{% endblock %}

@@ -2,7 +2,7 @@ Chart.defaults.global.responsive = false;
     var Data = {
         labels : [],
         datasets : [{
-        label : "Температура",
+        label : thislabel,
         fill : true,
         backgroundColor: "rgba(75,192,192,0.4)",
         borderColor: "rgba(75,192,192,1)",
