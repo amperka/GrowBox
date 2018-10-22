@@ -17,19 +17,19 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", title='Главная')
 
 #return measurements page
 @app.route("/measurements")
 def measurements():
-    return render_template("measurements/measurements.html")
+    return render_template("measurements/measurements.html", title='Измерения', goback='/index')
 
 #return temperature page with dynamic measurements
 ###############################################
 @app.route("/measurements/temp")
 def temp():
     template_data = {'label' : "Температура"}
-    return render_template("measurements/temp.html", **template_data)
+    return render_template("measurements/temp.html", **template_data, goback='/measurements')
 
 @app.route("/temp_measure")
 def temp_meas():
@@ -41,7 +41,7 @@ def temp_meas():
 @app.route("/measurements/humidity")
 def hum():
     template_data =  {'label' : "Влажность"}
-    return render_template("measurements/humidity.html", **template_data)
+    return render_template("measurements/humidity.html", **template_data, goback='/measurements')
 @app.route("/hum_measure")
 def hum_meas():
     global hum
@@ -53,7 +53,7 @@ def hum_meas():
 def ph():
     global ph
     template_data = {'label' : "Уровень pH"}
-    return render_template("measurements/ph.html", **template_data)
+    return render_template("measurements/ph.html", **template_data, goback='/measurements')
 @app.route("/ph_measure")
 def ph_meas():
     global ph
@@ -64,7 +64,7 @@ def ph_meas():
 @app.route("/measurements/tds")
 def tds():
     template_data = {'label' : "Уровень солей"}
-    return render_template("measurements/tds.html", **template_data)
+    return render_template("measurements/tds.html", **template_data, goback='/measurements')
 @app.route("/tds_measure")
 def tds_meas():
     global tds
@@ -75,7 +75,7 @@ def tds_meas():
 @app.route("/measurements/co2")
 def co2():
     template_data =  {'label' : "Уровень CO2"}
-    return render_template("measurements/co2.html", **template_data)
+    return render_template("measurements/co2.html", **template_data, goback='/measurements')
 @app.route("/co2_measure")
 def co2_meas():
     global c02
@@ -87,11 +87,11 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html")
+    return render_template("camera/camera.html", goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html")
+    return render_template("camera/photo.html", goback='/index')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
@@ -185,7 +185,7 @@ def co2_chart():
 #return return page about plants
 @app.route("/info")
 def info():
-    return render_template("info.html")
+    return render_template("info.html", title='Справка', goback='/index')
 
 @app.route("/dynamicCharts")
 def dynamicTemp():
