@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="../static/css/style.css">
+	<script src="../static/js/time.js"></script>
+	{% block headerScript %}{% endblock %}
+  </head>
+  <body>
+	<div class="banner">
+		<div>{% if goback %}<a width="10%" href="{{goback}}">←</a>{% endif %}</div><div width="60%"> {{title}}</div><div width="20%" id="clock"></div>
+	</div>
+    {% block content %}{% endblock %}
+  </body>
+</html>

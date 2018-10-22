@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Температура</title>
-	<meta charset="utf-8"></meta>
-	<link rel="stylesheet" href="../static/css/style.css">
-	<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
-	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-	<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-	<script src="../static/js/update_page.js"></script>
+{% extends "base.html" %}
+{% block headerScript %}
+<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+<script src="../static/js/update_page.js"></script>
+{% endblock %}
 
-</head>
-<body>
-	<h1 align="center" class="banner"> Текущая температура </h1>
+{% block content %}
 	<!-- Injecting linear gauge -->
 	<div style="margin-left:45px;height:100px; width:100px;">
 		<canvas class="canv"
@@ -42,11 +37,6 @@
 	</div>
 	<canvas id="chartCanv" width="600" height="400" style="margin-left: 300px; margin-top: -100px;"></canvas> <!-- Chart-->
 	<!--	<script src="../static/js/dynamic_chart.js"></script> -->
-	<div style="top: 85%; left: 45%; position: absolute">
-			<ul class=button-group>
-				<li><a href="/measurements">Назад</a></li>
-			</ul>
-		</div>
 	<script>
 		Chart.defaults.global.responsive = false;
     		var Data = {
@@ -82,7 +72,4 @@
 		var url = "/temp_measure";
 		getReading(url);
 	</script>
-
-
-</body>
-</html>
+{% endblock %}

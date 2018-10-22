@@ -1,15 +1,12 @@
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Уровень pH</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+{% extends "base.html" %}
+{% block headerScript %}
     <script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
     <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
     <script src="../static/js/update_page.js"></script>
-</head>
-	<body>
-    <h1 align="center" class="banner"> Текущий уровень pH </h1>
+{% endblock %}
+
+{% block content %}
     <div style="text-align:center">
       <canvas class="canv"
         data-type="linear-gauge"
@@ -93,6 +90,4 @@
   	var url = "/ph_measure";
   	getReading(url);
 </script>
-
-	</body>
-	</html>
+{% endblock %}
