@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>О растениях</title>
-		<link rel="stylesheet" href="../static/css/style.css">
-	</head>
-	<body>
-		<h1 align="center" class="banner"> Текущая температура </h1>
-		<select>
-			<option disabled selected>Выберите растение</option>
-			<option>Огурцы</option>
-			<option>Горох</option>
-			<option>Фасоль</option>
-		</select>
-		<p><input type="submit" value="Выбрать"></p>
-	</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<select>
+	<option disabled selected>Выберите растение</option>
+	<option>Огурцы</option>
+	<option>Горох</option>
+	<option>Фасоль</option>
+</select>
+<p><input type="submit" value="Выбрать"></p>
+{% endblock %}
