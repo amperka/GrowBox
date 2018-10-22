@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Влажность</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+{% extends "base.html" %}
+{% block headerScript %}
    	<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
 	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 	<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
 	<script src="../static/js/update_page.js"></script>
-  </head>
+{% endblock %}
 
-  <body>
-    <h1 align="center" class="banner"> Текущая влажность </h1>
+{% block content %}
     <div style="margin-left:45px;height:100px; width:100px;">
       <canvas class="canv"
 	  	  data-type="linear-gauge"
@@ -43,7 +38,7 @@
     <!--	<script src="../static/js/dynamic_chart.js"></script> -->
     <div style="top: 5%; left: 45%; position: relative;">
 			<ul class=button-group>
-				<li><a href="/measurements">Назад</a></li>
+				<li><a href="/measurements">{{label}}</a></li>
 			</ul>
 		</div>
     <script>
@@ -81,5 +76,4 @@
       var url = "/hum_measure";
       getReading(url);
     </script>
-  </body>
-</html>
+{% endblock %}

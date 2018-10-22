@@ -1,0 +1,1 @@
+CREATE TABLE sensors(date INT, temp REAL, humidity INT, carbon INT, acidity REAL, saline INT, level INT);
