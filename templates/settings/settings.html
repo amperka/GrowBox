@@ -5,6 +5,8 @@
     <title>Управление</title>
     <link rel="stylesheet" href="../../static/css/style.css">
     <link rel="stylesheet" href="../../static/css/settings_style.css">
+    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
   </head>
   <body>
     <h1 align=center class="banner"> Управление </h1>
@@ -93,7 +95,18 @@
 		if (compressor.checked) {
 			request.compressor = 1;
 		}
-		console.log(request); //TODO send data to server
+		console.log(request); // testing
+		
+		$.ajax({
+			url: "/accept_settings",
+			type: "POST",
+			data: JSON.stringify(request),
+			contentType: "application/json; charset=utf8",
+			dataType:"json",
+			success: function() {
+					alert("Настройки приняты");
+				 }
+		});
 	}
 
     </script>
