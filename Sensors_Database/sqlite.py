@@ -24,7 +24,7 @@ def drop():
     conn.commit()
     conn.close()
 
-#get data from DHT
+#insert test row into sensors table
 def testDataInsert():
     temp = random.randrange(-10, 30, 1)
     hum = random.randrange(0, 100, 1)
@@ -35,7 +35,7 @@ def testDataInsert():
 
     insertSensors(temp, hum, carb, acid, saline, lvl)
 
-#log sensor data on database
+#insert a row into sensors
 def insertSensors(temp='NULL', humidity='NULL', carbon='NULL', acidity='NULL', saline='NULL', level='NULL'):
     date = datetime.timestamp(datetime.now()) # FLOAT
     date = int(date) # INTEGER
@@ -51,7 +51,7 @@ def insertSensors(temp='NULL', humidity='NULL', carbon='NULL', acidity='NULL', s
     conn.commit()
     conn.close()
 
-#display database data
+#count rows in sensors table
 def countSensors():
 
     sql = "SELECT COUNT(*) FROM sensors"
@@ -64,7 +64,7 @@ def countSensors():
     return rows[0][0]
 
 
-#display database data
+#select dsensors data of [fromTime; toTime] period
 def selectSensors(fromTime = None, toTime = None):
 
     sql = "SELECT * FROM sensors"
