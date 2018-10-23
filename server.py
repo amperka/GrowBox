@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, make_response, request, Markup
 import os, datetime, random, json
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
@@ -122,11 +122,19 @@ def make_video():
 #return setting of GrowBox
 @app.route("/settings")
 def settings():
-    return render_template("/settings/settings.html")
+    settingFile = open("settings.txt", "r")
+    data = Markup(settingFile.readline())
+    settingFile.close()
+    return render_template("/settings/settings.html", jsonStr=data)
+
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
+    #input_queue.put('{"lamp":[1, 18]}')
     input_queue.put(str(content))
+    settingsFile = open("settings.txt", 'w')
+    settingsFile.write(str(content))
+    settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 #return net_settings
