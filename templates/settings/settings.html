@@ -26,9 +26,9 @@
 					</div>          
     			</td>
     			<td> 
-    				<input type="radio" class="lamp-value" name="lamp-radio">
+    				<input type="radio" id="lamp-value1" name="lamp-radio">
     				<label for="lamp-value1">18/6</label>
-    				<input type="radio" class="lamp-value" name="lamp-radio">
+    				<input type="radio" id="lamp-value2" name="lamp-radio">
     				<label for="lamp-value2">12/12</label>
     			</td>
     		</tr>
@@ -46,13 +46,13 @@
 					</div>
     			</td>
     			<td>
-    				<input type="radio" class="fan-value" name="fan-radio">
+    				<input type="radio" id="fan-value1" name="fan-radio">
     				<label for="fan-value1" class="fan-label">1 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" id="fan-value2" name="fan-radio"> 
     				<label for="fan-value2" class="fan-label">2 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" id="fan-value3" name="fan-radio"> 
     				<label for="fan-value3" class="fan-label">5 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" id="fan-value4" name="fan-radio"> 
     				<label for="fan-value4" class="fan-label">10 m</label>
     			</td>
     		</tr>
@@ -80,8 +80,8 @@
 		var lamp = document.querySelector("#lamp-switch");
 		var fan = document.querySelector("#fan-switch");
 		var compressor = document.querySelector("#compressor-switch");
-		var lampValue = document.getElementsByClassName("lamp-value");
-		var fanValue = document.getElementsByClassName("fan-value");
+		var lampValue = document.getElementsByName("lamp-radio");
+		var fanValue = document.getElementsByName("fan-radio");
 
 		var request = {
 			lamp : [0, 0],
@@ -126,27 +126,27 @@
 	
 	window.onload = function() {
 		var currentState= {{jsonStr}};
-		console.log(currentState);
+		console.log(currentState); //testing
 		document.getElementById("lamp-switch").checked = !!currentState.lamp[0];
 		document.getElementById("fan-switch").checked = !!currentState.fan[0]; 
 		document.getElementById("compressor-switch").checked = !!currentState.compressor[0];
 		if (currentState.lamp[1] === 18) {
-			document.getElementsByClassName("lamp-value")[0].checked = true;
+			document.getElementsByName("lamp-radio")[0].checked = true;
 		} else if (currentState.lamp[1] === 12) {
-			document.getElementsByClassName("lamp-value")[1].checked = true;
+			document.getElementsByName("lamp-radio")[1].checked = true;
 		}
 		switch(currentState.fan[1]) {
 			case 1:
-				document.getElementsByClassName("fan-value")[0].checked = true;
+				document.getElementsByName("fan-radio")[0].checked = true;
 				break;
 			case 2: 
-				document.getElementsByClassName("fan-value")[1].checked = true;
+				document.getElementsByName("fan-radio")[1].checked = true;
 				break;
 			case 5:
-				document.getElementsByClassName("fan-value")[2].checked = true;
+				document.getElementsByName("fan-radio")[2].checked = true;
 				break;
 			case 10:
-				document.getElementsByClassName("fan-value")[3].checked = true;
+				document.getElementsByName("fan-radio")[3].checked = true;
 				break;
 			default:
 				break;	
