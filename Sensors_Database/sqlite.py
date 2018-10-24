@@ -6,6 +6,54 @@ import random
 
 dbname = './sensorsData.db'
 
+#create table activity
+def createActivity():
+    sql = "CREATE TABLE IF NOT EXISTS activity(curstate TEXT, lamp INT DEFAULT 1, fan INT DEFAULT 10, compressor INT DEFAULT 1)"
+    conn = sqlite3.connect(dbname)
+    curs = conn.cursor()
+    curs.execute(sql)
+    conn.commit()
+    conn.close()
+
+#test activity
+def testActivity():
+
+    curstate = random.randrange(-10, 30, 1)
+    lamp = random.randrange(0, 100, 1)
+    fan = random.randrange(0, 100, 1)
+    compressor = random.randrange(0, 100, 1)
+
+    print(curstate, lamp, fan, compressor)
+
+    updateActivity(curstate, lamp, fan, compressor)
+
+#update a row of activity
+def updateActivity(curstate={}, lampMode=1, fanMode=10, compressorMode=1):
+
+    lamp = str(int(lampMode))
+    fan = str(int(fanMode))
+    compressor = str(int(compressorMode))
+
+    sql = "UPDATE activity SET curstate=?, lamp=?, fan=?, compressor=?"
+    val = (curstate, lamp, fan, compressor)
+
+    conn = sqlite3.connect(dbname)
+    curs = conn.cursor()
+    curs.execute(sql, val)
+    conn.commit()
+    conn.close()
+
+#select from activity
+def selectActivity():
+    sql = "SELECT * FROM activity LIMIT -1"
+
+    conn = sqlite3.connect(dbname)
+    curs = conn.cursor()
+    curs.execute(sql)
+    rows = curs.fetchall()
+    conn.close()
+    return rows
+
 #create table sensors
 def create():
     sql = "CREATE TABLE IF NOT EXISTS sensors(date INT, temp REAL, humidity INT, carbon INT, acidity REAL, saline INT, level INT)"
@@ -84,8 +132,14 @@ def selectSensors(fromTime = None, toTime = None):
 
 if __name__=="__main__":
     create()
+    createActivity()
 
     #tests begin
+    print('-----activity-----')
+    testActivity()
+    for row in selectActivity():
+        print(row)
+    print('-----sensors-----')
     testDataInsert()
     print(countSensors())
     now = datetime.timestamp(datetime.now())
