@@ -4,6 +4,7 @@ from flask import Flask, render_template, make_response, request, Markup
 import os, datetime, random, json
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
+import sqlite
 from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = (0, 0, 0, 0, 0, 0)
@@ -11,6 +12,7 @@ output_queue = multiprocessing.Queue(2)
 input_queue = multiprocessing.Queue(1)
 
 app = Flask(__name__)
+sql = sqlite.Sqlite('./database/sensorsData')
 
 #return index page
 @app.route("/")
@@ -122,19 +124,26 @@ def make_video():
 #return setting of GrowBox
 @app.route("/settings")
 def settings():
-    settingFile = open("settings.txt", "r")
-    data = Markup(settingFile.readline())
-    settingFile.close()
-    return render_template("/settings/settings.html", jsonStr=data)
+    row = sql.selectActivity()
+    #settings = {'curstate': row[0], 'lampMode': row[1], 'fanMode': row[2], 'comprMode': row[3]}
+    data = Markup(row[0][0])
+
+    #settingFile = open("settings.txt", "r")
+    #data = Markup(settingFile.readline())
+    #settingFile.close()
+    return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
-    #input_queue.put('{"lamp":[1, 18]}')
+    #input_queue.put('{"lamp":[1, 18]}')    
     input_queue.put(str(content))
-    settingsFile = open("settings.txt", 'w')
-    settingsFile.write(str(content))
-    settingsFile.close()
+
+    sql.updateActivity(str(content))
+
+    #settingsFile = open("settings.txt", 'w')
+    #settingsFile.write(str(content))
+    #settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 #return net_settings
@@ -217,6 +226,9 @@ def get():
 if __name__ == "__main__":
     #temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
     #output_queue = multiprocessing.Queue(2)
+
+    sql.create()
+    sql.createActivity()
 
     sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
     sp.daemon = True

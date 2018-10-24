@@ -89,4 +89,13 @@
 }
 .switch-check:checked + .switch-label .switch-slider-off {
 	width:40px;
-}          
+}
+
+.saved {
+	margin: auto;
+	color: green;
+	#visibility: hidden;
+	display: none;
+	text-align: center;
+	font-size: 20px;
+}      

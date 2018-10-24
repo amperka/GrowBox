@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Управление</title>
-    <link rel="stylesheet" href="../../static/css/style.css">
+{% extends "base.html" %}
+{% block headerScript %}
     <link rel="stylesheet" href="../../static/css/settings_style.css">
     <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+{% endblock %}
 
-  </head>
-  <body>
-    <h1 align=center class="banner"> Управление </h1>
+{% block content %}
     <div id="settings-block">
     	<table id=setting-table>
     		<tr>
@@ -18,7 +13,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="lamp-switch" class="switch-check">
+    					<input type="checkbox" id="lamp-switch" class="switch-check" onchange="setChanges()">
     						<label for="lamp-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -26,9 +21,9 @@
 					</div>          
     			</td>
     			<td> 
-    				<input type="radio" class="lamp-value" name="lamp-radio">
+    				<input type="radio" class="lamp-value" name="lamp-radio" onchange="setChanges()">
     				<label for="lamp-value1">18/6</label>
-    				<input type="radio" class="lamp-value" name="lamp-radio">
+    				<input type="radio" class="lamp-value" name="lamp-radio" onchange="setChanges()">
     				<label for="lamp-value2">12/12</label>
     			</td>
     		</tr>
@@ -38,7 +33,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="fan-switch" class="switch-check">
+    					<input type="checkbox" id="fan-switch" class="switch-check" onchange="setChanges()">
     						<label for="fan-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -46,13 +41,13 @@
 					</div>
     			</td>
     			<td>
-    				<input type="radio" class="fan-value" name="fan-radio">
+    				<input type="radio" class="fan-value" name="fan-radio" onchange="setChanges()">
     				<label for="fan-value1" class="fan-label">1 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" class="fan-value" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value2" class="fan-label">2 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" class="fan-value" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value3" class="fan-label">5 m</label>
-    				<input type="radio" class="fan-value" name="fan-radio"> 
+    				<input type="radio" class="fan-value" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value4" class="fan-label">10 m</label>
     			</td>
     		</tr>
@@ -62,7 +57,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="compressor-switch" class="switch-check">
+    					<input type="checkbox" id="compressor-switch" class="switch-check" onchange="setChanges()">
     						<label for="compressor-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -74,7 +69,8 @@
     		</tr>
     	</table>
     </div>
-    <input type="button" value="Настроить" onclick="setChanges()">
+    <!--<input type="button" value="Настроить" onclick="setChanges()">-->
+    <div class="saved" id="settings_saved">изменения сохранены</div>
     <script>
 	function setChanges() {
 		var lamp = document.querySelector("#lamp-switch");
@@ -95,7 +91,7 @@
 			request.fan[0] = 1;
 		}
 		if (compressor.checked) {
-			request.compressor[0] = 1;
+			request.compressor = 1;
 		}
 		
 		if (lampValue[0].checked) {
@@ -119,7 +115,12 @@
 			contentType: "application/json; charset=utf8",
 			dataType:"json",
 			success: function() {
-					alert("Настройки приняты");
+					// $("#settings_saved").style.visibility = "visible";
+                    // $("#settings_saved").css("visibility", "visible");
+                    $("#settings_saved").fadeIn();
+                    setTimeout(function() {
+                        $("#settings_saved").fadeOut(1000);
+                    }, 3000);
 				 }
 		});
 	}
@@ -129,7 +130,7 @@
 		console.log(currentState);
 		document.getElementById("lamp-switch").checked = !!currentState.lamp[0];
 		document.getElementById("fan-switch").checked = !!currentState.fan[0]; 
-		document.getElementById("compressor-switch").checked = !!currentState.compressor[0];
+		document.getElementById("compressor-switch").checked = !!currentState.compressor;
 		if (currentState.lamp[1] === 18) {
 			document.getElementsByClassName("lamp-value")[0].checked = true;
 		} else if (currentState.lamp[1] === 12) {
@@ -153,5 +154,4 @@
 		}
 	}
     </script>
-  </body>
-</html>
+{% endblock %}
