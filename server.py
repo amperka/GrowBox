@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request
-import datetime, random
+from flask import Flask, render_template, make_response, request, Markup
+import os, datetime, random, json
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
 from picamera import PiCamera
-import os
 
 temp, hum, ph, tds, co2, lvl = (0, 0, 0, 0, 0, 0)
 output_queue = multiprocessing.Queue(2)
-
+input_queue = multiprocessing.Queue(1)
 
 app = Flask(__name__)
 
@@ -123,12 +122,28 @@ def make_video():
 #return setting of GrowBox
 @app.route("/settings")
 def settings():
-    return render_template("/settings/settings.html")
+    settingFile = open("settings.txt", "r")
+    data = Markup(settingFile.readline())
+    settingFile.close()
+    return render_template("/settings/settings.html", jsonStr=data)
+
+@app.route("/accept_settings", methods=["POST"])
+def accept_setting():
+    content = request.json
+    #input_queue.put('{"lamp":[1, 18]}')
+    input_queue.put(str(content))
+    settingsFile = open("settings.txt", 'w')
+    settingsFile.write(str(content))
+    settingsFile.close()
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 #return net_settings
 @app.route("/net_settings")
 def net_settings():
     return render_template("/settings/net_settings.html")
+
+###################################################
+
 
 #return charts page
 @app.route("/charts")
@@ -203,7 +218,7 @@ if __name__ == "__main__":
     #temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
     #output_queue = multiprocessing.Queue(2)
 
-    sp = serial_port.SerialProcess(output_queue, "/dev/ttyACM0")
+    sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
     sp.daemon = True
 
     sp.start()
