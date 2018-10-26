@@ -1,15 +1,22 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup
-import os, datetime, random, json
+import os, datetime, random, json, time
 from get_data_from_database import get_hist_data
-import serial_port, multiprocessing
+import serial_port, multiprocessing, threading
 import sqlite
 from picamera import PiCamera
 
-temp, hum, ph, tds, co2, lvl = (0, 0, 0, 0, 0, 0)
+temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 output_queue = multiprocessing.Queue(2)
 input_queue = multiprocessing.Queue(1)
+
+currentTime = time.clock() 
+dbPeriod = 600 # seconds 
+arrayLen = 10 
+circularArray = [0] * arrayLen 
+arrayPivot = 0 
+itemPeriod = dbPeriod / arrayLen # seconds
 
 app = Flask(__name__)
 sql = sqlite.Sqlite('./database/sensorsData')
@@ -35,8 +42,7 @@ def temp():
 @app.route("/temp_measure")
 def temp_meas():
     global temp
-    get()
-    return temp
+    return str(temp) #alarm
 ################################################
 #return humidity page with dynamic measurements
 @app.route("/measurements/humidity")
@@ -46,7 +52,6 @@ def hum():
 @app.route("/hum_measure")
 def hum_meas():
     global hum
-    get()
     return hum
 #################################################
 #return pH page
@@ -58,7 +63,6 @@ def ph():
 @app.route("/ph_measure")
 def ph_meas():
     global ph
-    get()
     return ph
 #################################################
 #return TDS updatePage
@@ -69,7 +73,6 @@ def tds():
 @app.route("/tds_measure")
 def tds_meas():
     global tds
-    get()
     return tds
 #################################################
 #return CO2 page
@@ -79,8 +82,7 @@ def co2():
     return render_template("measurements/co2.html", **template_data, goback='/measurements')
 @app.route("/co2_measure")
 def co2_meas():
-    global c02
-    get()
+    global co2
     return co2
 ##################################################
 
@@ -215,11 +217,21 @@ def info():
 def dynamicTemp():
     return render_template("dynamicCharts.html")
 
-def get():
+def get(lock):
     global temp, hum, ph, tds, co2
     global output_queue
-    if not output_queue.empty():
-        temp, hum, ph, tds, co2, lvl = serial_port.get_data_from_serial(output_queue)
+    global arrayPivot, arrayLen, circularArray
+    while True:
+        with lock:
+            if not output_queue.empty():
+                temp, hum, ph, tds, co2, lvl = serial_port.get_data_from_serial(output_queue) 
+                circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
+                arrayPivot = arrayPivot + 1 
+                if arrayPivot == arrayLen: 
+                    s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
+                    sql.insertSensors(s[0], s[1], s[2], s[3], s[4])
+                    arrayPivot = 0
+        time.sleep(1)
 
 
 
@@ -233,6 +245,11 @@ if __name__ == "__main__":
     sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
     sp.daemon = True
     sp.start()
+
+    lock = threading.Lock()
+    getThread = threading.Thread(target=get, args=(lock,))
+    getThread.daemon = True
+    getThread.start()
 
     settings_file = open("settings.txt", "r")
     current_state = settings_file.readline()
