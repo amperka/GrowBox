@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, make_response, request, Markup
 import os, datetime, random, json
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
@@ -122,11 +122,18 @@ def make_video():
 #return setting of GrowBox
 @app.route("/settings")
 def settings():
-    return render_template("/settings/settings.html")
+    settings_file = open("settings.txt", "r")
+    data = Markup(settings_file.readline())
+    settings_file.close()
+    return render_template("/settings/settings.html", jsonStr=data)
+
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
+    settings_file = open("settings.txt", 'w')
+    settings_file.write(str(content))
+    settings_file.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 #return net_settings
@@ -212,6 +219,11 @@ if __name__ == "__main__":
 
     sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
     sp.daemon = True
-
     sp.start()
+
+    settings_file = open("settings.txt", "r")
+    current_state = settings_file.readline()
+    settings_file.close()
+    input_queue.put(current_state)
+
     app.run(host='0.0.0.0', debug=False)
