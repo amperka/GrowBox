@@ -232,6 +232,11 @@ if __name__ == "__main__":
 
     sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
     sp.daemon = True
-
     sp.start()
+
+    settings_file = open("settings.txt", "r")
+    current_state = settings_file.readline()
+    settings_file.close()
+    input_queue.put(current_state)
+
     app.run(host='0.0.0.0', debug=False)
