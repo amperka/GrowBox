@@ -18,7 +18,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="lamp-switch" class="switch-check">
+    					<input type="checkbox" id="lamp-switch" class="switch-check" onchange="setChanges()">
     						<label for="lamp-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -26,9 +26,9 @@
 					</div>          
     			</td>
     			<td> 
-    				<input type="radio" id="lamp-value1" name="lamp-radio">
+    				<input type="radio" id="lamp-value1" name="lamp-radio" onchange="setChanges()">
     				<label for="lamp-value1">18/6</label>
-    				<input type="radio" id="lamp-value2" name="lamp-radio">
+    				<input type="radio" id="lamp-value2" name="lamp-radio" onchange="setChanges()">
     				<label for="lamp-value2">12/12</label>
     			</td>
     		</tr>
@@ -38,7 +38,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="fan-switch" class="switch-check">
+    					<input type="checkbox" id="fan-switch" class="switch-check" onchange="setChanges()">
     						<label for="fan-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -46,13 +46,13 @@
 					</div>
     			</td>
     			<td>
-    				<input type="radio" id="fan-value1" name="fan-radio">
+    				<input type="radio" id="fan-value1" name="fan-radio" onchange="setChanges()">
     				<label for="fan-value1" class="fan-label">1 m</label>
-    				<input type="radio" id="fan-value2" name="fan-radio"> 
+    				<input type="radio" id="fan-value2" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value2" class="fan-label">2 m</label>
-    				<input type="radio" id="fan-value3" name="fan-radio"> 
+    				<input type="radio" id="fan-value3" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value3" class="fan-label">5 m</label>
-    				<input type="radio" id="fan-value4" name="fan-radio"> 
+    				<input type="radio" id="fan-value4" name="fan-radio" onchange="setChanges()"> 
     				<label for="fan-value4" class="fan-label">10 m</label>
     			</td>
     		</tr>
@@ -62,7 +62,7 @@
     			</td>
     			<td>
     				<div class="switch">
-    					<input type="checkbox" id="compressor-switch" class="switch-check">
+    					<input type="checkbox" id="compressor-switch" class="switch-check" onchange="setChanges()">
     						<label for="compressor-switch" class="switch-label">
     							<span class="switch-slider switch-slider-on"></span>
         						<span class="switch-slider switch-slider-off"></span>
@@ -74,7 +74,7 @@
     		</tr>
     	</table>
     </div>
-    <input type="button" value="Настроить" onclick="setChanges()">
+    <!--<input type="button" value="Настроить" onclick="setChanges()">-->
     <script>
 	function setChanges() {
 		var lamp = document.querySelector("#lamp-switch");
@@ -95,7 +95,7 @@
 			request.fan[0] = 1;
 		}
 		if (compressor.checked) {
-			request.compressor[0] = 1;
+			request.compressor = 1;
 		}
 		
 		if (lampValue[0].checked) {
@@ -119,7 +119,7 @@
 			contentType: "application/json; charset=utf8",
 			dataType:"json",
 			success: function() {
-					alert("Настройки приняты");
+					console.log("Настройки приняты");
 				 }
 		});
 	}
@@ -129,7 +129,7 @@
 		console.log(currentState); //testing
 		document.getElementById("lamp-switch").checked = !!currentState.lamp[0];
 		document.getElementById("fan-switch").checked = !!currentState.fan[0]; 
-		document.getElementById("compressor-switch").checked = !!currentState.compressor[0];
+		document.getElementById("compressor-switch").checked = !!currentState.compressor;
 		if (currentState.lamp[1] === 18) {
 			document.getElementsByName("lamp-radio")[0].checked = true;
 		} else if (currentState.lamp[1] === 12) {
