@@ -1,17 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup
-import os, datetime, random, json, time
+import os, datetime, random, json, time, sys
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing, threading
 import sqlite
 from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
-output_queue = multiprocessing.Queue(2)
 input_queue = multiprocessing.Queue(1)
 
-currentTime = time.clock() 
 dbPeriod = 600 # seconds 
 arrayLen = 10 
 circularArray = [0] * arrayLen 
@@ -41,8 +39,9 @@ def temp():
 
 @app.route("/temp_measure")
 def temp_meas():
-    global temp
-    return str(temp) #alarm
+    with lock:
+        ret_val = temp
+    return ret_val
 ################################################
 #return humidity page with dynamic measurements
 @app.route("/measurements/humidity")
@@ -51,19 +50,20 @@ def hum():
     return render_template("measurements/humidity.html", **template_data, goback='/measurements')
 @app.route("/hum_measure")
 def hum_meas():
-    global hum
-    return hum
+    with lock:
+        ret_val = hum 
+    return ret_val
 #################################################
 #return pH page
 @app.route("/measurements/ph")
 def ph():
-    global ph
     template_data = {'label' : "Уровень pH"}
     return render_template("measurements/ph.html", **template_data, goback='/measurements')
 @app.route("/ph_measure")
 def ph_meas():
-    global ph
-    return ph
+    with lock:
+        ret_val = ph
+    return ret_val
 #################################################
 #return TDS updatePage
 @app.route("/measurements/tds")
@@ -72,8 +72,9 @@ def tds():
     return render_template("measurements/tds.html", **template_data, goback='/measurements')
 @app.route("/tds_measure")
 def tds_meas():
-    global tds
-    return tds
+    with lock:
+        ret_val = tds
+    return ret_val
 #################################################
 #return CO2 page
 @app.route("/measurements/co2")
@@ -82,8 +83,9 @@ def co2():
     return render_template("measurements/co2.html", **template_data, goback='/measurements')
 @app.route("/co2_measure")
 def co2_meas():
-    global co2
-    return co2
+    with lock:
+        ret_val = co2
+    return ret_val
 ##################################################
 
 #camera control
@@ -217,37 +219,47 @@ def info():
 def dynamicTemp():
     return render_template("dynamicCharts.html")
 
-def get(lock):
+def get():
     global temp, hum, ph, tds, co2
-    global output_queue
     global arrayPivot, arrayLen, circularArray
+    data = "0 0 0 0 0 0"
+    empty_loop_count = 0
     while True:
+        if not input_queue.empty():
+            command_data = input_queue.get()
+            sp.write_serial(command_data.encode())
+            print("Write data to serial " + command_data) #testing
+
+        while sp.serial_available():
+            empty_loop_count = 0
+            data = sp.read_serial()
+        empty_loop_count += 1
+        if empty_loop_count > 10:
+            sp.close()
+            print("Serial port disconnect")
+            sys.exit(1)
         with lock:
-            if not output_queue.empty():
-                temp, hum, ph, tds, co2, lvl = serial_port.get_data_from_serial(output_queue) 
-                circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
-                arrayPivot = arrayPivot + 1 
-                if arrayPivot == arrayLen: 
-                    s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
-                    sql.insertSensors(s[0], s[1], s[2], s[3], s[4])
-                    arrayPivot = 0
+            temp, hum, ph, tds, co2, lvl = data.split() 
+            circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
+        arrayPivot += 1 
+        if arrayPivot == arrayLen: 
+            s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
+            sql.insertSensors(s[0], s[1], s[2], s[3], s[4])
+            arrayPivot = 0
         time.sleep(1)
 
 
 
 if __name__ == "__main__":
-    #temp, hum, ph, tds, co2 = (0, 0, 0, 0, 0)
-    #output_queue = multiprocessing.Queue(2)
 
     sql.create()
     sql.createActivity()
-
-    sp = serial_port.SerialProcess(output_queue, input_queue, "/dev/ttyACM0")
-    sp.daemon = True
-    sp.start()
+    
+    sp = serial_port.SerialPort("/dev/ttyACM0")
+    sp.open()
 
     lock = threading.Lock()
-    getThread = threading.Thread(target=get, args=(lock,))
+    getThread = threading.Thread(target=get)
     getThread.daemon = True
     getThread.start()
 
