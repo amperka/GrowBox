@@ -5,7 +5,7 @@ import os, datetime, random, json, time, sys
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing, threading
 import sqlite
-from picamera import PiCamera
+# from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = multiprocessing.Queue(1)
@@ -161,7 +161,7 @@ def net_settings():
 #return charts page
 @app.route("/charts")
 def charts():
-    return render_template("charts/charts.html")
+    return render_template("charts/charts.html", title='Журнал', goback='/index')
 
 #return chart for 30 days
 @app.route("/charts/temp_chart")
@@ -171,7 +171,7 @@ def temp_chart():
     label = "Температура"
     banner = "температуры"
     template_data = {'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
-    return render_template("charts/month_chart.html", **template_data)
+    return render_template("charts/month_chart.html", title='Журнал температуры', goback='/charts', **template_data)
 
 @app.route("/charts/hum_chart")
 def hum_chart():
@@ -255,7 +255,8 @@ if __name__ == "__main__":
     sql.create()
     sql.createActivity()
     
-    sp = serial_port.SerialPort("/dev/ttyACM0")
+    #sp = serial_port.SerialPort("/dev/ttyACM0")
+    sp = serial_port.SerialPort("COM8")
     sp.open()
 
     lock = threading.Lock()
@@ -268,4 +269,4 @@ if __name__ == "__main__":
     settings_file.close()
     input_queue.put(current_state)
 
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=True)
