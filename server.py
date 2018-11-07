@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup
 import os, datetime, random, json, time, sys
-from get_data_from_database import get_hist_data
+from datetime import datetime
 import serial_port, multiprocessing, threading
 import sqlite
 # from picamera import PiCamera
@@ -140,7 +140,7 @@ def settings():
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
-    #input_queue.put('{"lamp":[1, 18]}')    
+    #input_queue.put('{"lamp":[1, 18]}')
     input_queue.put(str(content))
 
     sql.updateActivity(str(content))
@@ -166,11 +166,21 @@ def charts():
 #return chart for 30 days
 @app.route("/charts/temp_chart")
 def temp_chart():
-    labels = [i for i in range(30)]
-    data = get_hist_data(30)[1]
+    # labels = [i for i in range(30)]
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    data = sql.selectSensors(monthEarlier, now, limit=30)
+    print('DATA length: '+str(len(data)))
+    error = False
+    if len(data) == 0:
+        error = 'Нет данных'
+    else:
+        prep = [x for x in zip(*data)]
+        labels = prep[0]
+        data = prep[1]
     label = "Температура"
     banner = "температуры"
-    template_data = {'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
+    template_data = {'error': error, 'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
     return render_template("charts/month_chart.html", title='Журнал температуры', goback='/charts', **template_data)
 
 @app.route("/charts/hum_chart")
@@ -255,8 +265,8 @@ if __name__ == "__main__":
     sql.create()
     sql.createActivity()
     
-    #sp = serial_port.SerialPort("/dev/ttyACM0")
-    sp = serial_port.SerialPort("COM8")
+    sp = serial_port.SerialPort("/dev/ttyACM0")
+    #sp = serial_port.SerialPort("COM8")
     sp.open()
 
     lock = threading.Lock()
@@ -269,4 +279,4 @@ if __name__ == "__main__":
     settings_file.close()
     input_queue.put(current_state)
 
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=False)

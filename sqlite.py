@@ -126,13 +126,17 @@ class Sqlite():
 
 
     #select dsensors data of [fromTime; toTime] period
-    def selectSensors(self, fromTime = None, toTime = None):
+    def selectSensors(self, fromTime = None, toTime = None, limit = None):
 
         sql = "SELECT * FROM sensors"
         if fromTime:
             sql = sql + " WHERE date>=" + str(int(fromTime))
             if toTime:
                 sql = sql + " AND date<=" + str(int(toTime))
+
+        if limit:
+            sql = sql + " LIMIT " + str(int(limit)) 
+
 
         # print(sql)
 
