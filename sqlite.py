@@ -149,7 +149,7 @@ class Sqlite():
 
 if __name__=="__main__":
 
-    sq = Sqlite('./database/sensorsData.db')
+    sq = Sqlite('./database/sensorsData')
 
     sq.create()
     sq.createActivity()
