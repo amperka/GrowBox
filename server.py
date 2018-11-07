@@ -1,11 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request, Markup
+from flask import Flask, render_template, make_response, request, Markup, Response
+from functools import wraps # for Basic Auth
 import os, datetime, random, json, time, sys
 from datetime import datetime
 import serial_port, multiprocessing, threading
 import sqlite
-# from picamera import PiCamera
+import signal
+
+WINDOWS = False
+import platform
+if platform.system() == 'Windows':
+    WINDOWS = True
+
+if not WINDOWS:
+    from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = multiprocessing.Queue(1)
@@ -129,7 +138,6 @@ def make_video():
 @app.route("/settings")
 def settings():
     row = sql.selectActivity()
-    #settings = {'curstate': row[0], 'lampMode': row[1], 'fanMode': row[2], 'comprMode': row[3]}
     data = Markup(row[0][0])
 
     #settingFile = open("settings.txt", "r")
@@ -140,7 +148,6 @@ def settings():
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
-    #input_queue.put('{"lamp":[1, 18]}')
     input_queue.put(str(content))
 
     sql.updateActivity(str(content))
@@ -150,10 +157,33 @@ def accept_setting():
     #settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return username == 'admin' and password == 'secret'
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
 #return net_settings
-@app.route("/net_settings")
-def net_settings():
-    return render_template("/settings/net_settings.html")
+@app.route('/net_settings')
+@requires_auth
+def secret_page():
+    return render_template('/settings/net_settings.html')
 
 ###################################################
 
@@ -166,58 +196,58 @@ def charts():
 #return chart for 30 days
 @app.route("/charts/temp_chart")
 def temp_chart():
-    # labels = [i for i in range(30)]
     now = int(datetime.timestamp(datetime.now()))
     monthEarlier = now - 2592000
-    data = sql.selectSensors(monthEarlier, now, limit=30)
-    print('DATA length: '+str(len(data)))
-    error = False
-    if len(data) == 0:
-        error = 'Нет данных'
-    else:
-        prep = [x for x in zip(*data)]
-        labels = prep[0]
-        data = prep[1]
+    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
+    error, data, labels = prepareData2Chart(data)
     label = "Температура"
     banner = "температуры"
-    template_data = {'error': error, 'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
+    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
     return render_template("charts/month_chart.html", title='Журнал температуры', goback='/charts', **template_data)
 
 @app.route("/charts/hum_chart")
 def hum_chart():
-    labels = [i for i in range(30)]
-    data = get_hist_data(30)[2]
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
+    error, data, labels = prepareData2Chart(data)
     label = "Влажность"
     banner = "влажности"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
-    return render_template("charts/month_chart.html", **template_data)
+    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
+    return render_template("charts/month_chart.html", title='Журнал влажности', goback='/charts', **template_data)
 
 @app.route("/charts/ph_chart")
 def ph_chart():
-    labels = [i for i in range(30)]
-    data = [i for i in range(30)] #temporally
-    label = "Уровень pH"
-    banner = "уровня pH"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
-    return render_template("charts/month_chart.html", **template_data)
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
+    error, data, labels = prepareData2Chart(data)
+    label = "Уровень кислотности pH"
+    banner = "уровня кислотности pH"
+    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
+    return render_template("charts/month_chart.html", title='Журнал уровня кислотности', goback='/charts', **template_data)
 
 @app.route("/charts/tds_chart")
 def tds_chart():
-    labels = [i for i in range(30)]
-    data = [i for i in range(30)] #temporally
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
+    error, data, labels = prepareData2Chart(data)
     label = "Уровень солей"
     banner = "уровня солей"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
-    return render_template("charts/month_chart.html", **template_data)
+    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
+    return render_template("charts/month_chart.html", title='Журнал уровня солей', goback='/charts', **template_data)
 
 @app.route("/charts/co2_chart")
 def co2_chart():
-    labels = [i for i in range(30)]
-    data = [i for i in range(30)] #temporally
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
+    error, data, labels = prepareData2Chart(data)
     label = "Уровень CO2"
     banner = "уровня CO2"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
-    return render_template("charts/month_chart.html", **template_data)
+    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
+    return render_template("charts/month_chart.html", title='Журнал концентрации углекислого газа', goback='/charts', **template_data)
 
 
 #return return page about plants
@@ -228,6 +258,19 @@ def info():
 @app.route("/dynamicCharts")
 def dynamicTemp():
     return render_template("dynamicCharts.html")
+
+def prepareData2Chart(data):
+    print('DATA length: '+str(len(data)))
+    if len(data) == 0:
+        error = "Нет данных"
+        labels = ""
+        data = []
+    else:
+        error = False
+        prep = [x for x in zip(*data)]
+        labels = [datetime.fromtimestamp(x).strftime("%m-%d %H:%M") for x in prep[0]]
+        data = prep[1]
+    return error, data, labels
 
 def get():
     global temp, hum, ph, tds, co2
@@ -264,9 +307,13 @@ if __name__ == "__main__":
 
     sql.create()
     sql.createActivity()
-    
-    sp = serial_port.SerialPort("/dev/ttyACM0")
-    #sp = serial_port.SerialPort("COM8")
+
+    print("IS IT WINDOWS? -" + str(WINDOWS))
+
+    if not WINDOWS:
+        sp = serial_port.SerialPort("/dev/ttyACM0")
+    else:
+        sp = serial_port.SerialPort("COM8")
     sp.open()
 
     lock = threading.Lock()
@@ -278,5 +325,21 @@ if __name__ == "__main__":
     current_state = settings_file.readline()
     settings_file.close()
     input_queue.put(current_state)
+
+    def sigint_handler(signum, frame):
+        print("Stop pressing the CTRL+C!")
+        # need to fix
+        sp.close()
+        getThread.join()
+        print("Join the thread. Is it alive?")
+        print(getThread.is_alive())
+        print("Exit application")
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
+        sys.exit(1)
+     
+    signal.signal(signal.SIGINT, sigint_handler)
 
     app.run(host='0.0.0.0', debug=False)
