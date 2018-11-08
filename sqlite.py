@@ -21,7 +21,10 @@ class Sqlite():
         if len(self.selectActivity()) == 0:
             conn = sqlite3.connect(self.dbname)
             curs = conn.cursor()
-            curs.execute("INSERT INTO activity(curstate) values('')")
+            curstate = str({'compressor': 0, 'fan': [0, 10], 'lamp': [1, 18]})
+            sql = "INSERT INTO activity(curstate) values(?)"
+            val = (curstate)
+            curs.execute(sql, val)
             conn.commit()
             conn.close()
 
@@ -138,6 +141,7 @@ class Sqlite():
             sql = sql + " LIMIT " + str(int(limit)) 
 
 
+        sql = sql + " ORDER BY date DESC "
         # print(sql)
 
         conn = sqlite3.connect(self.dbname)

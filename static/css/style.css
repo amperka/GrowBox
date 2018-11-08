@@ -1,3 +1,7 @@
+body {
+	margin: 0
+}
+
 #image{
 	width: 250px;
 	height: 250px;
@@ -7,7 +11,7 @@
 }
 
 #btn {
-	width: 250px;
+	width: 100%;
 	margin: auto;
 }
 
@@ -19,8 +23,10 @@ a {
 	list-style: none;
 	display: inline-block;
 	padding: 0px;
-	margin:10px;
+	margin: 1%;
 	text-align:center;
+	width: 86%;
+	font-size: 50px;
 }
 .button-group li a {
 	text-align:center;
@@ -36,6 +42,7 @@ a {
 	padding: .7em 1.5em;
 	min-width: 180px;
 	min-height: 20px;
+	width: 96%;
 }
 
 .banner {
