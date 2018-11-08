@@ -2,4 +2,4 @@ __pycache__/
 *.py[cod]
 server_win.py
 log.log
-database/
+database/*
