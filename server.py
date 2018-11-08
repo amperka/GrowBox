@@ -232,22 +232,45 @@ def dynamicTemp():
 def get():
     global temp, hum, ph, tds, co2
     global arrayPivot, arrayLen, circularArray
+    arduino_path = auto_detect_serial()
+    if arduino_path is not None:
+        sp = serial_port.SerialPort(arduino_path)
+    else:
+        print("Arduino not connected")
+        sys.exit(1)
+    print("Arduino path is ", arduino_path) #testing
+    sp.open()
     data = "0 0 0 0 0 0"
     empty_loop_count = 0
     while True:
-        if not input_queue.empty():
-            command_data = input_queue.get()
-            sp.write_serial(command_data.encode())
-            print("Write data to serial " + command_data) #testing
+        try:
+            if not input_queue.empty():
+                command_data = input_queue.get()
+                sp.write_serial(command_data.encode())
+                print("Write data to serial " + command_data) #testing
 
-        while sp.serial_available():
-            empty_loop_count = 0
-            data = sp.read_serial()
-        empty_loop_count += 1
-        if empty_loop_count > 10:
+            while sp.serial_available():
+                empty_loop_count = 0
+                data = sp.read_serial()
+            empty_loop_count += 1
+            if empty_loop_count > 10:
+                raise Exception("Time is over")
+        except:
             sp.close()
             print("Serial port disconnect")
-            sys.exit(1)
+            print("Try to reconnect")
+            time.sleep(10) #testing
+            arduino_path = auto_detect_serial()
+            if arduino_path is not None:
+                sp = serial_port.SerialPort(arduino_path)
+            else:
+                print("Arduino not connected")
+                sys.exit(1)
+            if sp.open():
+                empty_loop_count = 0
+                print("Connection succeful")
+                input_queue.put(current_state)
+
         with lock:
             temp, hum, ph, tds, co2, lvl = data.split() 
             circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
@@ -258,25 +281,32 @@ def get():
             arrayPivot = 0
         time.sleep(1)
 
-
+def auto_detect_serial():
+    import glob
+    path = glob.glob("/dev/ttyACM*")
+    if len(path) > 0:
+        return path[0]
+    else:
+        return None
 
 if __name__ == "__main__":
 
     sql.create()
     sql.createActivity()
     
-    sp = serial_port.SerialPort("/dev/ttyACM0")
+    #arduino_path = auto_detect_serial()
+    #sp = serial_port.SerialPort(arduino_path)
     #sp = serial_port.SerialPort("COM8")
-    sp.open()
+    #sp.open()
+    
+    settings_file = open("settings.txt", "r")
+    current_state = settings_file.readline()
+    settings_file.close()
+    input_queue.put(current_state)
 
     lock = threading.Lock()
     getThread = threading.Thread(target=get)
     getThread.daemon = True
     getThread.start()
-
-    settings_file = open("settings.txt", "r")
-    current_state = settings_file.readline()
-    settings_file.close()
-    input_queue.put(current_state)
 
     app.run(host='0.0.0.0', debug=False)

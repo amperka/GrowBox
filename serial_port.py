@@ -12,7 +12,7 @@ class SerialPort():
         try:
             self.sp = serial.Serial(self.serial_port, self.baudrate, timeout=self.timeout)
             self.sp.flushInput()
-
+            return True
         except:
             print("Serial is not available")
             sys.exit(1)
