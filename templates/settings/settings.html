@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Управление</title>
-    <link rel="stylesheet" href="../../static/css/style.css">
+{% extends "base.html" %}
+{% block headerScript %}
     <link rel="stylesheet" href="../../static/css/settings_style.css">
     <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+{% endblock %}
 
-  </head>
-  <body>
-    <h1 align=center class="banner"> Управление </h1>
+{% block content %}
     <div id="settings-block">
     	<table id=setting-table>
     		<tr>
@@ -75,6 +70,7 @@
     	</table>
     </div>
     <!--<input type="button" value="Настроить" onclick="setChanges()">-->
+    <div class="saved" id="settings_saved">изменения сохранены</div>
     <script>
 	function setChanges() {
 		var lamp = document.querySelector("#lamp-switch");
@@ -119,7 +115,12 @@
 			contentType: "application/json; charset=utf8",
 			dataType:"json",
 			success: function() {
-					console.log("Настройки приняты");
+					// $("#settings_saved").style.visibility = "visible";
+                    // $("#settings_saved").css("visibility", "visible");
+                    $("#settings_saved").fadeIn();
+                    setTimeout(function() {
+                        $("#settings_saved").fadeOut(1000);
+                    }, 3000);
 				 }
 		});
 	}
@@ -153,5 +154,4 @@
 		}
 	}
     </script>
-  </body>
-</html>
+{% endblock %}
