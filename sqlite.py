@@ -23,7 +23,7 @@ class Sqlite():
             curs = conn.cursor()
             curstate = str({'compressor': 0, 'fan': [0, 10], 'lamp': [1, 18]})
             sql = "INSERT INTO activity(curstate) values(?)"
-            val = (curstate)
+            val = (curstate, )
             curs.execute(sql, val)
             conn.commit()
             conn.close()
@@ -65,7 +65,7 @@ class Sqlite():
         curs.execute(sql)
         rows = curs.fetchall()
         conn.close()
-        print(rows)
+        # print(rows)
         return rows
         # return {'curstate': rows[0], 'lampMode': rows[1], 'fanMode': rows[2]}
         # return {'curstate': rows[0], 'lampMode': rows[1], 'fanMode': rows[2], 'comprMode': rows[3]}
@@ -153,7 +153,7 @@ class Sqlite():
 
 if __name__=="__main__":
 
-    sq = Sqlite('./database/sensorsData')
+    sq = Sqlite('./sensorsData.db')
 
     sq.create()
     sq.createActivity()
@@ -163,6 +163,8 @@ if __name__=="__main__":
     sq.testActivity()
     for row in sq.selectActivity():
         print(row)
+    print('Activity length:')
+    print(len(sq.selectActivity()))
     print('-----sensors-----')
     sq.testDataInsert()
     print('total rows: '+str(sq.countSensors()))
