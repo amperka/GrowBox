@@ -26,7 +26,7 @@ arrayPivot = 0
 itemPeriod = dbPeriod / arrayLen # seconds
 
 app = Flask(__name__)
-sql = sqlite.Sqlite('./database/sensorsData')
+sql = sqlite.Sqlite('./sensorsData.db')
 
 #return index page
 @app.route("/")
