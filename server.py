@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup, Response
-from functools import wraps # for Basic Auth
 import os, datetime, random, json, time, sys
 from datetime import datetime
 import serial_port, multiprocessing, threading
@@ -156,6 +155,7 @@ def accept_setting():
     #settingsFile.write(str(content))
     #settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+####################################################
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -163,27 +163,17 @@ def check_auth(username, password):
     """
     return username == 'admin' and password == 'secret'
 
-def authenticate():
-    """Sends a 401 response that enables basic auth"""
-    return Response(
-    'Could not verify your access level for that URL.\n'
-    'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+@app.route("/net_setting", methods=["POST"])
+def log_in():
+    login = request.form["login"]
+    passwd = request.form["passwd"]
+    if check_auth(login, passwd):
+        return render_template("/settings/net_setting.html", title='Настройки сети', goback='/index')
+    return str("You are not loggined") #testing
 
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
-
-#return net_settings
-@app.route('/net_settings')
-@requires_auth
+@app.route('/login')
 def secret_page():
-    return render_template('/settings/net_settings.html')
+    return render_template('/settings/login.html', title='Регистрация', goback='/index')
 
 ###################################################
 

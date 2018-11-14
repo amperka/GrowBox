@@ -2,17 +2,9 @@ body {
 	margin: 0
 }
 
-#image{
-	width: 250px;
-	height: 250px;
-	position: absolute;
-	top: 20%;
-	left: 72%;
-}
-
 #btn {
-	width: 100%;
-	margin: auto;
+	width: 89%;
+	margin: unset;
 }
 
 a {
