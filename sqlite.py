@@ -104,7 +104,7 @@ class Sqlite():
         date = datetime.timestamp(datetime.now()) # FLOAT
         date = int(date) # INTEGER
 
-        # print(date, temp, humidity, carbon, acidity, saline, level)
+        #print(date, temp, humidity, carbon, acidity, saline, level)
 
         sql = "INSERT INTO sensors(date, temp, humidity, carbon, acidity, saline, level) values(?, ?, ?, ?, ?, ?, ?)"
         val = (date, temp, humidity, carbon, acidity, saline, level)
@@ -129,20 +129,28 @@ class Sqlite():
 
 
     #select dsensors data of [fromTime; toTime] period
-    def selectSensors(self, fromTime = None, toTime = None, limit = None):
+    def selectSensors(self, param = [], fromTime = None, toTime = None, limit = None):
 
-        sql = "SELECT * FROM sensors"
+        select = "*"
+        if type(param) is str:
+            select = "date," + param
+        else:
+            if len(param) > 0:
+                select = "date," + ",".join(param)
+
+
+        sql = "SELECT " + select + " FROM sensors"
         if fromTime:
             sql = sql + " WHERE date>=" + str(int(fromTime))
             if toTime:
                 sql = sql + " AND date<=" + str(int(toTime))
 
+        sql = sql + " ORDER BY date DESC"
+
         if limit:
             sql = sql + " LIMIT " + str(int(limit)) 
 
-
-        sql = sql + " ORDER BY date DESC "
-        # print(sql)
+        sql = "SELECT * from (" + sql + ") ORDER BY date ASC"
 
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
