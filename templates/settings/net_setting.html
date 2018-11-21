@@ -1,4 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+	<form method="POST" action=/apply_settings>
+		<table>
+			<p>Введите имя сети и пароль</p>
+			<tr><td>Имя сети</td><td><input name="login" maxlength="25" size="40" type="text"></td></tr>
+			<tr><td>Пароль</td><td><input name="passwd" maxlength="25" size="40" type="text"></td></tr>
+		</table>
+		<p><input value="Подключиться" type="submit"></p>
+	</form>
 {% endblock %}

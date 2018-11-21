@@ -48,19 +48,9 @@ def temp():
 @app.route("/temp_measure")
 def temp_meas():
     with lock:
-        ret_val = temp
+        ret_val = str(temp)
     return ret_val
-################################################
-#return humidity page with dynamic measurements
-@app.route("/measurements/humidity")
-def hum():
-    template_data =  {'label' : "Влажность"}
-    return render_template("measurements/humidity.html", **template_data, goback='/measurements')
-@app.route("/hum_measure")
-def hum_meas():
-    with lock:
-        ret_val = hum 
-    return ret_val
+
 #################################################
 #return pH page
 @app.route("/measurements/ph")
@@ -70,7 +60,7 @@ def ph():
 @app.route("/ph_measure")
 def ph_meas():
     with lock:
-        ret_val = ph
+        ret_val = str(ph)
     return ret_val
 #################################################
 #return TDS updatePage
@@ -81,7 +71,7 @@ def tds():
 @app.route("/tds_measure")
 def tds_meas():
     with lock:
-        ret_val = tds
+        ret_val = str(tds)
     return ret_val
 #################################################
 #return CO2 page
@@ -92,7 +82,7 @@ def co2():
 @app.route("/co2_measure")
 def co2_meas():
     with lock:
-        ret_val = co2
+        ret_val = str(co2)
     return ret_val
 ##################################################
 
@@ -147,6 +137,7 @@ def settings():
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
+    print(content)
     input_queue.put(str(content))
 
     sql.updateActivity(str(content))
@@ -171,12 +162,25 @@ def log_in():
         return render_template("/settings/net_setting.html", title='Настройки сети', goback='/index')
     return str("You are not loggined") #testing
 
-@app.route('/login')
+@app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
 
+@app.route("/apply_settings", methods=["POST"])
+def apply_settings():
+    login = request.form["login"]
+    passwd = request.form["passwd"]
+    connect_flag = False
+    with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r+") as file:
+        for line in file:
+            if login in line:
+                connect_flag = True
+        if not connect_flag:
+            file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
+    if not connect_flag:
+        os.system("wpa_cli -i wlan0 reconfigure")
+    return render_template("/settings/net_setting.html", title="Настройки сети", goback='/index')
 ###################################################
-
 
 #return charts page
 @app.route("/charts")
@@ -250,7 +254,7 @@ def dynamicTemp():
     return render_template("dynamicCharts.html")
 
 def prepareData2Chart(data):
-    print('DATA length: '+str(len(data)))
+    print('DATA length: ' + str(len(data)))
     if len(data) == 0:
         error = "Нет данных"
         labels = ""
@@ -263,7 +267,7 @@ def prepareData2Chart(data):
     return error, data, labels
 
 def get():
-    global temp, hum, ph, tds, co2
+    global temp, hum, ph, tds, co2, lvl
     global arrayPivot, arrayLen, circularArray
     
     
@@ -279,7 +283,7 @@ def get():
         sys.exit(1)
     print("Arduino path is ", arduino_path) #testing
     sp.open()
-    data = "0 0 0 0 0 0"
+    data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
     while True:
         try:
@@ -290,7 +294,7 @@ def get():
 
             while sp.serial_available():
                 empty_loop_count = 0
-                data = sp.read_serial()
+                data = json.loads(sp.read_serial())
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise Exception("Time is over")
@@ -311,7 +315,12 @@ def get():
                 input_queue.put(current_state)
 
         with lock:
-            temp, hum, ph, tds, co2, lvl = data.split() 
+            temp = data["temp"]  
+            ph = data["acid"] 
+            tds = data["salin"] 
+            co2 = data["carb"] 
+            lvl = data["level"]
+            hum = '0' 
             circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
         arrayPivot += 1 
         if arrayPivot == arrayLen: 
@@ -361,4 +370,4 @@ if __name__ == "__main__":
         sys.exit(1)
      
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=False, threaded=True)
