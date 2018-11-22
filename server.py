@@ -137,7 +137,6 @@ def settings():
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
-    print(content)
     input_queue.put(str(content))
 
     sql.updateActivity(str(content))
@@ -159,15 +158,15 @@ def log_in():
     login = request.form["login"]
     passwd = request.form["passwd"]
     if check_auth(login, passwd):
-        return render_template("/settings/net_setting.html", title='Настройки сети', goback='/index')
+        return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
     return str("You are not loggined") #testing
 
 @app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
 
-@app.route("/apply_settings", methods=["POST"])
-def apply_settings():
+@app.route("/apply_net_settings", methods=["POST"])
+def apply_net_settings():
     login = request.form["login"]
     passwd = request.form["passwd"]
     connect_flag = False
@@ -179,7 +178,18 @@ def apply_settings():
             file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
     if not connect_flag:
         os.system("wpa_cli -i wlan0 reconfigure")
-    return render_template("/settings/net_setting.html", title="Настройки сети", goback='/index')
+    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+
+@app.route("/apply_time", methods=["POST"])
+def apply_time():
+    new_time = request.form["set_time"]
+    new_date = request.form["set_date"]
+    datetime = new_date + ' ' + new_time
+    set_systime(datetime)
+    #input_queue.put(
+    print(datetime) #testing
+    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+
 ###################################################
 
 #return charts page
@@ -295,6 +305,7 @@ def get():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
+                #print(data) #testing
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise Exception("Time is over")
@@ -336,6 +347,9 @@ def auto_detect_serial():
         return path[0]
     else:
         return None
+
+def set_systime(datetime):
+    os.system("sudo date --set='" + datetime + "'")
 
 if __name__ == "__main__":
 

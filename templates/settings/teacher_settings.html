@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block headerScript %}
+    <link rel="stylesheet" href="../../static/css/teacher_settings.css">
+{% endblock %}
+
+{% block content %}
+	<div id="net_settings">
+		<form method="POST" action=/apply_net_settings class="settings-form">
+			<table>
+				<p>Введите имя сети и пароль</p>
+				<tr><td>Имя сети</td><td><input name="login" maxlength="25" size="40" type="text"></td></tr>
+				<tr><td>Пароль</td><td><input name="passwd" maxlength="25" size="40" type="text"></td></tr>
+			</table>
+			<p><input value="Подключиться" type="submit"></p>
+		</form>
+	</div>
+
+	<div id="time_settings">
+		<form method="POST" action=/apply_time class="settings-form">
+			<table>
+				<p>Введите время и дату</p>
+				<tr><td>Время</td><td><input type="time" name="set_time"></td></tr>
+				<tr><td>Дата</td><td><input type="date" name="set_date"></td></tr>
+			</table>
+			<p><input value="OK" type="submit"></p>
+		</form>
+	</div>
+
+{% endblock %}

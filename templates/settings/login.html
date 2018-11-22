@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-
+{% block headerScript %}
+    <link rel="stylesheet" href="../../static/css/teacher_settings.css">
+{% endblock %}
 {% block content %}
-	<form method="POST" action=/net_setting>
+	<form method="POST" action=/net_setting class="settings-form">
 		<table>	
 			<p>Введите логин и пароль</p>
 			<tr><td>Логин</td><td><input name="login" maxlength="25" size="40" type="text"></td></tr>
