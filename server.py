@@ -246,7 +246,7 @@ def prepareMonthData2Chart(param):
     monthEarlier = now - 2592000
     # error, data, labels = prepareData(param, monthEarlier, now, 2592000 / (requestPeriod * arrayLen))
     error, data, labels = prepareData(param, monthEarlier, now, 100)
-    labels = [datetime.fromtimestamp(x).strftime("%d.%m %H:%M:%S") for x in labels]
+    labels = [datetime.fromtimestamp(x).strftime("%d.%m") for x in labels]
     return error, data, labels
 
 def prepareWeekData2Chart(param):
@@ -254,7 +254,7 @@ def prepareWeekData2Chart(param):
     weekEarlier = now - 604800
     # error, data, labels = prepareData(param, weekEarlier, now, 604800 / (requestPeriod * arrayLen))
     error, data, labels = prepareData(param, weekEarlier, now, 50)
-    labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh:%M:%S") for x in labels]
+    labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh") for x in labels]
     return error, data, labels
 
 def prepareDayData2Chart(param):
@@ -262,7 +262,7 @@ def prepareDayData2Chart(param):
     dayEarlier = now - 86400
     # error, data, labels = prepareData(param, dayEarlier, now, 86400 / (requestPeriod * arrayLen))
     error, data, labels = prepareData(param, dayEarlier, now, 20)
-    labels = [datetime.fromtimestamp(x).strftime("%Hh:%M:%S") for x in labels]
+    labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
 def prepareHourData2Chart(param):
@@ -270,7 +270,7 @@ def prepareHourData2Chart(param):
     hourEarlier = now - 3600
     # error, data, labels = prepareData(param, hourEarlier, now, 3600 / (requestPeriod * arrayLen))
     error, data, labels = prepareData(param, hourEarlier, now, 5)
-    labels = [datetime.fromtimestamp(x).strftime("%H:%M:%S") for x in labels]
+    labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
 def prepareData(param, fromTime, toTime, limit):
