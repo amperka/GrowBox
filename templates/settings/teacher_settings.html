@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block headerScript %}
-    <link rel="stylesheet" href="../../static/css/teacher_settings.css">
+	<link rel="stylesheet" href="../../static/css/teacher_settings.css">
+	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 {% endblock %}
 
 {% block content %}
-	<div id="net_settings">
+	<div id="net-settings">
 		<form method="POST" action=/apply_net_settings class="settings-form">
 			<table>
 				<p>Введите имя сети и пароль</p>
@@ -15,15 +16,42 @@
 		</form>
 	</div>
 
-	<div id="time_settings">
-		<form method="POST" action=/apply_time class="settings-form">
+	<div id="time-settings">
+		<form id="time-form" class="settings-form" onsubmit="setTime(); return false;">
 			<table>
 				<p>Введите время и дату</p>
-				<tr><td>Время</td><td><input type="time" name="set_time"></td></tr>
-				<tr><td>Дата</td><td><input type="date" name="set_date"></td></tr>
+				<tr><td>Время</td><td><input type="time" name="set-time"></td></tr>
+				<tr><td>Дата</td><td><input type="date" name="set-date"></td></tr>
 			</table>
 			<p><input value="OK" type="submit"></p>
 		</form>
 	</div>
+	<div class="saved-banner" id="time-saved">
+		Время установлено
+	</div>
+	<script>	
+		function setTime() {	
+			var newTime = document.getElementsByName("set-time")[0].value;
+			var newDate = document.getElementsByName("set-date")[0].value;
+			
+			if (newTime === "" || newDate === "") {
+				return alert("Incorrect value");
+			}
+
+			$.ajax({
+				url: "/apply_time",
+				type: "POST",
+				data: JSON.stringify({"set-time" : newTime, "set-date" : newDate}),	
+				contentType: "application/json; charset=utf8",
+				dataType:"json",
+				success: function() {
+                    				$("#time-saved").fadeIn();
+                    				setTimeout(function() {
+                        				$("#time-saved").fadeOut(1000);
+                    				}, 3000);
+					}
+				});
+		}	
+	</script>
 
 {% endblock %}

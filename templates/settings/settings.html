@@ -69,7 +69,6 @@
     		</tr>
     	</table>
     </div>
-    <!--<input type="button" value="Настроить" onclick="setChanges()">-->
     <div class="saved" id="settings_saved">изменения сохранены</div>
     <script>
 	function setChanges() {
@@ -105,8 +104,6 @@
 				  break;
 			}
 		}
-	
-		console.log(request); // testing
 		
 		$.ajax({
 			url: "/accept_settings",
@@ -115,14 +112,12 @@
 			contentType: "application/json; charset=utf8",
 			dataType:"json",
 			success: function() {
-					// $("#settings_saved").style.visibility = "visible";
-                    // $("#settings_saved").css("visibility", "visible");
-                    $("#settings_saved").fadeIn();
-                    setTimeout(function() {
-                        $("#settings_saved").fadeOut(1000);
-                    }, 3000);
+                    			$("#settings_saved").fadeIn();
+                    			setTimeout(function() {
+                        			$("#settings_saved").fadeOut(1000);
+                    			}, 3000);
 				 }
-		});
+			});
 	}
 	
 	window.onload = function() {

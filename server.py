@@ -182,13 +182,12 @@ def apply_net_settings():
 
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
-    new_time = request.form["set_time"]
-    new_date = request.form["set_date"]
-    datetime = new_date + ' ' + new_time
+    content = request.json
+    datetime = content["set-date"] + ' ' + content["set-time"]
+    print(datetime) #testing
     set_systime(datetime)
     #input_queue.put(
-    print(datetime) #testing
-    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 ###################################################
 
