@@ -18,11 +18,12 @@ if not WINDOWS:
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = multiprocessing.Queue(1)
 
-dbPeriod = 600 # seconds 
-arrayLen = 10 
+# dbPeriod = 600 # seconds 
+arrayLen = 10
+requestPeriod = 1 # seconds
 circularArray = [0] * arrayLen 
 arrayPivot = 0 
-itemPeriod = dbPeriod / arrayLen # seconds
+# itemPeriod = dbPeriod / arrayLen # seconds
 
 app = Flask(__name__)
 sql = sqlite.Sqlite('./sensorsData.db')
@@ -129,9 +130,6 @@ def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
 
-    #settingFile = open("settings.txt", "r")
-    #data = Markup(settingFile.readline())
-    #settingFile.close()
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
@@ -141,9 +139,6 @@ def accept_setting():
 
     sql.updateActivity(str(content))
 
-    #settingsFile = open("settings.txt", 'w')
-    #settingsFile.write(str(content))
-    #settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 
@@ -186,6 +181,7 @@ def apply_time():
     datetime = content["set-date"] + ' ' + content["set-time"]
     print(datetime) #testing
     set_systime(datetime)
+    # TODO: send json string to Arduino
     #input_queue.put(
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
@@ -196,62 +192,44 @@ def apply_time():
 def charts():
     return render_template("charts/charts.html", title='Журнал', goback='/index')
 
-#return chart for 30 days
-@app.route("/charts/temp_chart")
-def temp_chart():
-    now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
-    error, data, labels = prepareData2Chart(data)
-    label = "Температура"
-    banner = "температуры"
-    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
-    return render_template("charts/month_chart.html", title='Журнал температуры', goback='/charts', **template_data)
+#return chart
+@app.route("/charts/<param>")
+def temp_chart(param):
+    if param == 'temp':
+        template_data = {'label': "Температура", 'banner': "температуры"}
+        title = "Журнал температуры"
+    if param == 'humidity':
+        template_data = {'label': "Влажность", 'banner': "влажности"}
+        title = "Журнал влажности"
+    if param == 'acidity':
+        template_data = {'label': "Уровень кислотности pH", 'banner': "уровня кислотности pH"}
+        title = "Журнал уровня кислотности"
+    if param == 'saline':
+        template_data = {'label': "Уровень солей", 'banner': "уровня солей"}
+        title = "Журнал уровня солей"
+    if param == 'carbon':
+        template_data = {'label': "Уровень CO2", 'banner': "уровня CO2"}
+        title = "Журнал концентрации углекислого газа"
+    print(title)
+    return render_template("charts/month_chart.html", param=param, title=title, goback='/charts', **template_data)
 
-@app.route("/charts/hum_chart")
-def hum_chart():
-    now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
-    error, data, labels = prepareData2Chart(data)
-    label = "Влажность"
-    banner = "влажности"
-    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
-    return render_template("charts/month_chart.html", title='Журнал влажности', goback='/charts', **template_data)
+@app.route("/charts/draw_chart", methods=["POST"])
+def draw_chart():
+    if request.json:
+        param = request.json['param']
+        period = request.json['period']
+        if period:
+            if period == 'hour':
+                error, data, labels = prepareHourData2Chart(param = [param])
+            if period == 'day':
+                error, data, labels = prepareDayData2Chart(param = [param])
+            if period == 'week':
+                error, data, labels = prepareWeekData2Chart(param = [param])
+            if period == 'month':
+                error, data, labels = prepareMonthData2Chart(param = [param])
 
-@app.route("/charts/ph_chart")
-def ph_chart():
-    now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
-    error, data, labels = prepareData2Chart(data)
-    label = "Уровень кислотности pH"
-    banner = "уровня кислотности pH"
-    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
-    return render_template("charts/month_chart.html", title='Журнал уровня кислотности', goback='/charts', **template_data)
-
-@app.route("/charts/tds_chart")
-def tds_chart():
-    now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
-    error, data, labels = prepareData2Chart(data)
-    label = "Уровень солей"
-    banner = "уровня солей"
-    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
-    return render_template("charts/month_chart.html", title='Журнал уровня солей', goback='/charts', **template_data)
-
-@app.route("/charts/co2_chart")
-def co2_chart():
-    now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    data = sql.selectSensors(fromTime = monthEarlier, toTime = now, limit=30)
-    error, data, labels = prepareData2Chart(data)
-    label = "Уровень CO2"
-    banner = "уровня CO2"
-    template_data = {'error': error, 'labels': labels, 'data': data, 'label': label, 'banner': banner}
-    return render_template("charts/month_chart.html", title='Журнал концентрации углекислого газа', goback='/charts', **template_data)
-
+            template_data = {'error': error, 'labels': labels, 'data': data, 'param': param}
+            return json.dumps(template_data), 200, {'ContentType':'application/json'}
 
 #return return page about plants
 @app.route("/info")
@@ -262,35 +240,80 @@ def info():
 def dynamicTemp():
     return render_template("dynamicCharts.html")
 
-def prepareData2Chart(data):
-    print('DATA length: ' + str(len(data)))
+def prepareMonthData2Chart(param):
+    now = int(datetime.timestamp(datetime.now()))
+    monthEarlier = now - 2592000
+    # error, data, labels = prepareData(param, monthEarlier, now, 2592000 / (requestPeriod * arrayLen))
+    error, data, labels = prepareData(param, monthEarlier, now, 100)
+    labels = [datetime.fromtimestamp(x).strftime("%d.%m") for x in labels]
+    return error, data, labels
+
+def prepareWeekData2Chart(param):
+    now = int(datetime.timestamp(datetime.now()))
+    weekEarlier = now - 604800
+    # error, data, labels = prepareData(param, weekEarlier, now, 604800 / (requestPeriod * arrayLen))
+    error, data, labels = prepareData(param, weekEarlier, now, 50)
+    labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh") for x in labels]
+    return error, data, labels
+
+def prepareDayData2Chart(param):
+    now = int(datetime.timestamp(datetime.now()))
+    dayEarlier = now - 86400
+    # error, data, labels = prepareData(param, dayEarlier, now, 86400 / (requestPeriod * arrayLen))
+    error, data, labels = prepareData(param, dayEarlier, now, 20)
+    labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
+    return error, data, labels
+
+def prepareHourData2Chart(param):
+    now = int(datetime.timestamp(datetime.now()))
+    hourEarlier = now - 3600
+    # error, data, labels = prepareData(param, hourEarlier, now, 3600 / (requestPeriod * arrayLen))
+    error, data, labels = prepareData(param, hourEarlier, now, 5)
+    labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
+    return error, data, labels
+
+def prepareData(param, fromTime, toTime, limit):
+    data = sql.selectSensors(param, fromTime = fromTime, toTime = toTime, limit = limit)
+
+    #print('DATA length: '+str(len(data)))
     if len(data) == 0:
         error = "Нет данных"
         labels = ""
         data = []
     else:
-        error = False
+        for i in data:
+            print(i)
+        error = False        
         prep = [x for x in zip(*data)]
-        labels = [datetime.fromtimestamp(x).strftime("%m-%d %H:%M") for x in prep[0]]
+        labels = prep[0]
         data = prep[1]
     return error, data, labels
 
-def get():
-    global temp, hum, ph, tds, co2, lvl
+def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
     global arrayPivot, arrayLen, circularArray
+
+    circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
+    arrayPivot += 1 
+    if arrayPivot == arrayLen: 
+        s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
+        sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
+        arrayPivot = 0
+
+def readArduino():
+    global temp, hum, ph, tds, co2, lvl
     
-    
-    arduino_path = auto_detect_serial()
-    if arduino_path is not None:
-        #sp = serial_port.SerialPort(arduino_path)
-        if not WINDOWS:
+    if not WINDOWS:
+        arduino_path = auto_detect_serial()
+        if arduino_path is not None:
             sp = serial_port.SerialPort(arduino_path)
         else:
-            sp = serial_port.SerialPort("COM8")
+            print("Arduino not connected")
+            sys.exit(1)
     else:
-        print("Arduino not connected")
-        sys.exit(1)
-    print("Arduino path is ", arduino_path) #testing
+        arduino_path = "COM8"
+        sp = serial_port.SerialPort(arduino_path)
+
+    print("Arduino path is", arduino_path) #testing
     sp.open()
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
@@ -325,18 +348,8 @@ def get():
                 input_queue.put(current_state)
 
         with lock:
-            temp = data["temp"]  
-            ph = data["acid"] 
-            tds = data["salin"] 
-            co2 = data["carb"] 
-            lvl = data["level"]
-            hum = '0' 
-            circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
-        arrayPivot += 1 
-        if arrayPivot == arrayLen: 
-            s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
-            sql.insertSensors(s[0], s[1], s[2], s[3], s[4])
-            arrayPivot = 0
+            insertSensorsIntoDB(data["temp"], '0', data["acid"], data["salin"], data["carb"], data["level"])
+
         time.sleep(1)
 
 def auto_detect_serial():
@@ -355,16 +368,14 @@ if __name__ == "__main__":
     sql.create()
     sql.createActivity()
     
-    settings_file = open("settings.txt", "r")
-    current_state = settings_file.readline()
-    settings_file.close()
-    input_queue.put(current_state)
+    row = sql.selectActivity()
+    data = Markup(row[0][0])
+    input_queue.put(data)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
 
-
     lock = threading.Lock()
-    getThread = threading.Thread(target=get)
+    getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
     getThread.start()
 

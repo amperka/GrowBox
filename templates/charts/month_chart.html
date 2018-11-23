@@ -1,9 +1,20 @@
 {% extends "base.html" %}
 {% block headerScript %}
+    <link rel="stylesheet" href="../../static/css/settings_style.css">
     <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 {% endblock %}
 
 {% block content %}
+
+    <input type="radio" id="period-hour" name="period" onchange="setChanges()">
+    <label for="period-hour">Час</label>
+    <input type="radio" id="period-day" name="period" onchange="setChanges()">
+    <label for="period-day">День</label>
+    <input type="radio" id="period-week" name="period" onchange="setChanges()" checked=1>
+    <label for="period-week">Неделя</label>
+    <input type="radio" id="period-month" name="period" onchange="setChanges()">
+    <label for="period-month">Месяц</label>
 
     <canvas id="month_chart" width="600" height="400"></canvas>
 
@@ -14,7 +25,6 @@
       labels : [{% for item in labels %}
           "{{item}}",
            {% endfor %}],
-
       datasets : [{
         label : "{{label}}",
         fill : true,
@@ -39,10 +49,103 @@
         spanGaps: false
       }]
     };
-    var chart = new Chart(Canv, {
-			type: 'line',
-			data: Data
-			});
+    var Options = {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 14
+                }
+            }]
+        }
+    };
+
+    var mainChart = new Chart(Canv, {
+		type: 'line',
+		data: Data,
+        options: Options
+	});
+
+    function addData(chart, labels, data) {
+        labels.forEach((element) => {
+           chart.data.labels.push(element);
+        });
+        // chart.data.labels.push(label);
+        /*chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });*/
+        data.forEach((element) => {
+            chart.data.datasets[0].data.push(element);
+        });
+        chart.update();
+    }
+
+    function removeData(chart) {
+        // .pop();
+        chart.data.labels = [];
+        chart.data.datasets[0].data = [];
+        chart.update();
+    }
+
+    function setChanges() {
+        var hour = document.querySelector("#period-hour");
+        var day = document.querySelector("#period-day");
+        var week = document.querySelector("#period-week");
+        var month = document.querySelector("#period-month");
+
+        parameter = '{{param}}';
+        var request = {param: parameter};
+        if (hour.checked) {
+            request.period = 'hour'
+        }
+        if (day.checked) {
+            request.period = 'day'
+        }
+        if (week.checked) {
+            request.period = 'week'
+        }
+        if (month.checked) {
+            request.period = 'month'
+        }        
+    
+        console.log(request); // testing
+        
+        $.ajax({
+            url: "/charts/draw_chart",
+            type: "POST",
+            data: JSON.stringify(request),
+            contentType: "application/json; charset=utf8",
+            dataType:"json",
+            success: function(data) {
+                console.log(data); // testing
+                removeData(mainChart);
+                addData(mainChart, data.labels, data.data);
+                mainChart.render({
+                    duration: 800
+                });
+            }
+        });
+    }
+
+    window.onload = function() {
+        parameter = '{{param}}';
+        var request = {param: parameter, period: 'week'};
+
+        $.ajax({
+            url: "/charts/draw_chart",
+            type: "POST",
+            data: JSON.stringify(request),
+            contentType: "application/json; charset=utf8",
+            dataType:"json",
+            success: function(data) {
+                console.log(data); // testing
+                addData(mainChart, data.labels, data.data);
+                mainChart.render({
+                    duration: 800
+                });
+            }
+        });
+    }
     </script>
 
 {% endblock %}
