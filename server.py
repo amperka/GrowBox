@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup, Response
-from functools import wraps # for Basic Auth
 import os, datetime, random, json, time, sys
 from datetime import datetime
 import serial_port, multiprocessing, threading
@@ -50,19 +49,9 @@ def temp():
 @app.route("/temp_measure")
 def temp_meas():
     with lock:
-        ret_val = temp
+        ret_val = str(temp)
     return ret_val
-################################################
-#return humidity page with dynamic measurements
-@app.route("/measurements/humidity")
-def hum():
-    template_data =  {'label' : "Влажность"}
-    return render_template("measurements/humidity.html", **template_data, goback='/measurements')
-@app.route("/hum_measure")
-def hum_meas():
-    with lock:
-        ret_val = hum 
-    return ret_val
+
 #################################################
 #return pH page
 @app.route("/measurements/ph")
@@ -72,7 +61,7 @@ def ph():
 @app.route("/ph_measure")
 def ph_meas():
     with lock:
-        ret_val = ph
+        ret_val = str(ph)
     return ret_val
 #################################################
 #return TDS updatePage
@@ -83,7 +72,7 @@ def tds():
 @app.route("/tds_measure")
 def tds_meas():
     with lock:
-        ret_val = tds
+        ret_val = str(tds)
     return ret_val
 #################################################
 #return CO2 page
@@ -94,7 +83,7 @@ def co2():
 @app.route("/co2_measure")
 def co2_meas():
     with lock:
-        ret_val = co2
+        ret_val = str(co2)
     return ret_val
 ##################################################
 
@@ -141,9 +130,6 @@ def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
 
-    #settingFile = open("settings.txt", "r")
-    #data = Markup(settingFile.readline())
-    #settingFile.close()
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
@@ -153,10 +139,8 @@ def accept_setting():
 
     sql.updateActivity(str(content))
 
-    #settingsFile = open("settings.txt", 'w')
-    #settingsFile.write(str(content))
-    #settingsFile.close()
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+####################################################
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -164,27 +148,42 @@ def check_auth(username, password):
     """
     return username == 'admin' and password == 'secret'
 
-def authenticate():
-    """Sends a 401 response that enables basic auth"""
-    return Response(
-    'Could not verify your access level for that URL.\n'
-    'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+@app.route("/net_setting", methods=["POST"])
+def log_in():
+    login = request.form["login"]
+    passwd = request.form["passwd"]
+    if check_auth(login, passwd):
+        return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
+    return str("You are not loggined") #testing
 
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
-
-#return net_settings
-@app.route('/net_settings')
-@requires_auth
+@app.route("/login")
 def secret_page():
-    return render_template('/settings/net_settings.html')
+    return render_template('/settings/login.html', title='Регистрация', goback='/index')
+
+@app.route("/apply_net_settings", methods=["POST"])
+def apply_net_settings():
+    login = request.form["login"]
+    passwd = request.form["passwd"]
+    connect_flag = False
+    with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r+") as file:
+        for line in file:
+            if login in line:
+                connect_flag = True
+        if not connect_flag:
+            file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
+    if not connect_flag:
+        os.system("wpa_cli -i wlan0 reconfigure")
+    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+
+@app.route("/apply_time", methods=["POST"])
+def apply_time():
+    content = request.json
+    datetime = content["set-date"] + ' ' + content["set-time"]
+    print(datetime) #testing
+    set_systime(datetime)
+    # TODO: send json string to Arduino
+    #input_queue.put(
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 ###################################################
 
@@ -316,7 +315,7 @@ def readArduino():
 
     print("Arduino path is", arduino_path) #testing
     sp.open()
-    data = "0 0 0 0 0 0"
+    data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
     while True:
         try:
@@ -327,7 +326,8 @@ def readArduino():
 
             while sp.serial_available():
                 empty_loop_count = 0
-                data = sp.read_serial()
+                data = json.loads(sp.read_serial())
+                #print(data) #testing
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise Exception("Time is over")
@@ -348,8 +348,7 @@ def readArduino():
                 input_queue.put(current_state)
 
         with lock:
-            temp, hum, ph, tds, co2, lvl = data.split()
-            insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl)
+            insertSensorsIntoDB(data["temp"], '0', data["acid"], data["salin"], data["carb"], data["level"])
 
         time.sleep(1)
 
@@ -361,15 +360,17 @@ def auto_detect_serial():
     else:
         return None
 
+def set_systime(datetime):
+    os.system("sudo date --set='" + datetime + "'")
+
 if __name__ == "__main__":
 
     sql.create()
     sql.createActivity()
     
-    settings_file = open("settings.txt", "r")
-    current_state = settings_file.readline()
-    settings_file.close()
-    input_queue.put(current_state)
+    row = sql.selectActivity()
+    data = Markup(row[0][0])
+    input_queue.put(data)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
 
@@ -393,4 +394,4 @@ if __name__ == "__main__":
         sys.exit(1)
      
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=False, threaded=True)

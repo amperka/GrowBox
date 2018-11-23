@@ -1,0 +1,22 @@
+.settings-form {
+	overflow-y: scroll;
+	padding-bottom: 1.25rem;
+	font-size: 35px;
+}
+.settings-form input {
+	margin: 0 .25rem;
+	width: 310px;
+	height: 55px;
+	font-size: 35px;
+	border: 1px solid green;
+	border-radius: 5px;
+	transition: border-color .5s ease-out;
+}
+.saved-banner {
+	margin: auto;
+	color: green;
+	#visibility: hidden;
+	display: none;
+	text-align: center;
+	font-size: 20px;
+}
