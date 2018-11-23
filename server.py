@@ -348,7 +348,12 @@ def readArduino():
                 input_queue.put(current_state)
 
         with lock:
-            insertSensorsIntoDB(data["temp"], '0', data["acid"], data["salin"], data["carb"], data["level"])
+            temp = data["temp"]
+            ph = data["acid"]
+            tds = data["salin"]
+            co2 = data["carb"]
+            lvl = data["level"]
+            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
 
         time.sleep(1)
 
