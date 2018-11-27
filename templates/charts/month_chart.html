@@ -1,25 +1,16 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>График {{banner}}</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-    <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-  </head>
-  <body>
-    <h1 align="center" class="banner"> График {{banner}} за 30 дней </h1>
+{% extends "base.html" %}
 
-    <canvas id="month_chart" width="600" height="400"></canvas>
+{% block scriptsSection %}
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
 
-    <script>
+<script>
     Chart.defaults.global.responsive = false;
     var Canv = document.getElementById("month_chart").getContext('2d');
     var Data = {
       labels : [{% for item in labels %}
           "{{item}}",
            {% endfor %}],
-
-      datasets : [{
+    datasets: [{
         label : "{{label}}",
         fill : true,
         backgroundColor: "rgba(75,192,192,0.4)",
@@ -44,10 +35,18 @@
       }]
     };
     var chart = new Chart(Canv, {
-			type: 'line',
-			data: Data
-			});
-    </script>
+        type: 'line',
+        data: Data
+    });
+</script>
+{% endblock %}
 
-  </body>
-</html>
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <canvas id="month_chart" width="600" height="440"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}

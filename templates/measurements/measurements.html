@@ -1,12 +1,45 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div id='btn'>
-  <ul class=button-group>
-	<li><a href="/measurements/temp"> Температура </a></li>
-	<li><a href="/measurements/humidity"> Влажность </a></li>
-	<li><a href="/measurements/ph">Уровень pH </a></li>
-	<li><a href="/measurements/tds">Уровень солей</a></li>
-	<li><a href="/measurements/co2">Уровень CO <sub>2</sub></a></li>
-  </ul>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row py-2">
+                <!-- Температура -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements/temp" role="button">
+                    <p class="h2">Температура</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Влажность -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements/humidity" role="button">
+                    <p class="h2">Влажность</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Уровень pH -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements/ph" role="button">
+                    <p class="h2">Уровень pH</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Уровень солей -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements/tds" role="button">
+                    <p class="h2">Уровень солей</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Влажность -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements/co2" role="button">
+                    <p class="h2">Уровень CO <sub>2</sub></p>
+                </a>
+            </div>
+
+        </div>
+    </div>
 </div>
 {% endblock %}

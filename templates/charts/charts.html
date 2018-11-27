@@ -1,21 +1,46 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Журнал</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-  </head>
-  <body>
-    <h1 align=center class="banner"> Журнал измерений за последние 30 дней </h1>
-    <div id='btn'>
-      <ul class=button-group>
-        <li><a href="/charts/temp_chart"> Температура </a></li>
-        <li><a href="/charts/hum_chart"> Влажность </a></li>
-        <li><a href="/charts/ph_chart">Уровень pH </a></li>
-        <li><a href="/charts/tds_chart">Уровень солей</a></li>
-        <li><a href="/charts/co2_chart">Уровень CO <sub>2</sub></a></li>
-        <li><a href="/index"> Назад </a></li>
-      </ul>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row py-2">
+                <!-- Температура -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/temp_chart" role="button">
+                    <p class="h2">Температура</p>
+                </a>
+
+            </div>
+
+            <div class="row py-2">
+                <!-- Влажность -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/hum_chart" role="button">
+                    <p class="h2">Влажность</p>
+                </a>
+            </div>
+
+
+            <div class="row py-2">
+                <!-- Уровень pH -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/ph_chart" role="button">
+                    <p class="h2">Уровень pH</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Уровень солей -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/tds_chart" role="button">
+                    <p class="h2">Уровень солей</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Уровень CO <sub>2</sub> -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/co2_chart" role="button">
+                    <p class="h2">Уровень CO <sub>2</sub></p>
+                </a>
+            </div>
+        </div>
     </div>
-  </body>
-</html>
+</div>
+{% endblock %}

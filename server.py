@@ -4,7 +4,7 @@ from flask import Flask, render_template, make_response, request, Markup
 import os, datetime, random, json
 from get_data_from_database import get_hist_data
 import serial_port, multiprocessing
-from picamera import PiCamera
+# from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = (0, 0, 0, 0, 0, 0)
 output_queue = multiprocessing.Queue(2)
@@ -27,8 +27,12 @@ def measurements():
 ###############################################
 @app.route("/measurements/temp")
 def temp():
-    template_data = {'label' : "Температура"}
-    return render_template("measurements/temp.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Температура",
+        'goback': "/measurements",
+        'label' : "Температура"
+    }
+    return render_template("measurements/temp.html", **template_data)
 
 @app.route("/temp_measure")
 def temp_meas():
@@ -39,8 +43,12 @@ def temp_meas():
 #return humidity page with dynamic measurements
 @app.route("/measurements/humidity")
 def hum():
-    template_data =  {'label' : "Влажность"}
-    return render_template("measurements/humidity.html", **template_data, goback='/measurements')
+    template_data =  {
+        'title': "Влажность",
+        'goback': "/measurements",
+        'label' : "Влажность"
+    }
+    return render_template("measurements/humidity.html", **template_data)
 @app.route("/hum_measure")
 def hum_meas():
     global hum
@@ -51,8 +59,12 @@ def hum_meas():
 @app.route("/measurements/ph")
 def ph():
     global ph
-    template_data = {'label' : "Уровень pH"}
-    return render_template("measurements/ph.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Уровень pH",
+        'goback': "/measurements",
+        'label' : "Уровень pH",
+    }
+    return render_template("measurements/ph.html", **template_data)
 @app.route("/ph_measure")
 def ph_meas():
     global ph
@@ -62,8 +74,12 @@ def ph_meas():
 #return TDS updatePage
 @app.route("/measurements/tds")
 def tds():
-    template_data = {'label' : "Уровень солей"}
-    return render_template("measurements/tds.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Уровень солей",
+        'goback': "/measurements",
+        'label' : "Уровень солей"
+    }
+    return render_template("measurements/tds.html", **template_data)
 @app.route("/tds_measure")
 def tds_meas():
     global tds
@@ -73,8 +89,12 @@ def tds_meas():
 #return CO2 page
 @app.route("/measurements/co2")
 def co2():
-    template_data =  {'label' : "Уровень CO2"}
-    return render_template("measurements/co2.html", **template_data, goback='/measurements')
+    template_data =  {
+        'title': "Уровень CO2",
+        'goback': "/measurements",
+        'label' : "Уровень CO2"
+    }
+    return render_template("measurements/co2.html", **template_data)
 @app.route("/co2_measure")
 def co2_meas():
     global c02
@@ -86,11 +106,11 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", goback='/index')
+    return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", goback='/index')
+    return render_template("camera/photo.html", title='Фото', goback='/camera')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
@@ -110,7 +130,7 @@ def clear_photo():
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html")
+    return render_template("camera/video.html", title='Видео', goback='/camera')
 
 @app.route("/make_video")
 def make_video():
@@ -125,7 +145,7 @@ def settings():
     settings_file = open("settings.txt", "r")
     data = Markup(settings_file.readline())
     settings_file.close()
-    return render_template("/settings/settings.html", jsonStr=data)
+    return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
@@ -139,7 +159,7 @@ def accept_setting():
 #return net_settings
 @app.route("/net_settings")
 def net_settings():
-    return render_template("/settings/net_settings.html")
+    return render_template("/settings/net_settings.html", title='Настройки сети', goback='/index')
 
 ###################################################
 
@@ -147,7 +167,7 @@ def net_settings():
 #return charts page
 @app.route("/charts")
 def charts():
-    return render_template("charts/charts.html")
+    return render_template("charts/charts.html", title='Журнал измерений', goback='/index')
 
 #return chart for 30 days
 @app.route("/charts/temp_chart")
@@ -155,8 +175,14 @@ def temp_chart():
     labels = [i for i in range(30)]
     data = get_hist_data(30)[1]
     label = "Температура"
-    banner = "температуры"
-    template_data = {'labels' : labels, 'data' : data, 'label': label, 'banner' : banner}
+    title = "График температуры за 30 дней"
+    template_data = {
+        'labels' : labels,
+        'data' : data,
+        'label': label,
+        'title' : title,
+        'goback': "/charts"
+    }
     return render_template("charts/month_chart.html", **template_data)
 
 @app.route("/charts/hum_chart")
@@ -164,8 +190,14 @@ def hum_chart():
     labels = [i for i in range(30)]
     data = get_hist_data(30)[2]
     label = "Влажность"
-    banner = "влажности"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    title = "График влажности за 30 дней"
+    template_data = {
+        'labels' : labels,
+        'data' : data,
+        'label' : label,
+        'title' : title,
+        'goback': "/charts"
+    }
     return render_template("charts/month_chart.html", **template_data)
 
 @app.route("/charts/ph_chart")
@@ -173,8 +205,14 @@ def ph_chart():
     labels = [i for i in range(30)]
     data = [i for i in range(30)] #temporally
     label = "Уровень pH"
-    banner = "уровня pH"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    title = "График уровня pH за 30 дней"
+    template_data = {
+        'labels' : labels,
+        'data' : data,
+        'label' : label,
+        'title' : title,
+        'goback': "/charts"
+    }
     return render_template("charts/month_chart.html", **template_data)
 
 @app.route("/charts/tds_chart")
@@ -182,8 +220,14 @@ def tds_chart():
     labels = [i for i in range(30)]
     data = [i for i in range(30)] #temporally
     label = "Уровень солей"
-    banner = "уровня солей"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    title = "График уровня солей за 30 дней"
+    template_data = {
+        'labels' : labels,
+        'data' : data,
+        'label' : label,
+        'title' : title,
+        'goback': "/charts"
+    }
     return render_template("charts/month_chart.html", **template_data)
 
 @app.route("/charts/co2_chart")
@@ -191,8 +235,14 @@ def co2_chart():
     labels = [i for i in range(30)]
     data = [i for i in range(30)] #temporally
     label = "Уровень CO2"
-    banner = "уровня CO2"
-    template_data = {'labels' : labels, 'data' : data, 'label' : label, 'banner' : banner}
+    title = "График уровня CO2 за 30 дней"
+    template_data = {
+        'labels' : labels,
+        'data' : data,
+        'label' : label,
+        'title' : title,
+        'goback': "/charts"
+    }
     return render_template("charts/month_chart.html", **template_data)
 
 
