@@ -43,8 +43,12 @@ def measurements():
 ###############################################
 @app.route("/measurements/temp")
 def temp():
-    template_data = {'label' : "Температура"}
-    return render_template("measurements/temp.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Температура",
+        'goback': "/measurements",
+        'label' : "Температура"
+    }
+    return render_template("measurements/temp.html", **template_data)
 
 @app.route("/temp_measure")
 def temp_meas():
@@ -58,6 +62,7 @@ def temp_meas():
 def ph():
     template_data = {'label' : "Уровень pH"}
     return render_template("measurements/ph.html", **template_data, goback='/measurements')
+
 @app.route("/ph_measure")
 def ph_meas():
     with lock:
@@ -67,8 +72,12 @@ def ph_meas():
 #return TDS updatePage
 @app.route("/measurements/tds")
 def tds():
-    template_data = {'label' : "Уровень солей"}
-    return render_template("measurements/tds.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Уровень солей",
+        'goback': "/measurements",
+        'label' : "Уровень солей"
+    }
+    return render_template("measurements/tds.html", **template_data)
 @app.route("/tds_measure")
 def tds_meas():
     with lock:
@@ -78,8 +87,12 @@ def tds_meas():
 #return CO2 page
 @app.route("/measurements/co2")
 def co2():
-    template_data =  {'label' : "Уровень CO2"}
-    return render_template("measurements/co2.html", **template_data, goback='/measurements')
+    template_data =  {
+        'title': "Уровень CO2",
+        'goback': "/measurements",
+        'label' : "Уровень CO2"
+    }
+    return render_template("measurements/co2.html", **template_data)
 @app.route("/co2_measure")
 def co2_meas():
     with lock:
@@ -91,11 +104,11 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", goback='/index')
+    return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", goback='/index')
+    return render_template("camera/photo.html", title='Фото', goback='/camera')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
@@ -115,7 +128,7 @@ def clear_photo():
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html")
+    return render_template("camera/video.html", title='Видео', goback='/camera')
 
 @app.route("/make_video")
 def make_video():
@@ -129,16 +142,13 @@ def make_video():
 def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
-
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
-
     sql.updateActivity(str(content))
-
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 

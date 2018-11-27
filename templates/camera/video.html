@@ -1,47 +1,55 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Видео</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-  </head>
-  <body>
-	<h1 align=center class="banner"> Видео </h1>
-	<div>
-		<input type=button onclick="make_video()" value="Смонтировать видео"/>
-  	</div>
-	<div>
-		<input type=button onclick="watch_video()" value="Смотреть видео"/>
-	</div>
-	
-	<div id="image_place" width=500 height=500>
-	</div>
-	
-	<script>
-		function make_video() {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', '/make_video', true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
+{% extends "base.html" %}
 
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
-				} else {
-					alert("OK");
-				}
+{% block scriptsSection %}
+<script>
+	function make_video() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/make_video', true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status != 200) {
+				alert(xhr.status + ': ' + xhr.statusText);
+			} else {
+				alert("OK");
 			}
 		}
-		
-		function watch_video() {
-			var img = new Image(500, 500);
-			img.src = "../static/img/animation.gif"
-			img.onload = function() {
-				   document.getElementById('image_place').appendChild(img);
-			}
+	}
 
+	function watch_video() {
+		var img = new Image(500, 500);
+		img.src = "../static/img/animation.gif";
+		img.onload = function() {
+			   document.getElementById('image_place').appendChild(img);
 		}
-	</script>
 
-  </body>
-</html>
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+			<div class="row py-2">
+                <!-- Смонтировать видео -->
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="make_video()">
+                    <p class="h2">Смонтировать видео</p>
+                </button>
+            </div>
+
+			<div class="row py-2">
+                <!-- Смотреть видео -->
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="watch_video()">
+                    <p class="h2">Смотреть видео</p>
+                </button>
+            </div>
+
+			<div class="row py-4 d-flex justify-content-center">
+				<div id="image_place" width=500 height=500></div>
+			</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

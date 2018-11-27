@@ -1,99 +1,97 @@
 {% extends "base.html" %}
-{% block headerScript %}
-  	<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
-	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-	<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-	<script src="../static/js/update_page.js"></script>
+
+{% block scriptsSection %}
+<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+<script src="../static/js/update_page.js"></script>
+
+<script>
+    Chart.defaults.global.responsive = false;
+    var Data = {
+        labels: [],
+        datasets: [{
+            label: "{{label}}",
+            fill: true,
+            backgroundColor: "rgba(75,192,192,0.4)",
+            borderColor: "rgba(75,192,192,1)",
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: "rgba(75,192,192,1)",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+            pointHoverBorderColor: "rgba(220,220,220,1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: [],
+            spanGaps: false
+        }]
+    };
+
+    var Canv = document.getElementById('chartCanv').getContext('2d');
+    var chart = new Chart(Canv, {
+        type: 'line',
+        data: Data
+    });
+    var url = "/co2_measure";
+    getReading(url);
+</script>
 {% endblock %}
 
 {% block content %}
-    <div style="text-align:center">
-      <canvas class="canv"
-        	data-type="radial-gauge"
-			data-width="300"
-			data-height="300"
-	      	data-title="CO2"
-	      	data-min-value="0"
-		    data-max-value="8000"
-		    data-major-ticks="[0,1000,2000,3000,4000,5000,6000,7000,8000]"
-			data-minor-ticks="10"
-			data-stroke-ticks="true"
-			data-highlights='[ {"from": 0, "to": 7, "color": "rgba(0,0, 255, .3)"},{"from": 7, "to": 14, "color": "rgba(255, 0, 0, .3)"} ]'
-			data-ticks-angle="225"
-			data-start-angle="67.5"
-			data-color-major-ticks="#ddd"
-			data-color-minor-ticks="#ddd"
-			data-color-title="#eee"
-			data-color-units="#ccc"
-			data-color-numbers="#eee"
-			data-color-plate="#009a40"
-			data-borders="true"
-			data-needle-type="arrow"
-			data-needle-width="2"
-			data-needle-circle-size="7"
-			data-needle-circle-outer="true"
-			data-needle-circle-inner="false"
-			data-animation-duration="500"
-			data-animation-rule="linear"
-			data-color-border-outer="#333"
-			data-color-border-outer-end="#111"
-			data-color-border-middle="#222"
-			data-color-border-middle-end="#111"
-			data-color-border-inner="#111"
-			data-color-border-inner-end="#333"
-			data-color-needle-shadow-down="#333"
-			data-color-needle-circle-outer="#333"
-			data-color-needle-circle-outer-end="#111"
-			data-color-needle-circle-inner="#111"
-			data-color-needle-circle-inner-end="#222"
-			data-value-box-border-radius="0"
-			data-color-value-box-rect="#222"
-			data-color-value-box-rect-end="#333"
-        	data-value="0"
-			 >
-		   </canvas>
-    </div>
-    <canvas id="chartCanv" width="600" height="400" style="margin: 0 auto"></canvas> <!-- Chart-->
+<div class="row py3">
+    <canvas class="canv"
+            data-type="radial-gauge"
+            data-width="300"
+            data-height="300"
+            data-title="CO2"
+            data-min-value="0"
+            data-max-value="8000"
+            data-major-ticks="[0,1000,2000,3000,4000,5000,6000,7000,8000]"
+            data-minor-ticks="10"
+            data-stroke-ticks="true"
+            data-highlights='[ {"from": 0, "to": 7, "color": "rgba(0,0, 255, .3)"},{"from": 7, "to": 14, "color": "rgba(255, 0, 0, .3)"} ]'
+            data-ticks-angle="225"
+            data-start-angle="67.5"
+            data-color-major-ticks="#ddd"
+            data-color-minor-ticks="#ddd"
+            data-color-title="#eee"
+            data-color-units="#ccc"
+            data-color-numbers="#eee"
+            data-color-plate="#009a40"
+            data-borders="true"
+            data-needle-type="arrow"
+            data-needle-width="2"
+            data-needle-circle-size="7"
+            data-needle-circle-outer="true"
+            data-needle-circle-inner="false"
+            data-animation-duration="500"
+            data-animation-rule="linear"
+            data-color-border-outer="#333"
+            data-color-border-outer-end="#111"
+            data-color-border-middle="#222"
+            data-color-border-middle-end="#111"
+            data-color-border-inner="#111"
+            data-color-border-inner-end="#333"
+            data-color-needle-shadow-down="#333"
+            data-color-needle-circle-outer="#333"
+            data-color-needle-circle-outer-end="#111"
+            data-color-needle-circle-inner="#111"
+            data-color-needle-circle-inner-end="#222"
+            data-value-box-border-radius="0"
+            data-color-value-box-rect="#222"
+            data-color-value-box-rect-end="#333"
+            data-value="0"
+    >
+    </canvas>
+</div>
+<div class="row py3">
+    <canvas id="chartCanv" width="600" height="400"></canvas> <!-- Chart-->
     <!--	<script src="../static/js/dynamic_chart.js"></script> -->
-    <div style="top: 5%; left: 38%; position: relative">
-			<ul class=button-group>
-				<li><a href="/measurements">Назад</a></li>
-			</ul>
-		</div>
-
-    <script>
-	Chart.defaults.global.responsive = false;
-    	var Data = {
-        	labels : [],
-        	datasets : [{
-		label : "{{label}}",
-        	fill : true,
-        	backgroundColor: "rgba(75,192,192,0.4)",
-        	borderColor: "rgba(75,192,192,1)",
-        	borderCapStyle: 'butt',
-        	borderDash: [],
-        	borderDashOffset: 0.0,
-        	borderJoinStyle: 'miter',
-      		pointBorderColor: "rgba(75,192,192,1)",
-        	pointBackgroundColor: "#fff",
-        	pointBorderWidth: 1,
-        	pointHoverRadius: 5,
-        	pointHoverBackgroundColor: "rgba(75,192,192,1)",
-        	pointHoverBorderColor: "rgba(220,220,220,1)",
-        	pointHoverBorderWidth: 2,
-        	pointRadius: 1,
-        	pointHitRadius: 10,
-        	data : [],
-        	spanGaps: false
-        	}]
-    	};
-
-    	var Canv = document.getElementById('chartCanv').getContext('2d');
-    	var chart = new Chart(Canv, {
-            	type: 'line',
-            	data: Data
-    	});
-    	var url = "/co2_measure";
-    	getReading(url);
-    </script>
+</div>
 {% endblock %}

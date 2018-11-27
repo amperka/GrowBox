@@ -1,13 +1,53 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div id="btn">
-<ul class="button-group">
-	<li><a href="/measurements"> Измерения </a></li>
-	<li><a href="/charts"> Журнал измерений </a></li>
-	<li><a href="/camera"> Камера </a></li>
-	<li><a href="/settings">Управление</a></li>
-	<li><a href="/login">Настройки сети</a></li>
-	<li><a href="/info"> О растениях</a></li>
-</ul>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row py-2">
+                <!-- Измерения -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/measurements" role="button">
+                    <p class="h2">Измерения</p>
+                </a>
+
+            </div>
+
+            <div class="row py-2">
+                <!-- Журнал измерений -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/charts" role="button">
+                    <p class="h2">Журнал измерений</p>
+                </a>
+            </div>
+
+
+            <div class="row py-2">
+                <!-- Камера -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/camera" role="button">
+                    <p class="h2">Камера</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Управление -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/settings" role="button">
+                    <p class="h2">Управление</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- Настройки сети -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/net_settings" role="button">
+                    <p class="h2">Настройки сети</p>
+                </a>
+            </div>
+
+            <div class="row py-2">
+                <!-- О растениях -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/info" role="button">
+                    <p class="h2">О растениях</p>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

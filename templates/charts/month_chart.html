@@ -1,12 +1,6 @@
 {% extends "base.html" %}
-{% block headerScript %}
-    <link rel="stylesheet" href="../../static/css/settings_style.css">
-    <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-{% endblock %}
 
 {% block content %}
-
     <input type="radio" id="period-hour" name="period" onchange="setChanges()">
     <label for="period-hour">Час</label>
     <input type="radio" id="period-day" name="period" onchange="setChanges()">
@@ -16,16 +10,20 @@
     <input type="radio" id="period-month" name="period" onchange="setChanges()">
     <label for="period-month">Месяц</label>
 
-    <canvas id="month_chart" width="600" height="400"></canvas>
+    <canvas id="month_chart" width="600" height="440"></canvas>
+{% endblock %}
 
-    <script>
+{% block scriptsSection %}
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+
+<script>
     Chart.defaults.global.responsive = false;
     var Canv = document.getElementById("month_chart").getContext('2d');
     var Data = {
       labels : [{% for item in labels %}
           "{{item}}",
            {% endfor %}],
-      datasets : [{
+    datasets: [{
         label : "{{label}}",
         fill : true,
         backgroundColor: "rgba(75,192,192,0.4)",
