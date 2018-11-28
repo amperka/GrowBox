@@ -6,13 +6,19 @@ from datetime import datetime
 import serial_port, multiprocessing, threading
 import sqlite
 import signal
+import random
+import argparse
+
+MOCK = False
+if sys.argv[1] == '-mock':
+    MOCK = True
 
 WINDOWS = False
 import platform
 if platform.system() == 'Windows':
     WINDOWS = True
 
-if not WINDOWS:
+if ((not WINDOWS) and (not MOCK)):
     from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
@@ -313,6 +319,24 @@ def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
         sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
         arrayPivot = 0
 
+def mockArduino():
+    global temp, ph, tds, co2, lvl
+
+    while True:
+        if not input_queue.empty():
+            command_data = input_queue.get()
+            print("Write data to serial " + command_data) #testing
+
+        temp = round(random.uniform(20, 30), 2)
+        ph = round(random.uniform(4, 10), 1)
+        tds = round(random.uniform(500, 700))
+        co2 = round(random.uniform(500, 1100))
+        lvl = round(random.uniform(0.0, 1.0))
+        insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
+
+        time.sleep(1)
+
+
 def readArduino():
     global temp, hum, ph, tds, co2, lvl
     
@@ -392,9 +416,13 @@ if __name__ == "__main__":
     input_queue.put(data)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
+    print("SHOULD MOCK? -" + str(MOCK))
 
     lock = threading.Lock()
-    getThread = threading.Thread(target=readArduino)
+    if MOCK:
+        getThread = threading.Thread(target=mockArduino)
+    else:
+        getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
     getThread.start()
 
