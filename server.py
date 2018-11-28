@@ -3,7 +3,7 @@
 from flask import Flask, render_template, make_response, request, Markup, Response
 import os, datetime, random, json, time, sys
 from datetime import datetime
-import serial_port, multiprocessing, threading
+import serial_port, threading, queue
 import sqlite
 import signal
 
@@ -16,7 +16,7 @@ if not WINDOWS:
     from picamera import PiCamera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
-input_queue = multiprocessing.Queue(1)
+input_queue = queue.Queue(1)
 
 # dbPeriod = 600 # seconds 
 arrayLen = 10
@@ -178,11 +178,14 @@ def apply_net_settings():
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
     content = request.json
-    datetime = content["set-date"] + ' ' + content["set-time"]
-    print(datetime) #testing
-    set_systime(datetime)
-    # TODO: send json string to Arduino
-    #input_queue.put(
+    datetime_set = content["set-date"] + ' ' + content["set-time"]
+    print(datetime_set) #testing
+    #set_systime(datetime_set) #uncomment to set system time
+
+    datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
+    fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")} 
+    print(fmt_datetime)
+    input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 ###################################################
@@ -327,7 +330,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                #print(data) #testing
+                print(data) #testing
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise Exception("Time is over")
@@ -374,8 +377,8 @@ if __name__ == "__main__":
     sql.createActivity()
     
     row = sql.selectActivity()
-    data = Markup(row[0][0])
-    input_queue.put(data)
+    current_state = Markup(row[0][0])
+    input_queue.put(current_state)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
 
