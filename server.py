@@ -146,7 +146,7 @@ def settings():
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
-    print('accept_settings')
+    print(request)
     content = request.json
     print(content)
     input_queue.put(str(content))
@@ -411,6 +411,6 @@ if __name__ == "__main__":
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
         sys.exit(1)
-     
+
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=False, threaded=True)
