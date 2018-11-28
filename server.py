@@ -146,9 +146,13 @@ def settings():
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
+    print('accept_settings')
     content = request.json
+    print(content)
     input_queue.put(str(content))
+    print('input')
     sql.updateActivity(str(content))
+    print('sql')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 
@@ -409,4 +413,4 @@ if __name__ == "__main__":
         sys.exit(1)
      
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=False, threaded=True)
+    app.run(host='0.0.0.0', debug=True, threaded=True)
