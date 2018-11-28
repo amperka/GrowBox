@@ -183,7 +183,7 @@ def apply_time():
     #set_systime(datetime_set) #uncomment to set system time
 
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
-    fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")} 
+    fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     print(fmt_datetime)
     input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
@@ -320,6 +320,7 @@ def readArduino():
     sp.open()
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
+    first_data_pack_flag = False
     while True:
         try:
             if not input_queue.empty():
@@ -331,6 +332,12 @@ def readArduino():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
                 print(data) #testing
+                if not first_data_pack_flag:
+                    print("First package") #testing
+                    current_time = datetime.fromtimestamp(data["time"])
+                    print(current_time) #testing
+                    set_systime(str(current_time))
+                    first_data_pack_flag = True
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise Exception("Time is over")
