@@ -17,22 +17,24 @@
 <body>
 <div>
     <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <div class="container">
+        <div class="container-fluid p-0">
+            <div class="col">
                 <div class="row">
-                    <div class="col-sm d-flex align-items-center justify-content-center">
+                    <div class="col d-flex align-items-center justify-content-center">
+                        <p class="h3 text-light text-center p-2 m-0">{{title}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm d-flex align-items-center justify-content-start">
                         {% if goback %}
-                            <a class="text-light" href="{{goback}}">
-                                <p class="h3 text-light text-center p-3 m-0">< Назад</p>
-                            </a>
+                        <a class="text-light" href="{{goback}}">
+                            <p class="h3 text-light text-center p-2 m-0"><&nbsp;Назад</p>
+                        </a>
                         {% endif %}
                     </div>
-                    <div class="col-sm d-flex align-items-center justify-content-center">
-                        <p class="h3 text-light text-center p-3 m-0">{{title}}</p>
-                    </div>
-                    <div class="col-sm d-flex align-items-center justify-content-center">
+                    <div class="col d-flex align-items-center justify-content-end">
                         <!-- Timer -->
-                        <p class="h4 text-light text-right p-3 m-0" id="clock"></p>
+                        <p class="h4 text-light text-right p-2 m-0" id="clock">00:00:00</p>
                     </div>
                 </div>
             </div>
@@ -48,8 +50,8 @@
 <script src="../static/js/popper.min.js"></script>
 <script src="../static/js/bootstrap.min.js"></script>
 
-<script src="../static/js/time.js"></script>
 <!-- Scripts section -->
 {% block scriptsSection %}{% endblock %}
+<script src="../static/js/time.js"></script>
 </body>
 </html>

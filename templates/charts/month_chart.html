@@ -1,16 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <input type="radio" id="period-hour" name="period" onchange="setChanges()">
-    <label for="period-hour">Час</label>
-    <input type="radio" id="period-day" name="period" onchange="setChanges()">
-    <label for="period-day">День</label>
-    <input type="radio" id="period-week" name="period" onchange="setChanges()" checked=1>
-    <label for="period-week">Неделя</label>
-    <input type="radio" id="period-month" name="period" onchange="setChanges()">
-    <label for="period-month">Месяц</label>
+<div class="container">
+    <div class="col">
+        <div class="row">
+            <div class="col">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-hour" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-hour">Час</label>
+                </div>
+            </div>
 
-    <canvas id="month_chart" width="600" height="440"></canvas>
+            <div class="col">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-day" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-day">День</label>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-week" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-week">Неделя</label>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-month" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-month">Месяц</label>
+                </div>
+            </div>
+        </div>
+        <div class="row pt-5">
+            <canvas id="month_chart" width="480" height="480"></canvas>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scriptsSection %}
