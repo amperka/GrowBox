@@ -13,7 +13,7 @@ if platform.system() == 'Windows':
     WINDOWS = True
 
 if not WINDOWS:
-    from picamera import PiCamera
+    import usb_camera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
@@ -91,15 +91,15 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", goback='/index')
+    return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", goback='/index')
+    return render_template("camera/photo.html", title='Фотографии', goback='/index')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
-    camera = PiCamera()
+    camera = usb_camera.PiCamera(0)
     if img == "img1":
         name = "img1.jpg"
     elif img == "img2":
@@ -115,11 +115,11 @@ def clear_photo():
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html")
+    return render_template("camera/video.html", title='Видео', goback='/index')
 
 @app.route("/make_video")
 def make_video():
-    os.system("convert -delay 10 -loop 0 ./static/img/video_img/image* ./static/img/animation.gif")
+    os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
     return render_template("/camera/video.html")
 
 ##################################################
