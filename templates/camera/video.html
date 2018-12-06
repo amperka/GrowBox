@@ -9,8 +9,7 @@
 		<input type=button onclick="watch_video()" value="Смотреть видео"/>
 	</div>
 	
-	<div id="image_place" width=500 height=500>
-	</div>
+	<div id="image_place" width=500 height=500></div>
 	
 	<script>
 		function make_video() {
@@ -29,10 +28,12 @@
 		}
 		
 		function watch_video() {
-			var img = new Image(500, 500);
-			img.src = "../static/img/animation.gif"
-			img.onload = function() {
-				   document.getElementById('image_place').appendChild(img);
+			if (document.getElementById("image_place").childNodes.length == 0) {
+				var img = new Image(500, 500);
+				img.src = "../static/img/animation.gif";
+				img.onload = function() {
+				document.getElementById("image_place").appendChild(img);
+				} 
 			}
 
 		}

@@ -32,7 +32,6 @@ if __name__ == "__main__":
     import datetime
     dt_str = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M")
     img_name = "/home/pi/Pictures/" + dt_str + ".jpg"
-    print(img_name)
     cam = PiCamera(0)
     cam.capture(img_name, resize=(300, 300))
     cam.close()
