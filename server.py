@@ -188,6 +188,18 @@ def apply_time():
     input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+@app.route("/calibration/<param>") 
+def calibration(param):
+    if param == "four":
+        command = json.dumps({"calibrateFour" : 1})
+        print(command)
+        #input_queue.put(command)
+    if param == "seven":
+        command = json.dumps({"calibrateSeven" : 1})
+        print(command)
+        #input_queue.put(command)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
 ###################################################
 
 #return charts page
@@ -331,7 +343,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                print(data) #testing
+                #print(data) #testing
                 if not first_data_pack_flag:
                     print("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])

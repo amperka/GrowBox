@@ -1,8 +1,13 @@
-.settings-form {
-	overflow-y: scroll;
+p {
+	margin: 15px;
 	font-size: 35px;
 }
-.settings-form input {
+.settings-form {
+	overflow-y: scroll;
+	padding-bottom: 1.25rem;
+	font-size: 35px;
+}
+input {
 	margin: 0 .25rem;
 	width: 310px;
 	height: 55px;
