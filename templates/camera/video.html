@@ -1,23 +1,44 @@
 {% extends "base.html" %}
 {% block headerScript %}
 	<link rel="stylesheet" href="../../static/css/camera.css">
+	<link rel="stylesheet" href="../../static/css/preloader.css">
+	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 {% endblock %}
 
 {% block content %}
-
-	<div>
-		<input type=button onclick="make_video()" value="Смонтировать видео"/>
-  	</div>
-	<div>
-		<input type=button onclick="watch_video()" value="Смотреть видео"/>
+	
+	<div class=video-control>
+		<table>	
+			<tr><td><input type="button" onclick="recordVideo()" value="Включить запись"/></td></tr>
+			<tr><td><input type="button" onclick="finishRecord()" value="Отключить запись"/></td></tr>
+			<tr><td><input type="button" onclick="makeVideo()" value="Смонтировать видео"/></td></tr>
+			<tr><td><input type="button" onclick="watchVideo()" value="Смотреть видео"/></td></tr>
+		</table>
 	</div>
 	
 	<div id="image_place" width=500 height=500></div>
+
+	<div id="preloader"></div>
 	
 	<script>
-		function make_video() {
+		function recordVideo() {
 			var xhr = new XMLHttpRequest();
-			xhr.open('GET', '/make_video', true);
+			xhr.open("GET", "/record_video", true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+				
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("Запись включена");
+				}
+			}
+		}
+		
+		function finishRecord() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/finish_record", true);
 			xhr.send();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState != 4) return;
@@ -25,12 +46,30 @@
 				if (xhr.status != 200) {
 					alert(xhr.status + ': ' + xhr.statusText);
 				} else {
-					alert("OK");
+					alert("Запись закончена");
+				}
+			}
+		}
+
+		function makeVideo() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/make_video', true);
+			xhr.send();
+			$("#preloader").fadeIn();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("Подготовка видео завершена");
+					$("#preloader").fadeOut(500);
+
 				}
 			}
 		}
 		
-		function watch_video() {
+		function watchVideo() {
 			if (document.getElementById("image_place").childNodes.length == 0) {
 				var img = new Image(500, 500);
 				img.src = "../static/img/animation.gif";
@@ -40,6 +79,7 @@
 			}
 
 		}
+
 	</script>
 {% endblock %}
 

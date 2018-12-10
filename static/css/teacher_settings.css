@@ -19,7 +19,6 @@ input {
 .saved-banner {
 	margin: auto;
 	color: green;
-	#visibility: hidden;
 	display: none;
 	text-align: center;
 	font-size: 20px;

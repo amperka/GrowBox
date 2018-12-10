@@ -154,7 +154,7 @@ def log_in():
     passwd = request.form["passwd"]
     if check_auth(login, passwd):
         return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
-    return str("You are not loggined") #testing
+    return str("You are not loggined") #testing, need to fix
 
 @app.route("/login")
 def secret_page():
