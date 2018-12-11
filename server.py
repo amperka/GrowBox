@@ -6,6 +6,7 @@ from datetime import datetime
 import serial_port, threading, queue
 import sqlite
 import signal
+from crontab import CronTab
 
 WINDOWS = False
 import platform
@@ -117,10 +118,31 @@ def clear_photo():
 def video():
     return render_template("camera/video.html", title='Видео', goback='/index')
 
+@app.route("/start_record")
+def start_record():
+    my_cron = CronTab(user="pi")
+    for job in my_cron:
+        if job.comment == "Growbox":
+            return make_response('', 403)
+    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox")
+    job.minute.every(30)
+    my_cron.write()
+    return make_response('', 200)
+
+@app.route("/finish_record")
+def finish_record():
+    my_cron = CronTab(user="pi")
+    for job in my_cron:
+        if job.comment == "Growbox":
+            my_cron.remove(job)
+            my_cron.write()
+            return make_response('', 200)
+    return make_response('', 403)
+
 @app.route("/make_video")
 def make_video():
     os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
-    return render_template("/camera/video.html")
+    return make_response('', 200)
 
 ##################################################
 
@@ -129,30 +151,20 @@ def make_video():
 def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
-
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
-
     sql.updateActivity(str(content))
-
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 
-def check_auth(username, password):
-    """This function is called to check if a username /
-    password combination is valid.
-    """
-    return username == 'admin' and password == 'secret'
-
 @app.route("/net_setting", methods=["POST"])
 def log_in():
-    login = request.form["login"]
     passwd = request.form["passwd"]
-    if check_auth(login, passwd):
+    if passwd == "secret":
         return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
     return str("You are not loggined") #testing, need to fix
 
@@ -181,7 +193,6 @@ def apply_time():
     datetime_set = content["set-date"] + ' ' + content["set-time"]
     print(datetime_set) #testing
     #set_systime(datetime_set) #uncomment to set system time
-
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     print(fmt_datetime)

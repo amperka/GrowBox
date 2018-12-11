@@ -9,7 +9,7 @@
 	
 	<div class=video-control>
 		<table>	
-			<tr><td><input type="button" onclick="recordVideo()" value="Включить запись"/></td></tr>
+			<tr><td><input type="button" onclick="startRecord()" value="Включить запись"/></td></tr>
 			<tr><td><input type="button" onclick="finishRecord()" value="Отключить запись"/></td></tr>
 			<tr><td><input type="button" onclick="makeVideo()" value="Смонтировать видео"/></td></tr>
 			<tr><td><input type="button" onclick="watchVideo()" value="Смотреть видео"/></td></tr>
@@ -21,17 +21,19 @@
 	<div id="preloader"></div>
 	
 	<script>
-		function recordVideo() {
+		function startRecord() {
 			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/record_video", true);
+			xhr.open("GET", "/start_record", true);
 			xhr.send();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState != 4) return;
 				
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
-				} else {
+				if (xhr.status == 200) {
 					alert("Запись включена");
+				} else if (xhr.status == 403) {
+					alert("Запись уже идет");
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
 				}
 			}
 		}
@@ -43,10 +45,12 @@
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState != 4) return;
 
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
-				} else {
+				if (xhr.status == 200) {
 					alert("Запись закончена");
+				} else if (xhr.status == 403) {
+					alert("Запись не ведётся. Включите запись!");	
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
 				}
 			}
 		}
@@ -59,12 +63,11 @@
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState != 4) return;
 
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
-				} else {
+				if (xhr.status == 200) {
 					alert("Подготовка видео завершена");
 					$("#preloader").fadeOut(500);
-
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
 				}
 			}
 		}
