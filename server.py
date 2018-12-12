@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request, Markup, Response
+from flask import Flask, render_template, make_response, request, Markup, Response 
 import os, datetime, random, json, time, sys
 from datetime import datetime
 import serial_port, threading, queue
@@ -116,7 +116,7 @@ def clear_photo():
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html", title='Видео', goback='/index')
+    return render_template("camera/video.html", title='Видео', goback='/camera')
 
 @app.route("/start_record")
 def start_record():
@@ -124,7 +124,7 @@ def start_record():
     for job in my_cron:
         if job.comment == "Growbox":
             return make_response('', 403)
-    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox")
+    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new command
     job.minute.every(30)
     my_cron.write()
     return make_response('', 200)
@@ -161,12 +161,17 @@ def accept_setting():
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 
-@app.route("/net_setting", methods=["POST"])
+@app.route("/teacher_settings", methods=["POST"])
 def log_in():
-    passwd = request.form["passwd"]
+    content = request.json
+    passwd = content["passwd"]
     if passwd == "secret":
-        return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
-    return str("You are not loggined") #testing, need to fix
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return make_response('', 403)
+
+@app.route("/teacher_page")
+def teacher_page():
+    return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
 
 @app.route("/login")
 def secret_page():
@@ -202,13 +207,13 @@ def apply_time():
 @app.route("/calibration/<param>") 
 def calibration(param):
     if param == "four":
-        command = json.dumps({"calibrateFour" : 1})
+        command = json.dumps({"calibrate" : 4})
         print(command)
-        #input_queue.put(command)
+        input_queue.put(command)
     if param == "seven":
-        command = json.dumps({"calibrateSeven" : 1})
+        command = json.dumps({"calibrate" : 7})
         print(command)
-        #input_queue.put(command)
+        input_queue.put(command)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 ###################################################
@@ -354,7 +359,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                #print(data) #testing
+                print(data) #testing
                 if not first_data_pack_flag:
                     print("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])

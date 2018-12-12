@@ -19,7 +19,7 @@
 	<div id="image_place" width=500 height=500></div>
 
 	<div id="preloader"></div>
-	
+	<div class="saved-banner" id="camera-msg"></div>
 	<script>
 		function startRecord() {
 			var xhr = new XMLHttpRequest();
@@ -29,9 +29,9 @@
 				if (xhr.readyState != 4) return;
 				
 				if (xhr.status == 200) {
-					alert("Запись включена");
+					addMsgToDiv("Запись включена");
 				} else if (xhr.status == 403) {
-					alert("Запись уже идет");
+					addMsgToDiv("Запись уже идет");
 				} else {
 					alert(xhr.status + ': ' + xhr.statusText);
 				}
@@ -46,9 +46,9 @@
 				if (xhr.readyState != 4) return;
 
 				if (xhr.status == 200) {
-					alert("Запись закончена");
+					addMsgToDiv("Запись закончена");
 				} else if (xhr.status == 403) {
-					alert("Запись не ведётся. Включите запись!");	
+					addMsgToDiv("Запись не ведётся. Включите запись!");	
 				} else {
 					alert(xhr.status + ': ' + xhr.statusText);
 				}
@@ -64,8 +64,9 @@
 				if (xhr.readyState != 4) return;
 
 				if (xhr.status == 200) {
-					alert("Подготовка видео завершена");
+					//alert("Подготовка видео завершена");
 					$("#preloader").fadeOut(500);
+					addMsgToDiv("Подготовка видео завершена");
 				} else {
 					alert(xhr.status + ': ' + xhr.statusText);
 				}
@@ -83,6 +84,14 @@
 
 		}
 
+		function addMsgToDiv(msg) {
+			var div = document.getElementById("camera-msg");
+			div.innerHTML = msg;
+			$("#camera-msg").fadeIn();
+			setTimeout(function() {
+				$("#camera-msg").fadeOut();
+			}, 2000);
+		}
 	</script>
 {% endblock %}
 
