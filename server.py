@@ -105,14 +105,14 @@ def make_photo(img):
         name = "img1.jpg"
     elif img == "img2":
         name = "img2.jpg"
-    camera.capture("./static/img/" + name, resize=(500, 300))
+    camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
     camera.close()
-    return render_template("camera/photo.html")
+    return make_response('', 200)
 
 @app.route("/clear_photo")
 def clear_photo():
     os.system("rm -f ./static/img/img*")
-    return render_template("camera/photo.html")
+    return make_response('', 200)
 
 @app.route("/camera/video")
 def video():
@@ -124,7 +124,7 @@ def start_record():
     for job in my_cron:
         if job.comment == "Growbox":
             return make_response('', 403)
-    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new command
+    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
     job.minute.every(30)
     my_cron.write()
     return make_response('', 200)
@@ -139,10 +139,17 @@ def finish_record():
             return make_response('', 200)
     return make_response('', 403)
 
+@app.route("/remove_frames")
+def remove_frames():
+    os.system("rm -f ~/Pictures/*")
+    return make_response('', 200)
+
 @app.route("/make_video")
 def make_video():
-    os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
-    return make_response('', 200)
+    if len(os.listdir("/home/pi/Pictures")) != 0: 
+        os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        return make_response('', 200)
+    return make_response('', 403)
 
 ##################################################
 
@@ -197,7 +204,7 @@ def apply_time():
     content = request.json
     datetime_set = content["set-date"] + ' ' + content["set-time"]
     print(datetime_set) #testing
-    #set_systime(datetime_set) #uncomment to set system time
+    set_systime(datetime_set) #uncomment to set system time
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     print(fmt_datetime)
@@ -229,9 +236,6 @@ def temp_chart(param):
     if param == 'temp':
         template_data = {'label': "Температура", 'banner': "температуры"}
         title = "Журнал температуры"
-    if param == 'humidity':
-        template_data = {'label': "Влажность", 'banner': "влажности"}
-        title = "Журнал влажности"
     if param == 'acidity':
         template_data = {'label': "Уровень кислотности pH", 'banner': "уровня кислотности pH"}
         title = "Журнал уровня кислотности"
@@ -348,6 +352,7 @@ def readArduino():
     sp.open()
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
+    reconnect_count = 0
     first_data_pack_flag = False
     while True:
         try:
@@ -359,7 +364,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                print(data) #testing
+                #print(data) #testing
                 if not first_data_pack_flag:
                     print("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])
@@ -373,6 +378,10 @@ def readArduino():
             sp.close()
             print("Serial port disconnect")
             print("Try to reconnect")
+            reconnect_count += 1
+            if reconnect_count > 3:
+                print("Reconnection limit") #TODO testing
+                sys.exit(1)
             time.sleep(10) #testing
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
@@ -381,6 +390,7 @@ def readArduino():
                 print("Arduino not connected")
                 sys.exit(1)
             if sp.open():
+                reconnect_count = 0
                 empty_loop_count = 0
                 print("Connection succeful")
                 input_queue.put(current_state)
@@ -391,7 +401,7 @@ def readArduino():
             tds = data["salin"]
             co2 = data["carb"]
             lvl = data["level"]
-            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
+            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl) #TODO need to remove hum
 
         time.sleep(1)
 

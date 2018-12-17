@@ -19,7 +19,6 @@ class PiCamera:
     def capture(self, name, resize=None):
         for i in range(self._frames):
             temp = self._get_image()
-        #print("Taking image...") #testing
         cam_capture = self._get_image()
         if resize is not None:
             cam_capture = cv2.resize(cam_capture, resize, interpolation=1) 

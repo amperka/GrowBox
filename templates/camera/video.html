@@ -11,6 +11,7 @@
 		<table>	
 			<tr><td><input type="button" onclick="startRecord()" value="Включить запись"/></td></tr>
 			<tr><td><input type="button" onclick="finishRecord()" value="Отключить запись"/></td></tr>
+			<tr><td><input type="button" onclick="removeFrames()" value="Удалить кадры"/></td></tr>
 			<tr><td><input type="button" onclick="makeVideo()" value="Смонтировать видео"/></td></tr>
 			<tr><td><input type="button" onclick="watchVideo()" value="Смотреть видео"/></td></tr>
 		</table>
@@ -54,6 +55,23 @@
 				}
 			}
 		}
+		
+		function removeFrames() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/remove_frames", true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status == 200) {
+					addMsgToDiv("Старые кадры удалены");
+				} else if (xhr.status == 403) {
+					addMsgToDiv("Проблема с удалением");
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
+				}
+			}
+		}
 
 		function makeVideo() {
 			var xhr = new XMLHttpRequest();
@@ -64,9 +82,11 @@
 				if (xhr.readyState != 4) return;
 
 				if (xhr.status == 200) {
-					//alert("Подготовка видео завершена");
-					$("#preloader").fadeOut(500);
+					$("#preloader").fadeOut();
 					addMsgToDiv("Подготовка видео завершена");
+				} else if (xhr.status == 403) {
+					$("#preloader").fadeOut();
+					addMsgToDiv("Отсутствуют кадры для видео");	
 				} else {
 					alert(xhr.status + ': ' + xhr.statusText);
 				}
@@ -78,7 +98,7 @@
 				var img = new Image(500, 500);
 				img.src = "../static/img/animation.gif";
 				img.onload = function() {
-				document.getElementById("image_place").appendChild(img);
+					document.getElementById("image_place").appendChild(img);
 				} 
 			}
 
