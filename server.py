@@ -105,9 +105,15 @@ def make_photo(img):
         name = "img1.jpg"
     elif img == "img2":
         name = "img2.jpg"
-    camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
-    camera.close()
-    return make_response('', 200)
+    try:
+        camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
+    except RuntimeError:
+        print("Unable to get image. Check your camera connection")
+        camera.close()
+        return make_response('', 403)
+    else:
+        camera.close()
+        return make_response('', 200)
 
 @app.route("/clear_photo")
 def clear_photo():
