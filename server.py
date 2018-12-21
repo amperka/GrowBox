@@ -108,12 +108,13 @@ def make_photo(img):
     try:
         camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
     except RuntimeError:
-        print("Unable to get image. Check your camera connection")
-        camera.close()
+        print("Photo is not created")
         return make_response('', 403)
     else:
-        camera.close()
         return make_response('', 200)
+    finally:
+        print("Camera close") #test
+        camera.close()
 
 @app.route("/clear_photo")
 def clear_photo():
@@ -131,7 +132,7 @@ def start_record():
         if job.comment == "Growbox":
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
-    job.minute.every(30)
+    job.hour.every(1)
     my_cron.write()
     return make_response('', 200)
 
@@ -370,8 +371,9 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                #print(data) #testing
+                print(data) #testing
                 if not first_data_pack_flag:
+                    reconnect_count = 0 
                     print("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])
                     print(current_time) #testing
@@ -379,14 +381,14 @@ def readArduino():
                     first_data_pack_flag = True
             empty_loop_count += 1
             if empty_loop_count > 10:
-                raise Exception("Time is over")
-        except:
+                raise RuntimeError("Time is over")
+        except RuntimeError:
             sp.close()
             print("Serial port disconnect")
             print("Try to reconnect")
             reconnect_count += 1
             if reconnect_count > 3:
-                print("Reconnection limit") #TODO testing
+                print("Reconnection limit. Please restart your computer.")
                 sys.exit(1)
             time.sleep(10) #testing
             arduino_path = auto_detect_serial()
@@ -396,7 +398,6 @@ def readArduino():
                 print("Arduino not connected")
                 sys.exit(1)
             if sp.open():
-                reconnect_count = 0
                 empty_loop_count = 0
                 print("Connection succeful")
                 input_queue.put(current_state)

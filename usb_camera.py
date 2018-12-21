@@ -7,13 +7,9 @@ class PiCamera:
         self._frames = 10
     
     def _get_image(self):
-        try:
-            ret, im = self.cam.read()
-            if not ret:
-                raise RuntimeError("Unable to get image")
-            return im
-        except RuntimeError:
-            raise
+        ret, im = self.cam.read()
+        if not ret:
+            raise RuntimeError("Unable to get image")
     
     def capture(self, name, resize=None):
         try:
@@ -23,7 +19,7 @@ class PiCamera:
             if resize is not None:
                 cam_capture = cv2.resize(cam_capture, resize, interpolation=1) 
         except RuntimeError:
-            self.close()
+            print("Unable to get image. Check your camera connection.")  
             raise
         else:
             cv2.imwrite(name, cam_capture)
@@ -39,7 +35,7 @@ if __name__ == "__main__":
     try:
         cam.capture(img_name, resize=(300, 300))
     except RuntimeError:
-        print("Unable to get image. Check your camera connection")    
+        print("The frame is not recorded.")    
     finally:    
         cam.close()
 
