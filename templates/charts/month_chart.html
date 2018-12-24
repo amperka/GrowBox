@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="col">
         <div class="row">
-            <div class="col">
+            <div class="col d-flex justify-content-center">
                 <div class="custom-control custom-radio">
                     <input class="custom-control-input" type="radio" id="period-hour" name="period"
                            onchange="setChanges()">
@@ -12,7 +12,7 @@
                 </div>
             </div>
 
-            <div class="col">
+            <div class="col d-flex justify-content-center">
                 <div class="custom-control custom-radio">
                     <input class="custom-control-input" type="radio" id="period-day" name="period"
                            onchange="setChanges()">
@@ -20,7 +20,7 @@
                 </div>
             </div>
 
-            <div class="col">
+            <div class="col d-flex justify-content-center">
                 <div class="custom-control custom-radio">
                     <input class="custom-control-input" type="radio" id="period-week" name="period"
                            onchange="setChanges()">
@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <div class="col">
+            <div class="col d-flex justify-content-center">
                 <div class="custom-control custom-radio">
                     <input class="custom-control-input" type="radio" id="period-month" name="period"
                            onchange="setChanges()">
@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="row pt-5">
-            <canvas id="month_chart" width="480" height="480"></canvas>
+            <canvas id="month_chart" width="570" height="480"></canvas>
         </div>
     </div>
 </div>
