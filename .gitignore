@@ -3,3 +3,4 @@ __pycache__/
 server_win.py
 log.log
 *.db
+static/img/animation.gif

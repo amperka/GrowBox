@@ -1,49 +1,59 @@
 {% extends "base.html" %}
 
 {% block scriptsSection %}
+<link rel="stylesheet" href="../../static/css/camera.css">
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script>
-    function request_photo(url, id) {
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
+		function request_photo(url, id) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', url, true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
 
-			if (xhr.status != 200) {
-				alert(xhr.status + ': ' + xhr.statusText);
-			} else {
-				alert("OK");
-				var img = new Image(500, 500);
-				if (id == 'image1') {
-					img.src = "../../static/img/img1.jpg?" + Math.random();
-				} else if (id == 'image2') {
-					img.src = "../../static/img/img2.jpg?" + Math.random();
+				if (xhr.status == 200) {
+					addMsgToDiv("Снимок сделан успешно")
+					var img = new Image(500, 500);
+					if (id == 'image1') {
+						img.src = "../../static/img/img1.jpg?" + Math.random();
+					} else if (id == 'image2') {
+						img.src = "../../static/img/img2.jpg?" + Math.random();
+					}
+					img.onload = function () {
+						document.getElementById(id).src = img.src;
+					}
+				} else if (xhr.status == 403) {
+					addMsgToDiv("Камера недоступна. Проверьте подключение камеры")
 				}
-				img.onload = function () {
-					document.getElementById(id).src = img.src;
-				}
-			}
-
-		}
-	}
-
-	function clear_photo() {
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', '/clear_photo', true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-
-			if (xhr.status != 200) {
-				alert(xhr.status + ': ' + xhr.statusText);
-			} else {
-				alert("OK");
-				location.reload(true);
 			}
 		}
 
-	}
-</script>
+		function clear_photo() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/clear_photo', true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status != 200) {
+					alert(xhr.status + ': ' + xhr.statusText);
+				} else {
+					alert("OK");
+					location.reload(true);
+				}
+			}
+		}
+
+		function addMsgToDiv(msg) {
+			var div = document.getElementById("camera-msg");
+			div.innerHTML = msg;
+			$("#camera-msg").fadeIn();
+			setTimeout(function() {
+				$("#camera-msg").fadeOut();
+			}, 2000);
+		}
+		
+	</script>
 {% endblock %}
 
 {% block content %}

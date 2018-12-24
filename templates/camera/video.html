@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block scriptsSection %}
+<link rel="stylesheet" href="../../static/css/camera.css">
+<link rel="stylesheet" href="../../static/css/preloader.css">
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script>
 	function make_video() {
 		var xhr = new XMLHttpRequest();
@@ -16,14 +19,94 @@
 			}
 		}
 	}
-
-	function watch_video() {
-		var img = new Image(500, 500);
-		img.src = "../static/img/animation.gif";
-		img.onload = function() {
-			   document.getElementById('image_place').appendChild(img);
+	function startRecord() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/start_record", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+			
+			if (xhr.status == 200) {
+				addMsgToDiv("Запись включена");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Запись уже идет");
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
 		}
+	}
+	
+	function finishRecord() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/finish_record", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
 
+			if (xhr.status == 200) {
+				addMsgToDiv("Запись закончена");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Запись не ведётся. Включите запись!");	
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+	
+	function removeFrames() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/remove_frames", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status == 200) {
+				addMsgToDiv("Старые кадры удалены");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Проблема с удалением");
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+
+	function makeVideo() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/make_video', true);
+		xhr.send();
+		$("#preloader").fadeIn();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status == 200) {
+				$("#preloader").fadeOut();
+				addMsgToDiv("Подготовка видео завершена");
+			} else if (xhr.status == 403) {
+				$("#preloader").fadeOut();
+				addMsgToDiv("Отсутствуют кадры для видео");	
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+	
+	function watchVideo() {
+		if (document.getElementById("image_place").childNodes.length == 0) {
+			var img = new Image(500, 500);
+			img.src = "../static/img/animation.gif";
+			img.onload = function() {
+				document.getElementById("image_place").appendChild(img);
+			} 
+		}
+	}
+
+	function addMsgToDiv(msg) {
+		var div = document.getElementById("camera-msg");
+		div.innerHTML = msg;
+		$("#camera-msg").fadeIn();
+		setTimeout(function() {
+			$("#camera-msg").fadeOut();
+		}, 2000);
 	}
 </script>
 {% endblock %}
@@ -33,15 +116,31 @@
     <div class="row">
         <div class="col">
 			<div class="row py-2">
-                <!-- Смонтировать видео -->
-                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="make_video()">
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="startRecord()">
+                    <p class="h2">Включить запись</p>
+                </button>
+            </div>
+
+       		<div class="row py-2">
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="finishRecord()">
+                    <p class="h2">Отключить запись</p>
+                </button>
+            </div>
+
+       		<div class="row py-2">
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="removeFrames()">
+                    <p class="h2">Удалить кадры</p>
+                </button>
+            </div>
+
+			<div class="row py-2">
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="makeVideo()">
                     <p class="h2">Смонтировать видео</p>
                 </button>
             </div>
 
 			<div class="row py-2">
-                <!-- Смотреть видео -->
-                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="watch_video()">
+                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="watchVideo()">
                     <p class="h2">Смотреть видео</p>
                 </button>
             </div>
@@ -49,6 +148,15 @@
 			<div class="row py-4 d-flex justify-content-center">
 				<div id="image_place" width=500 height=500></div>
 			</div>
+
+			<div class="row py-4 d-flex justify-content-center">
+				<div id="preloader"></div>
+			</div>
+
+			<div class="row py-4 d-flex justify-content-center">
+				<div class="saved-banner" id="camera-msg"></div>
+			</div>
+
         </div>
     </div>
 </div>

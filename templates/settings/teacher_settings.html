@@ -18,11 +18,11 @@
         document.getElementsByName("set-date")[0].value = year + "-" + month + "-" + day;
     });
 
-    function setTime() {
+    function setTime() {    
         var newTime = document.getElementsByName("set-time")[0].value;
         var newDate = document.getElementsByName("set-date")[0].value;
         var newTimezone = document.getElementsByName("set-timezone")[0].value;
-
+        
         if (newTime === "" || newDate === "" || newTimezone === "") {
             return alert("Incorrect value");
         }
@@ -38,6 +38,38 @@
                 setTimeout(function () {
                     $("#time-saved").fadeOut(1000);
                 }, 3000);
+            }
+        });
+    }
+
+    function calibrateFour() {
+        $.get("/calibration/four", function(data) {
+            respStatus = JSON.parse(data);
+            if (respStatus["success"] == true) {
+                var div = document.getElementById("calibration-done");
+                div.innerHTML = "Калибровка 4.01 завершена";
+                $("#calibration-done").fadeIn();
+                setTimeout(function() {
+                    $("#calibration-done").fadeOut(1000);
+                }, 2000);
+            } else {
+                alert("Calibration false");
+            }
+        });
+    }
+    
+    function calibrateSeven() {
+        $.get("/calibration/seven", function(data) {
+            respStatus = JSON.parse(data);
+            if (respStatus["success"] == true) {
+                var div = document.getElementById("calibration-done");
+                div.innerHTML = "Калибровка 7.01 завершена";
+                $("#calibration-done").fadeIn();
+                setTimeout(function() {
+                    $("#calibration-done").fadeOut(1000);
+                }, 2000);
+            } else {
+                alert("Calibration false");
             }
         });
     }
@@ -85,7 +117,6 @@
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
             </form>
-
             <div class="saved-banner" id="time-saved">
                 Время установлено
             </div>
