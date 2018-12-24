@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request, Markup, Response
+from flask import Flask, render_template, make_response, request, Markup, Response 
 import os, datetime, random, json, time, sys
 from datetime import datetime
-import serial_port, multiprocessing, threading
+import serial_port, threading, queue
 import sqlite
 import signal
+from crontab import CronTab
 
 WINDOWS = False
 import platform
@@ -13,10 +14,10 @@ if platform.system() == 'Windows':
     WINDOWS = True
 
 if not WINDOWS:
-    from picamera import PiCamera
+    import usb_camera
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
-input_queue = multiprocessing.Queue(1)
+input_queue = queue.Queue(1)
 
 # dbPeriod = 600 # seconds 
 arrayLen = 10
@@ -91,36 +92,71 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", goback='/index')
+    return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", goback='/index')
+    return render_template("camera/photo.html", title='Фотографии', goback='/index')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
-    camera = PiCamera()
+    camera = usb_camera.PiCamera(0)
     if img == "img1":
         name = "img1.jpg"
     elif img == "img2":
         name = "img2.jpg"
-    camera.capture("./static/img/" + name, resize=(500, 300))
-    camera.close()
-    return render_template("camera/photo.html")
+    try:
+        camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
+    except RuntimeError:
+        print("Photo is not created")
+        return make_response('', 403)
+    else:
+        return make_response('', 200)
+    finally:
+        print("Camera close") #test
+        camera.close()
 
 @app.route("/clear_photo")
 def clear_photo():
     os.system("rm -f ./static/img/img*")
-    return render_template("camera/photo.html")
+    return make_response('', 200)
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html")
+    return render_template("camera/video.html", title='Видео', goback='/camera')
+
+@app.route("/start_record")
+def start_record():
+    my_cron = CronTab(user="pi")
+    for job in my_cron:
+        if job.comment == "Growbox":
+            return make_response('', 403)
+    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
+    job.hour.every(1)
+    my_cron.write()
+    return make_response('', 200)
+
+@app.route("/finish_record")
+def finish_record():
+    my_cron = CronTab(user="pi")
+    for job in my_cron:
+        if job.comment == "Growbox":
+            my_cron.remove(job)
+            my_cron.write()
+            return make_response('', 200)
+    return make_response('', 403)
+
+@app.route("/remove_frames")
+def remove_frames():
+    os.system("rm -f ~/Pictures/*")
+    return make_response('', 200)
 
 @app.route("/make_video")
 def make_video():
-    os.system("convert -delay 10 -loop 0 ./static/img/video_img/image* ./static/img/animation.gif")
-    return render_template("/camera/video.html")
+    if len(os.listdir("/home/pi/Pictures")) != 0: 
+        os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        return make_response('', 200)
+    return make_response('', 403)
 
 ##################################################
 
@@ -129,32 +165,27 @@ def make_video():
 def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
-
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
-
     sql.updateActivity(str(content))
-
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ####################################################
 
-def check_auth(username, password):
-    """This function is called to check if a username /
-    password combination is valid.
-    """
-    return username == 'admin' and password == 'secret'
-
-@app.route("/net_setting", methods=["POST"])
+@app.route("/teacher_settings", methods=["POST"])
 def log_in():
-    login = request.form["login"]
-    passwd = request.form["passwd"]
-    if check_auth(login, passwd):
-        return render_template("/settings/teacher_settings.html", title='Настройки сети', goback='/index')
-    return str("You are not loggined") #testing
+    content = request.json
+    passwd = content["passwd"]
+    if passwd == "secret":
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return make_response('', 403)
+
+@app.route("/teacher_page")
+def teacher_page():
+    return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
 
 @app.route("/login")
 def secret_page():
@@ -178,11 +209,25 @@ def apply_net_settings():
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
     content = request.json
-    datetime = content["set-date"] + ' ' + content["set-time"]
-    print(datetime) #testing
-    set_systime(datetime)
-    # TODO: send json string to Arduino
-    #input_queue.put(
+    datetime_set = content["set-date"] + ' ' + content["set-time"]
+    print(datetime_set) #testing
+    set_systime(datetime_set) #uncomment to set system time
+    datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
+    fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
+    print(fmt_datetime)
+    input_queue.put(json.dumps(fmt_datetime))
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route("/calibration/<param>") 
+def calibration(param):
+    if param == "four":
+        command = json.dumps({"calibrate" : 4})
+        print(command)
+        input_queue.put(command)
+    if param == "seven":
+        command = json.dumps({"calibrate" : 7})
+        print(command)
+        input_queue.put(command)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 ###################################################
@@ -198,9 +243,6 @@ def temp_chart(param):
     if param == 'temp':
         template_data = {'label': "Температура", 'banner': "температуры"}
         title = "Журнал температуры"
-    if param == 'humidity':
-        template_data = {'label': "Влажность", 'banner': "влажности"}
-        title = "Журнал влажности"
     if param == 'acidity':
         template_data = {'label': "Уровень кислотности pH", 'banner': "уровня кислотности pH"}
         title = "Журнал уровня кислотности"
@@ -317,6 +359,8 @@ def readArduino():
     sp.open()
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
+    reconnect_count = 0
+    first_data_pack_flag = False
     while True:
         try:
             if not input_queue.empty():
@@ -327,14 +371,25 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                #print(data) #testing
+                print(data) #testing
+                if not first_data_pack_flag:
+                    reconnect_count = 0 
+                    print("First package") #testing
+                    current_time = datetime.fromtimestamp(data["time"])
+                    print(current_time) #testing
+                    set_systime(str(current_time))
+                    first_data_pack_flag = True
             empty_loop_count += 1
             if empty_loop_count > 10:
-                raise Exception("Time is over")
-        except:
+                raise RuntimeError("Time is over")
+        except RuntimeError:
             sp.close()
             print("Serial port disconnect")
             print("Try to reconnect")
+            reconnect_count += 1
+            if reconnect_count > 3:
+                print("Reconnection limit. Please restart your computer.")
+                sys.exit(1)
             time.sleep(10) #testing
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
@@ -353,7 +408,7 @@ def readArduino():
             tds = data["salin"]
             co2 = data["carb"]
             lvl = data["level"]
-            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
+            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl) #TODO need to remove hum
 
         time.sleep(1)
 
@@ -374,8 +429,8 @@ if __name__ == "__main__":
     sql.createActivity()
     
     row = sql.selectActivity()
-    data = Markup(row[0][0])
-    input_queue.put(data)
+    current_state = Markup(row[0][0])
+    input_queue.put(current_state)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
 

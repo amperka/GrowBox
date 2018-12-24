@@ -1,14 +1,35 @@
 {% extends "base.html" %}
 {% block headerScript %}
-    <link rel="stylesheet" href="../../static/css/teacher_settings.css">
+	<link rel="stylesheet" href="../../static/css/teacher_settings.css">
+	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 {% endblock %}
 {% block content %}
-	<form method="POST" action=/net_setting class="settings-form">
-		<table>	
-			<p>Введите логин и пароль</p>
-			<tr><td>Логин</td><td><input name="login" maxlength="25" size="40" type="text"></td></tr>
-			<tr><td>Пароль</td><td><input name="passwd" maxlength="25" size="40" type="text"></td></tr>
-		</table>
-		<p><input value="Log in" type="submit"></p>
+	<form class="settings-form" onsubmit="sendPasswd(); return false;">
+		<p>Введите пароль</p>
+		<input name="passwd" maxlength="25" size="40" type="text"><br/>
+		<input value="Log in" type="submit">
 	</form>
+	<div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
+	<script>
+		function sendPasswd() {
+			var passwd = document.getElementsByName("passwd")[0].value;
+			$.ajax({
+				url: "/teacher_settings",
+				type: "POST", 
+				data: JSON.stringify({"passwd" : passwd}),
+			       	contentType: "application/json; charset=utf8",	
+				dataType: "json",
+			})
+			.fail(function() {
+					$("#wrong-passwd").fadeIn();
+					setTimeout(function() {
+						$("#wrong-passwd").fadeOut();
+					}, 3000);
+						
+				})	
+			.done(function() {
+					window.location.href="/teacher_page";
+				});
+		}
+	</script>
 {% endblock %}

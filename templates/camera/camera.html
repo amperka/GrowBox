@@ -1,19 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Камера</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-  </head>
-  <body>
-    <h1 align=center class="banner"> Камера </h1>
-
+{% extends "base.html" %}
+{% block content %}
     <div id='btn'>
 			<ul class=button-group>
 				<li><a href="/camera/video"> Видео </a></li>
 				<li><a href="/camera/photo"> Фото </a></li>
-				<li><a href="/index"> Назад </a></li>
 			</ul>
 		</div>
-  </body>
-</html>
+{% endblock %}

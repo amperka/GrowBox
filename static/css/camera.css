@@ -1,0 +1,16 @@
+input {
+	margin: 0 .25rem;
+	width: 370px;
+	height: 55px;
+	font-size: 35px;
+	border: 1px solid green;
+	border-radius: 5px;
+	transition: border-color .5s ease-out;
+}
+.saved-banner {
+	margin: auto;
+	color: green;
+	display: none;
+	text-align: center;
+	font-size: 20px;
+}

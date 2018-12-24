@@ -1,10 +1,14 @@
+p {
+	margin: 15px;
+	font-size: 35px;
+}
 .settings-form {
 	overflow-y: scroll;
 	padding-bottom: 1.25rem;
 	font-size: 35px;
 }
-.settings-form input {
-	margin: 0 .25rem;
+input {
+	margin: 2px;
 	width: 310px;
 	height: 55px;
 	font-size: 35px;
@@ -15,7 +19,6 @@
 .saved-banner {
 	margin: auto;
 	color: green;
-	#visibility: hidden;
 	display: none;
 	text-align: center;
 	font-size: 20px;

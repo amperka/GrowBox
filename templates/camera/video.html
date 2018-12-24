@@ -1,47 +1,117 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Видео</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-  </head>
-  <body>
-	<h1 align=center class="banner"> Видео </h1>
-	<div>
-		<input type=button onclick="make_video()" value="Смонтировать видео"/>
-  	</div>
-	<div>
-		<input type=button onclick="watch_video()" value="Смотреть видео"/>
+{% extends "base.html" %}
+{% block headerScript %}
+	<link rel="stylesheet" href="../../static/css/camera.css">
+	<link rel="stylesheet" href="../../static/css/preloader.css">
+	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+	
+	<div class=video-control>
+		<table>	
+			<tr><td><input type="button" onclick="startRecord()" value="Включить запись"/></td></tr>
+			<tr><td><input type="button" onclick="finishRecord()" value="Отключить запись"/></td></tr>
+			<tr><td><input type="button" onclick="removeFrames()" value="Удалить кадры"/></td></tr>
+			<tr><td><input type="button" onclick="makeVideo()" value="Смонтировать видео"/></td></tr>
+			<tr><td><input type="button" onclick="watchVideo()" value="Смотреть видео"/></td></tr>
+		</table>
 	</div>
 	
-	<div id="image_place" width=500 height=500>
-	</div>
-	
+	<div id="image_place" width=500 height=500></div>
+
+	<div id="preloader"></div>
+	<div class="saved-banner" id="camera-msg"></div>
 	<script>
-		function make_video() {
+		function startRecord() {
 			var xhr = new XMLHttpRequest();
-			xhr.open('GET', '/make_video', true);
+			xhr.open("GET", "/start_record", true);
 			xhr.send();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState != 4) return;
-
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
+				
+				if (xhr.status == 200) {
+					addMsgToDiv("Запись включена");
+				} else if (xhr.status == 403) {
+					addMsgToDiv("Запись уже идет");
 				} else {
-					alert("OK");
+					alert(xhr.status + ': ' + xhr.statusText);
 				}
 			}
 		}
 		
-		function watch_video() {
-			var img = new Image(500, 500);
-			img.src = "../static/img/animation.gif"
-			img.onload = function() {
-				   document.getElementById('image_place').appendChild(img);
+		function finishRecord() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/finish_record", true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status == 200) {
+					addMsgToDiv("Запись закончена");
+				} else if (xhr.status == 403) {
+					addMsgToDiv("Запись не ведётся. Включите запись!");	
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
+				}
+			}
+		}
+		
+		function removeFrames() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/remove_frames", true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status == 200) {
+					addMsgToDiv("Старые кадры удалены");
+				} else if (xhr.status == 403) {
+					addMsgToDiv("Проблема с удалением");
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
+				}
+			}
+		}
+
+		function makeVideo() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/make_video', true);
+			xhr.send();
+			$("#preloader").fadeIn();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+
+				if (xhr.status == 200) {
+					$("#preloader").fadeOut();
+					addMsgToDiv("Подготовка видео завершена");
+				} else if (xhr.status == 403) {
+					$("#preloader").fadeOut();
+					addMsgToDiv("Отсутствуют кадры для видео");	
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
+				}
+			}
+		}
+		
+		function watchVideo() {
+			if (document.getElementById("image_place").childNodes.length == 0) {
+				var img = new Image(500, 500);
+				img.src = "../static/img/animation.gif";
+				img.onload = function() {
+					document.getElementById("image_place").appendChild(img);
+				} 
 			}
 
 		}
-	</script>
 
-  </body>
-</html>
+		function addMsgToDiv(msg) {
+			var div = document.getElementById("camera-msg");
+			div.innerHTML = msg;
+			$("#camera-msg").fadeIn();
+			setTimeout(function() {
+				$("#camera-msg").fadeOut();
+			}, 2000);
+		}
+	</script>
+{% endblock %}
+
