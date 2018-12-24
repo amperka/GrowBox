@@ -9,9 +9,13 @@ import signal
 import argparse
 
 MOCK = False
+DEBUG = False
 if len(sys.argv) > 1:
-    if sys.argv[1] == '-mock':
-        MOCK = True
+    for i in sys.argv:
+        if i == '-mock':
+            MOCK = True
+        if i == '-debug':
+            DEBUG = True
 
 WINDOWS = False
 import platform
@@ -502,4 +506,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+
+    if DEBUG:
+        app.run(host='0.0.0.0', debug=True, threaded=True)
+    else:
+        app.run(host='0.0.0.0', debug=False, threaded=True)
