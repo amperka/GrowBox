@@ -33,7 +33,7 @@ window.onload = function() {
     function tickTimer() {
 		document.getElementById("clock").innerHTML = formatDisplayTime(new Date());
     }
-
+	tickTimer();
 	window.setInterval(tickTimer, 1000);
 };
 						

@@ -71,8 +71,12 @@ def temp_meas():
 #return pH page
 @app.route("/measurements/ph")
 def ph():
-    template_data = {'label' : "Уровень pH"}
-    return render_template("measurements/ph.html", **template_data, goback='/measurements')
+    template_data = {
+            'title' : "Кислотность",
+            'label' : "Уровень pH", 
+            'goback': "/measurements",
+    }
+    return render_template("measurements/ph.html", **template_data)
 
 @app.route("/ph_measure")
 def ph_meas():
@@ -84,7 +88,7 @@ def ph_meas():
 @app.route("/measurements/tds")
 def tds():
     template_data = {
-        'title': "Уровень солей",
+        'title': "Солёность",
         'goback': "/measurements",
         'label' : "Уровень солей"
     }
@@ -100,9 +104,9 @@ def tds_meas():
 @app.route("/measurements/co2")
 def co2():
     template_data =  {
-        'title': "Уровень CO2",
+        'title': "Углекислый газ",
         'goback': "/measurements",
-        'label' : "Уровень CO2"
+        'label' : "CO2"
     }
     return render_template("measurements/co2.html", **template_data)
 
