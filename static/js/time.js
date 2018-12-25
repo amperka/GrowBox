@@ -3,6 +3,9 @@ window.onload = function() {
 		var hours = time.getHours();
 		var minutes = time.getMinutes();
 		var seconds = time.getSeconds();
+		var day = time.getDate();
+		var month = time.getMonth() + 1;
+		var year = time.getFullYear();
 
 		if (hours < 10) {
 			hours = '0' + hours;
@@ -15,8 +18,16 @@ window.onload = function() {
 		if (seconds < 10) {
 			seconds = '0' + seconds;
 		}
+		
+		if (day < 10) {
+			day = '0' + day;
+		}
 
-		return [hours, minutes, seconds].join(':');
+		if (month < 10) { 
+			month = '0' + month;
+		}
+		
+		return [hours, minutes, seconds].join(':') + ' ' + [day, month, year].join('.');
     }
 
     function tickTimer() {
