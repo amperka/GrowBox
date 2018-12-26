@@ -21,16 +21,15 @@
     function setTime() {    
         var newTime = document.getElementsByName("set-time")[0].value;
         var newDate = document.getElementsByName("set-date")[0].value;
-        var newTimezone = document.getElementsByName("set-timezone")[0].value;
         
-        if (newTime === "" || newDate === "" || newTimezone === "") {
+        if (newTime === "" || newDate === "") {
             return alert("Incorrect value");
         }
 
         $.ajax({
             url: "/apply_time",
             type: "POST",
-            data: JSON.stringify({"set-time": newTime, "set-date": newDate, "timezone": newTimezone}),
+            data: JSON.stringify({"set-time": newTime, "set-date": newDate,}),
             contentType: "application/json; charset=utf8",
             dataType: "json",
             success: function () {
@@ -108,12 +107,6 @@
                 <div class="form-group">
                     <label for="date" class="col-form-label col-form-label-lg">Дата</label>
                     <input class="form-control form-control-lg" type="date" name="set-date" value="2011-08-19" id="date">
-                </div>
-
-                <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="timeZone">Часовой пояс</label>
-                    <input type="text" name="set-timezone" class="form-control form-control-lg" id="timeZone"
-                           placeholder="Введите часовой пояс">
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
             </form>
