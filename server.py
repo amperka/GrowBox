@@ -423,7 +423,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                print(data) #testing
+                #print(data) #testing
                 if not first_data_pack_flag:
                     reconnect_count = 0 
                     print("First package") #testing
@@ -434,7 +434,7 @@ def readArduino():
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise RuntimeError("Time is over")
-        except RuntimeError:
+        except (RuntimeError, OSError):
             sp.close()
             print("Serial port disconnect")
             print("Try to reconnect")
