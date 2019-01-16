@@ -202,9 +202,7 @@ def settings():
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
-    print(request)
     content = request.json
-    print(content)
     input_queue.put(str(content))
     sql.updateActivity(str(content))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}

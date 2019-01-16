@@ -1,11 +1,51 @@
 {% extends "base.html" %}
 
+{% block scriptsSection %}
+
+<script>
+	function addText(){
+		var plants = document.getElementById("plants");
+		var selectedOption = plants.options[plants.selectedIndex];
+		var text = '';
+		switch(selectedOption.innerText) {
+			case "Салат":
+				text = "Салат";
+				break;
+			case "Базилик":
+				text = "Базилик";
+				break;
+			case "Фасоль":
+				text = "Фасоль";
+				break;
+			case "Овёс":
+				text = "Овёс";
+				break;
+		}
+		addTextNode(text);
+
+	}
+	
+	function addTextNode(text) {
+		var textBlock = document.getElementById("about-plants");
+		if (textBlock.childNodes.length != 0) {
+			textBlock.removeChild(textBlock.firstChild);
+		}
+		var textElem = document.createTextNode(text);
+		textBlock.appendChild(textElem);
+	}
+</script>
+
+{% endblock %}
+
 {% block content %}
-<select>
+<select id="plants">
     <option disabled selected>Выберите растение</option>
-    <option>Огурцы</option>
-    <option>Горох</option>
+    <option>Салат</option>
+    <option>Базилик</option>
     <option>Фасоль</option>
+    <option>Овёс</option>
 </select>
-<p><input type="submit" value="Выбрать"></p>
+<p><input type="button" value="Выбрать" onclick="addText()"></p>
+<div id="about-plants">
+</div>
 {% endblock %}
