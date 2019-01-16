@@ -7,6 +7,7 @@ import serial_port, threading, queue
 import sqlite
 import signal
 import argparse
+sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 
 MOCK = False
 DEBUG = False
@@ -221,6 +222,18 @@ def log_in():
 def teacher_page():
     return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
 
+@app.route("/time_settings")
+def time_settings():
+    return render_template('/settings/time_settings.html', title='Время и дата', goback='/teacher_page')
+
+@app.route("/net_settings")
+def net_settings():
+    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+
+@app.route("/calibration_page")
+def calibration_page():
+    return render_template('/settings/calibration.html', title='Калибровка датчика pH', goback='/teacher_page')
+
 @app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
@@ -238,7 +251,16 @@ def apply_net_settings():
             file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
     if not connect_flag:
         os.system("wpa_cli -i wlan0 reconfigure")
-    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+
+@app.route("/update_system")
+def update_system():
+    ret = os.system("echo Update") #testing
+    #ret = os.system("git pull origin master") #uncomment to update
+    if ret == 0:
+        return make_response('', 200)
+    else: 
+        return make_response('', 403)
 
 @app.route("/apply_time", methods=["POST"])
 def apply_time():

@@ -1,119 +1,31 @@
 {% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/teacher_settings.css">
-{% endblock %}
-
-{% block scriptsSection %}
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var currentdate = new Date();
-        month = currentdate.getMonth() + 1;
-        year = currentdate.getFullYear();
-        day = currentdate.getDate();
-
-        document.getElementsByName("set-time")[0].value = currentdate.getHours() + ":" + currentdate.getMinutes();
-        document.getElementsByName("set-date")[0].value = year + "-" + month + "-" + day;
-    });
-
-    function setTime() {    
-        var newTime = document.getElementsByName("set-time")[0].value;
-        var newDate = document.getElementsByName("set-date")[0].value;
-        
-        if (newTime === "" || newDate === "") {
-            return alert("Incorrect value");
-        }
-
-        $.ajax({
-            url: "/apply_time",
-            type: "POST",
-            data: JSON.stringify({"set-time": newTime, "set-date": newDate,}),
-            contentType: "application/json; charset=utf8",
-            dataType: "json",
-            success: function () {
-                $("#time-saved").fadeIn();
-                setTimeout(function () {
-                    $("#time-saved").fadeOut(1000);
-                }, 3000);
-            }
-        });
-    }
-
-    function calibrateFour() {
-        $.get("/calibration/four", function(data) {
-            respStatus = JSON.parse(data);
-            if (respStatus["success"] == true) {
-                var div = document.getElementById("calibration-done");
-                div.innerHTML = "Калибровка 4.01 завершена";
-                $("#calibration-done").fadeIn();
-                setTimeout(function() {
-                    $("#calibration-done").fadeOut(1000);
-                }, 2000);
-            } else {
-                alert("Calibration false");
-            }
-        });
-    }
-    
-    function calibrateSeven() {
-        $.get("/calibration/seven", function(data) {
-            respStatus = JSON.parse(data);
-            if (respStatus["success"] == true) {
-                var div = document.getElementById("calibration-done");
-                div.innerHTML = "Калибровка 7.01 завершена";
-                $("#calibration-done").fadeIn();
-                setTimeout(function() {
-                    $("#calibration-done").fadeOut(1000);
-                }, 2000);
-            } else {
-                alert("Calibration false");
-            }
-        });
-    }
-</script>
-{% endblock %}
-
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
-            <form method="POST" action="/apply_net_settings">
-                <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label>
-                    <input type="text" maxlength="25" name="login" class="form-control form-control-lg" id="netName"
-                           aria-describedby="emailHelp"
-                           placeholder="Введите имя сети">
-                </div>
-                <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label>
-                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg"
-                           id="netPassword" placeholder="Введите пароль">
-                </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Подключиться</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="row mt-5">
-        <div class="col">
-            <form id="time-form" onsubmit="setTime(); return false;">
-                <div class="form-group">
-                    <label for="time" class="col-form-label col-form-label-lg">Время</label>
-                    <input class="form-control form-control-lg" type="time" name="set-time" value="13:45:00" id="time">
-                </div>
-
-                <div class="form-group">
-                    <label for="date" class="col-form-label col-form-label-lg">Дата</label>
-                    <input class="form-control form-control-lg" type="date" name="set-date" value="2011-08-19" id="date">
-                </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
-            </form>
-            <div class="saved-banner" id="time-saved">
-                Время установлено
+            <div class="row py-2">
+                <!-- Видео -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/net_settings" role="button">
+                    <p class="h2">Сеть и обновления</p>
+                </a>
             </div>
+
+            <div class="row py-2">
+                <!-- Фото -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/time_settings" role="button">
+                    <p class="h2">Время и дата</p>
+                </a>
+            </div>
+
+	    <div class="row py-2">
+                <!--Ж Фото -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/calibration_page" role="button">
+                    <p class="h2">Калибровка датчика pH</p>
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
+
 {% endblock %}

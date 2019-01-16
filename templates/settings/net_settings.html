@@ -1,11 +1,58 @@
 {% extends "base.html" %}
 
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/teacher_settings.css">
+{% endblock %}
+
+{% block scriptsSection %}
+
+<script>
+	function updateSystem() {
+		var isUpdate = confirm("Вы хотите обновить систему?");
+		if (isUpdate) {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/update_system", true);
+			xhr.send();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState != 4) return;
+			
+				if (xhr.status == 200) {
+					//addMsgToDiv("Запись включена");
+					alert("Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.");
+				} else if (xhr.status == 403) {
+					//addMsgToDiv("Запись уже идет");
+					alert("Ошибка при обновлении.");
+				} else {
+					alert(xhr.status + ': ' + xhr.statusText);
+				}
+			}
+		}	
+	}
+
+</script>
+
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
-            <p>Тут будут настройки сети!</p>
+            <form method="POST" action="/apply_net_settings">
+                <div class="form-group">
+                    <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label>
+                    <input type="text" maxlength="25" name="login" class="form-control form-control-lg" id="netName"
+                           aria-describedby="emailHelp"
+                           placeholder="Введите имя сети">
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label>
+                    <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg"
+                           id="netPassword" placeholder="Введите пароль">
+                </div>
+                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Подключиться</button>
+            </form>
+	    <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновление ПО" type="button" onclick="updateSystem()">
+
         </div>
     </div>
-</div>
 {% endblock %}
