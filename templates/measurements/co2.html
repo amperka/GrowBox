@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/canvas.css">
+{% endblock %}
+
 {% block scriptsSection %}
 <script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
@@ -16,9 +20,10 @@
 <div class="container">
     <div class="row">
         <canvas class="canv"
+		id="co2-canv"
                 data-type="radial-gauge"
-                data-width="300"
-                data-height="300"
+                data-width="400"
+                data-height="400"
 		data-title="{{label}}"
                 data-min-value="0"
                 data-max-value="8000"

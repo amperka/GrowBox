@@ -1,0 +1,16 @@
+#temp-canv {
+	position: absolute;
+	top: 700px;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	margin: auto;
+}
+#co2-canv {
+	position: absolute;
+	top: 0px;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	margin: auto;
+}
