@@ -139,7 +139,7 @@ def make_photo(img):
     elif img == "img2":
         name = "img2.jpg"
     try:
-        camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
+        camera.capture("./static/img/" + name, resize=(640, 480)) #need to fix size
     except RuntimeError:
         print("Photo is not created")
         return make_response('', 403)
@@ -181,13 +181,16 @@ def finish_record():
 
 @app.route("/remove_frames")
 def remove_frames():
-    os.system("rm -f ~/Pictures/*")
-    return make_response('', 200)
+    if os.system("rm -f ~/Pictures/*") == 0:
+        return make_response('', 200)
+    else:
+        return make_response('', 403)
 
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0: 
-        os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        #os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
         return make_response('', 200)
     return make_response('', 403)
 
@@ -231,6 +234,10 @@ def net_settings():
 @app.route("/calibration_page")
 def calibration_page():
     return render_template('/settings/calibration.html', title='Калибровка датчика pH', goback='/teacher_page')
+
+@app.route("/camera_settings")
+def camera_settings():
+    return render_template('/settings/camera_settings.html', title='Удаление кадров камеры', goback='/teacher_page')
 
 @app.route("/login")
 def secret_page():
@@ -330,7 +337,25 @@ def draw_chart():
 #return return page about plants
 @app.route("/info")
 def info():
-    return render_template("info.html", title='Справка', goback='/index')
+    return render_template("/info/info.html", title='Справка', goback='/index')
+
+@app.route("/info/<plant>")
+def select_plant(plant):
+    ret_val = "/info/" + plant + ".html"
+    if plant == "salad":
+        title = "Салат"
+    elif plant == "bean":
+        title = "Фасоль"
+    elif plant == "oats":
+        title = "Oвёс"
+    elif plant == "basil":
+        title = "Базилик"
+    template_data = {
+        'title': title,
+        'goback': "/index",
+    }
+    return render_template(ret_val, **template_data)
+
 
 @app.route("/dynamicCharts")
 def dynamicTemp():

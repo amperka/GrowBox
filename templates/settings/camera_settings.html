@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block scriptsSection %}
+<script>
+	function removeFrames() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/remove_frames", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status == 200) {
+				addMsgToDiv("Старые кадры удалены");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Проблема с удалением");
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<input class="btn btn-lg btn-danger btn-block p-3 mt-4" value="Удаление кадров камеры" type="button" onclick="removeFrames()">
+		</div>
+	</div>
+
+</div>
+{% endblock %}

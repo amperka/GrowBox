@@ -2,32 +2,36 @@
 
 {% block stylesSection %}
 <link rel="stylesheet" href="../../static/css/teacher_settings.css">
+<link rel="stylesheet" href="../../static/css/confirm.css">
 {% endblock %}
 
 {% block scriptsSection %}
-
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/confirm.js"></script>
 <script>
 	function updateSystem() {
-		var isUpdate = confirm("Вы хотите обновить систему?");
-		if (isUpdate) {
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/update_system", true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/update_system", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
 			
-				if (xhr.status == 200) {
-					//addMsgToDiv("Запись включена");
-					alert("Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.");
-				} else if (xhr.status == 403) {
-					//addMsgToDiv("Запись уже идет");
-					alert("Ошибка при обновлении.");
-				} else {
-					alert(xhr.status + ': ' + xhr.statusText);
-				}
+			if (xhr.status == 200) {
+				//addMsgToDiv("Запись включена");
+				alert("Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.");
+			} else if (xhr.status == 403) {
+				//addMsgToDiv("Запись уже идет");
+				alert("Ошибка при обновлении.");
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
 			}
-		}	
+		}
+			
 	}
+
+$('#update-button').click(function () {
+	        	Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
+		});
 
 </script>
 
@@ -51,7 +55,7 @@
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Подключиться</button>
             </form>
-	    <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновление ПО" type="button" onclick="updateSystem()">
+	    <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
 
         </div>
     </div>

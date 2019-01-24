@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 
-{% block scriptsSection %}
+{% block stylesSection %}
 <link rel="stylesheet" href="../../static/css/camera.css">
+<link rel="stylesheet" href="../../static/css/confirm.css">
+{% endblock %}
+
+{% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/confirm.js"></script>
 <script>
 		function request_photo(url, id) {
 			var xhr = new XMLHttpRequest();
@@ -13,14 +18,18 @@
 
 				if (xhr.status == 200) {
 					addMsgToDiv("Снимок сделан успешно")
-					var img = new Image(500, 500);
+					var img = new Image(330, 300);
+					var placeid;
 					if (id == 'image1') {
 						img.src = "../../static/img/img1.jpg?" + Math.random();
+						placeid = "place1";
 					} else if (id == 'image2') {
 						img.src = "../../static/img/img2.jpg?" + Math.random();
+						placeid = "place2";
 					}
 					img.onload = function () {
-						document.getElementById(id).src = img.src;
+						document.getElementById(placeid).removeChild(document.getElementById(id));
+						document.getElementById(placeid).appendChild(img);
 					}
 				} else if (xhr.status == 403) {
 					addMsgToDiv("Камера недоступна. Проверьте подключение камеры")
@@ -28,7 +37,7 @@
 			}
 		}
 
-		function clear_photo() {
+		function clearPhoto() {
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', '/clear_photo', true);
 			xhr.send();
@@ -38,7 +47,6 @@
 				if (xhr.status != 200) {
 					alert(xhr.status + ': ' + xhr.statusText);
 				} else {
-					alert("OK");
 					location.reload(true);
 				}
 			}
@@ -53,6 +61,9 @@
 			}, 2000);
 		}
 		
+		$('#clear-button').click(function () {
+	        	Confirm('Удалить снимки', 'Вы действительно хотите удалить снимки?', 'Да', 'Нет', clearPhoto);
+		});
 	</script>
 {% endblock %}
 
@@ -60,34 +71,26 @@
 <div class="container">
     <div class="row">
         <div class="col">
-			<div class="row py-2">
                 <!-- Сделать 1-ый снимок -->
-                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="request_photo('/make_photo/img1', 'image1')" >
-                    <p class="h2">Сделать 1-ый снимок</p>
-                </button>
-            </div>
+		<div class="row pt-2 pb-3 d-flex justify-content-center" id="place1">
+			<img src= "../../static/img/Camera.png" alt="Фотография №1" id="image1" width="330" height="300" style="padding:80px; border: 4px double black;" onclick="request_photo('/make_photo/img1', 'image1')"> 
+		</div>
 
-			<div class="row py-2">
-                <!-- Сделать 2-ой снимок -->
-                <button type="button" class="btn btn-success btn-lg btn-block p-3" onclick="request_photo('/make_photo/img2', 'image2')">
-                    <p class="h2">Сделать 2-ой снимок</p>
-                </button>
-            </div>
+		<!-- Сделать 2-ой снимок -->
+		<div class="row pt-3 pb-4 d-flex justify-content-center" id="place2">
+			<img src= "../../static/img/Camera.png" alt="Фотография №2" id="image2" width="330" height="300" style="padding:80px; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
+		</div>
 
-			<div class="row py-2">
+		<div class="row py-2">
                 <!-- Очистить фото -->
-                <button type="button" class="btn btn-danger btn-lg btn-block p-3" onclick="clear_photo()">
-                    <p class="h2">Очистить фото</p>
-                </button>
-            </div>
-
-			<div class="row pt-4 pb-2 d-flex justify-content-center">
-				<img src= "../../static/img/loading.gif" alt="Фотография №1" id="image1">
-			</div>
-			<div class="row pt-2 pb-4 d-flex justify-content-center">
-				<img src= "../../static/img/loading.gif" alt="Фотография №2" id="image2">
-			</div>
-        </div>
+                	<button type="button" class="btn btn-danger btn-lg btn-block p-3" id="clear-button">
+                    		<p class="h2">Очистить фото</p>
+                	</button>
+		</div>
+		<div class="row py-4 d-flex justify-content-center">
+			<div class="saved-banner" id="camera-msg"></div>
+	    	</div>
+	</div>
     </div>
 </div>
 {% endblock %}
