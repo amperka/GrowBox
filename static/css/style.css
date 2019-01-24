@@ -51,3 +51,11 @@ div.banner div {
 div.banner a {
 	color: #FFF
 }
+
+.custom-control-label::after,
+.custom-control-label::before {
+    top: -4px !important;
+    left: -15px !important;
+    width: 2rem !important;
+    height: 2rem !important;
+}

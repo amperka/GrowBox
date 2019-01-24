@@ -6,17 +6,19 @@ function callback(data, status) {
 
 		var chartCanv = document.getElementById("chartCanv")
 		var time = (new Date()).getSeconds()
-		if (chart.data.labels.length < 10) {
-			chart.data.labels.push(time);
-			chart.data.datasets[0].data.push(data);
+		if (window.chart != undefined) {
+			if (chart.data.labels.length < 10) {
+				chart.data.labels.push(time);
+				chart.data.datasets[0].data.push(data);
+			}
+			else {
+				chart.data.labels.push(time);
+				chart.data.labels.shift();
+				chart.data.datasets[0].data.push(data);
+				chart.data.datasets[0].data.shift();
+			}
+			window.chart.update();
 		}
-		else {
-			chart.data.labels.push(time);
-			chart.data.labels.shift();
-			chart.data.datasets[0].data.push(data);
-			chart.data.datasets[0].data.shift();
-		}
-		window.chart.update();
 		setTimeout(getReading, 1000, url);
 	}
 	else {

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/teacher_settings.css">
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var currentdate = new Date();
+        month = currentdate.getMonth() + 1;
+        year = currentdate.getFullYear();
+        day = currentdate.getDate();
+
+        document.getElementsByName("set-time")[0].value = currentdate.getHours() + ":" + currentdate.getMinutes();
+        document.getElementsByName("set-date")[0].value = year + "-" + month + "-" + day;
+    });
+
+    function setTime() {    
+        var newTime = document.getElementsByName("set-time")[0].value;
+        var newDate = document.getElementsByName("set-date")[0].value;
+        
+        if (newTime === "" || newDate === "") {
+            return alert("Incorrect value");
+        }
+
+        $.ajax({
+            url: "/apply_time",
+            type: "POST",
+            data: JSON.stringify({"set-time": newTime, "set-date": newDate,}),
+            contentType: "application/json; charset=utf8",
+            dataType: "json",
+            success: function () {
+                $("#time-saved").fadeIn();
+                setTimeout(function () {
+                    $("#time-saved").fadeOut(1000);
+                }, 3000);
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<form id="time-form" onsubmit="setTime(); return false;">
+                		<div class="form-group">
+                    			<label for="time" class="col-form-label col-form-label-lg">Время</label>
+                    			<input class="form-control form-control-lg" type="time" name="set-time" value="13:45:00" id="time">
+                		</div>
+
+                		<div class="form-group">
+                    			<label for="date" class="col-form-label col-form-label-lg">Дата</label>
+                    			<input class="form-control form-control-lg" type="date" name="set-date" value="2011-08-19" id="date">
+                		</div>
+                		<button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
+            		</form>
+            		<div class="saved-banner" id="time-saved">
+                		Время установлено
+            		</div>
+		</div> 
+	</div>
+</div>
+{% endblock %}
+

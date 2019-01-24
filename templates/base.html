@@ -1,15 +1,57 @@
 <!DOCTYPE HTML>
 <html>
-  <head>
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="../static/css/style.css">
-	<script src="../static/js/time.js"></script>
-	{% block headerScript %}{% endblock %}
-  </head>
-  <body>
-	<div class="banner">
-		<div>{% if goback %}<a width="10%" href="{{goback}}">←</a>{% endif %}</div><div width="60%"> {{title}}</div><div width="20%" id="clock"></div>
-	</div>
-    {% block content %}{% endblock %}
-  </body>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>{{title}}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <!-- Other CSS -->
+    <link rel="stylesheet" href="../static/css/style.css">
+
+    {% block stylesSection %}{% endblock %}
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid p-0">
+            <div class="col">
+                <div class="row">
+                    <div class="col d-flex align-items-center justify-content-center">
+                        <p class="h3 text-light text-center p-2 m-0">{{title}}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm d-flex align-items-center justify-content-start">
+                        {% if goback %}
+                        <a class="text-light" href="{{goback}}">
+                            <p class="h3 text-light text-center p-2 m-0"><&nbsp;Назад</p>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="col d-flex align-items-center justify-content-end">
+                        <!-- Timer -->
+                        <p class="h4 text-light text-right p-2 m-0" id="clock"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid pt-4 flex-column align-items-center m-0 pr-1 pl-1">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- Bootstrap Scripts-->
+<script src="../static/js/jquery-3.3.1.slim.min.js"></script>
+<script src="../static/js/popper.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+
+<!-- Scripts section -->
+{% block scriptsSection %}{% endblock %}
+<script src="../static/js/time.js"></script>
+</body>
 </html>

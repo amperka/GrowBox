@@ -1,152 +1,263 @@
 {% extends "base.html" %}
-{% block headerScript %}
-    <link rel="stylesheet" href="../../static/css/settings_style.css">
-    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/settings_style.css">
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
+<script>
+    function disableRadioButtons(radioButtons) {
+        radioButtons.forEach(function (radio) {
+            radio.disabled = true;
+        });
+    }
+
+    function enableRadiosButtons(radioButtons) {
+        radioButtons.forEach(function (radio) {
+            radio.disabled = false;
+        });
+    }
+
+    function setChanges() {
+        var lamp = document.querySelector("#lamp-switch");
+        var fan = document.querySelector("#fan-switch");
+        var compressor = document.querySelector("#compressor-switch");
+        var lampValues = document.getElementsByName("lamp-radio");
+        var fanValues = document.getElementsByName("fan-radio");
+
+        var request = {
+            lamp: [0, 0],
+            fan: [0, 0],
+            compressor: 0
+        };
+
+        if (lamp.checked) {
+            request.lamp[0] = 1;
+            enableRadiosButtons(lampValues);
+        } else {
+            disableRadioButtons(lampValues);
+        }
+
+        if (fan.checked) {
+            request.fan[0] = 1;
+            enableRadiosButtons(fanValues);
+        } else {
+            disableRadioButtons(fanValues);
+        }
+
+        if (compressor.checked) {
+            request.compressor = 1;
+        }
+
+        if (lampValues[0].checked) {
+            request.lamp[1] = 18;
+        } else if (lampValues[1].checked) {
+            request.lamp[1] = 12;
+        }
+
+        fanValues.forEach(function (value, i) {
+            if (value.checked) {
+                request.fan[1] = parseInt((document.getElementsByClassName("fan-label")[i].textContent.split(' '))[0]);
+            }
+        });
+
+        console.log("request:", request); // testing
+
+        $.ajax({
+            url: "/accept_settings",
+            type: "POST",
+            data: JSON.stringify(request),
+            contentType: "application/json; charset=utf8",
+            dataType: "json",
+            success: function () {
+                console.log("Настройки приняты");
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var currentState = {{jsonStr}};
+        console.log(currentState); //testing
+
+        var isLampSwitchChecked = !!currentState.lamp[0];
+        var isFanSwitchChecked = !!currentState.fan[0];
+        var isCompressorSwitchChecked = !!currentState.compressor;
+
+        document.getElementById("lamp-switch").checked = isLampSwitchChecked;
+        var lampRadios = document.getElementsByName("lamp-radio");
+        if (isLampSwitchChecked) {
+            enableRadiosButtons(lampRadios);
+
+            switch (currentState.lamp[1]) {
+                case 18:
+                    lampRadios[0].checked = true;
+                    break;
+                case 12:
+                    lampRadios[1].checked = true;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            disableRadioButtons(lampRadios);
+        }
+
+        document.getElementById("fan-switch").checked = isFanSwitchChecked;
+        var fanRadios = document.getElementsByName("fan-radio");
+        if (isFanSwitchChecked) {
+            enableRadiosButtons(fanRadios);
+
+            switch (currentState.fan[1]) {
+                case 1:
+                    fanRadios[0].checked = true;
+                    break;
+                case 2:
+                    fanRadios[1].checked = true;
+                    break;
+                case 5:
+                    fanRadios[2].checked = true;
+                    break;
+                case 10:
+                    fanRadios[3].checked = true;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            disableRadioButtons(fanRadios);
+        }
+
+        document.getElementById("compressor-switch").checked = isCompressorSwitchChecked;
+    });
+</script>
 {% endblock %}
 
 {% block content %}
-    <div id="settings-block">
-    	<table id=setting-table>
-    		<tr>
-    			<td>
-    				<h3>Лампа</h3>
-    			</td>
-    			<td>
-    				<div class="switch">
-    					<input type="checkbox" id="lamp-switch" class="switch-check" onchange="setChanges()">
-    						<label for="lamp-switch" class="switch-label">
-    							<span class="switch-slider switch-slider-on"></span>
-        						<span class="switch-slider switch-slider-off"></span>
-    						</label>
-					</div>          
-    			</td>
-    			<td> 
-    				<input type="radio" id="lamp-value1" name="lamp-radio" onchange="setChanges()">
-    				<label for="lamp-value1">18/6</label>
-    				<input type="radio" id="lamp-value2" name="lamp-radio" onchange="setChanges()">
-    				<label for="lamp-value2">12/12</label>
-    			</td>
-    		</tr>
-    		<tr>
-    			<td>
-    				<h3>Вентилятор</h3>
-    			</td>
-    			<td>
-    				<div class="switch">
-    					<input type="checkbox" id="fan-switch" class="switch-check" onchange="setChanges()">
-    						<label for="fan-switch" class="switch-label">
-    							<span class="switch-slider switch-slider-on"></span>
-        						<span class="switch-slider switch-slider-off"></span>
-    						</label>
-					</div>
-    			</td>
-    			<td>
-    				<input type="radio" id="fan-value1" name="fan-radio" onchange="setChanges()">
-    				<label for="fan-value1" class="fan-label">1 m</label>
-    				<input type="radio" id="fan-value2" name="fan-radio" onchange="setChanges()"> 
-    				<label for="fan-value2" class="fan-label">2 m</label>
-    				<input type="radio" id="fan-value3" name="fan-radio" onchange="setChanges()"> 
-    				<label for="fan-value3" class="fan-label">5 m</label>
-    				<input type="radio" id="fan-value4" name="fan-radio" onchange="setChanges()"> 
-    				<label for="fan-value4" class="fan-label">10 m</label>
-    			</td>
-    		</tr>
-    		<tr>
-    			<td>
-    				<h3>Компрессор</h3>
-    			</td>
-    			<td>
-    				<div class="switch">
-    					<input type="checkbox" id="compressor-switch" class="switch-check" onchange="setChanges()">
-    						<label for="compressor-switch" class="switch-label">
-    							<span class="switch-slider switch-slider-on"></span>
-        						<span class="switch-slider switch-slider-off"></span>
-    						</label>
-					</div>
-    			</td>
-    			<td>
-    			</td>
-    		</tr>
-    	</table>
-    </div>
-    <div class="saved" id="settings_saved">изменения сохранены</div>
-    <script>
-	function setChanges() {
-		var lamp = document.querySelector("#lamp-switch");
-		var fan = document.querySelector("#fan-switch");
-		var compressor = document.querySelector("#compressor-switch");
-		var lampValue = document.getElementsByName("lamp-radio");
-		var fanValue = document.getElementsByName("fan-radio");
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card mb-5">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <h2>Лампа</h2>
+                        </div>
+                        <div class="col">
+                            <div class="row d-flex justify-content-center p-3">
+                                <div class="switch">
+                                    <input type="checkbox" id="lamp-switch" class="switch-check"
+                                           onchange="setChanges()">
+                                    <label for="lamp-switch" class="switch-label">
+                                        <span class="switch-slider switch-slider-on"></span>
+                                        <span class="switch-slider switch-slider-off"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="lamp-value1" name="lamp-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label" for="lamp-value1">18/6</label>
+                            </div>
+                        </div>
 
-		var request = {
-			lamp : [0, 0],
-			fan : [0, 0],
-			compressor : 0
-		};	
-		if (lamp.checked) {
-			request.lamp[0] = 1;
-		}
-		if (fan.checked) {
-			request.fan[0] = 1;
-		}
-		if (compressor.checked) {
-			request.compressor = 1;
-		}
-		
-		if (lampValue[0].checked) {
-			request.lamp[1] = 18;
-		} else if (lampValue[1].checked) {
-			request.lamp[1] = 12;
-		}
-		for (var i = 0; i < fanValue.length; i++) {
-			if (fanValue[i].checked) {
-				  request.fan[1] = parseInt((document.getElementsByClassName("fan-label")[i].textContent.split(' '))[0]);
-				  break;
-			}
-		}
-		
-		$.ajax({
-			url: "/accept_settings",
-			type: "POST",
-			data: JSON.stringify(request),
-			contentType: "application/json; charset=utf8",
-			dataType:"json",
-			success: function() {
-                    			$("#settings_saved").fadeIn();
-                    			setTimeout(function() {
-                        			$("#settings_saved").fadeOut(1000);
-                    			}, 3000);
-				 }
-			});
-	}
-	
-	window.onload = function() {
-		var currentState= {{jsonStr}};
-		console.log(currentState); //testing
-		document.getElementById("lamp-switch").checked = !!currentState.lamp[0];
-		document.getElementById("fan-switch").checked = !!currentState.fan[0]; 
-		document.getElementById("compressor-switch").checked = !!currentState.compressor;
-		if (currentState.lamp[1] === 18) {
-			document.getElementsByName("lamp-radio")[0].checked = true;
-		} else if (currentState.lamp[1] === 12) {
-			document.getElementsByName("lamp-radio")[1].checked = true;
-		}
-		switch(currentState.fan[1]) {
-			case 1:
-				document.getElementsByName("fan-radio")[0].checked = true;
-				break;
-			case 2: 
-				document.getElementsByName("fan-radio")[1].checked = true;
-				break;
-			case 5:
-				document.getElementsByName("fan-radio")[2].checked = true;
-				break;
-			case 10:
-				document.getElementsByName("fan-radio")[3].checked = true;
-				break;
-			default:
-				break;	
-		}
-	}
-    </script>
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-control-lg custom-radio">
+                                <input class="custom-control-input" type="radio" id="lamp-value2" name="lamp-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label" for="lamp-value2">12/12</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card mb-5">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <h2>Вентилятор</h2>
+                        </div>
+                        <div class="col">
+                            <div class="row d-flex justify-content-center p-3">
+                                <div class="switch">
+                                    <input type="checkbox" id="fan-switch" class="switch-check" onchange="setChanges()">
+                                    <label for="fan-switch" class="switch-label">
+                                        <span class="switch-slider switch-slider-on"></span>
+                                        <span class="switch-slider switch-slider-off"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="fan-value1" name="fan-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label fan-label" for="fan-value1">1 m</label>
+                            </div>
+                        </div>
+
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="fan-value2" name="fan-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label fan-label" for="fan-value2">2 m</label>
+                            </div>
+                        </div>
+
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="fan-value3" name="fan-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label fan-label" for="fan-value3">5 m</label>
+                            </div>
+                        </div>
+
+                        <div class="col d-flex align-items-center justify-content-center p-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="fan-value4" name="fan-radio"
+                                       onchange="setChanges()">
+                                <label class="custom-control-label fan-label" for="fan-value4">10 m</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center">
+                            <h2>Компрессор</h2>
+                        </div>
+                        <div class="col">
+                            <div class="row d-flex justify-content-center p-3">
+                                <div class="switch">
+                                    <input type="checkbox" id="compressor-switch" class="switch-check"
+                                           onchange="setChanges()">
+                                    <label for="compressor-switch" class="switch-label">
+                                        <span class="switch-slider switch-slider-on"></span>
+                                        <span class="switch-slider switch-slider-off"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

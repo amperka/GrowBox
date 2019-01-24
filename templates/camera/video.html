@@ -1,117 +1,133 @@
 {% extends "base.html" %}
-{% block headerScript %}
-	<link rel="stylesheet" href="../../static/css/camera.css">
-	<link rel="stylesheet" href="../../static/css/preloader.css">
-	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/camera.css">
+<link rel="stylesheet" href="../../static/css/preloader.css">
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script>
+	$('#recButton').addClass("notRec");
+
+	$('#recButton').click(function(){
+		if($('#recButton').hasClass('notRec')){
+			$('#recButton').removeClass("notRec");
+			$('#recButton').addClass("Rec");
+			startRecord();
+		}
+		else {
+			$('#recButton').removeClass("Rec");
+			$('#recButton').addClass("notRec");
+			finishRecord();
+			makeVideo();
+		}
+	});
+	
+	function startRecord() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/start_record", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+			
+			if (xhr.status == 200) {
+				addMsgToDiv("Запись включена");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Запись уже идет");
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+	
+	function finishRecord() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/finish_record", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status == 200) {
+				addMsgToDiv("Запись закончена");
+			} else if (xhr.status == 403) {
+				addMsgToDiv("Запись не ведётся. Включите запись!");	
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+	
+	function makeVideo() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/make_video', true);
+		xhr.send();
+		$("#preloader").fadeIn();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState != 4) return;
+
+			if (xhr.status == 200) {
+				watchVideo();
+				$("#preloader").fadeOut();
+				addMsgToDiv("Подготовка видео завершена");
+			} else if (xhr.status == 403) {
+				$("#preloader").fadeOut();
+				addMsgToDiv("Отсутствуют кадры для видео");	
+			} else {
+				alert(xhr.status + ': ' + xhr.statusText);
+			}
+		}
+	}
+	
+	function watchVideo() {
+		if (document.getElementById("image_place").childNodes.length == 0) {
+			var video = document.createElement("video");
+			video.setAttribute("src", "../static/img/timelapse.mp4");
+			video.setAttribute("width", "480");
+			video.setAttribute("height", "320")
+			video.setAttribute("controls", "controls");
+			document.getElementById("image_place").appendChild(video);
+		}
+	}
+
+	function addMsgToDiv(msg) {
+		var div = document.getElementById("camera-msg");
+		div.innerHTML = msg;
+		$("#camera-msg").fadeIn();
+		setTimeout(function() {
+			$("#camera-msg").fadeOut();
+		}, 2000);
+	}
+</script>
 {% endblock %}
 
 {% block content %}
-	
-	<div class=video-control>
-		<table>	
-			<tr><td><input type="button" onclick="startRecord()" value="Включить запись"/></td></tr>
-			<tr><td><input type="button" onclick="finishRecord()" value="Отключить запись"/></td></tr>
-			<tr><td><input type="button" onclick="removeFrames()" value="Удалить кадры"/></td></tr>
-			<tr><td><input type="button" onclick="makeVideo()" value="Смонтировать видео"/></td></tr>
-			<tr><td><input type="button" onclick="watchVideo()" value="Смотреть видео"/></td></tr>
-		</table>
-	</div>
-	
-	<div id="image_place" width=500 height=500></div>
+<div class="container">
+    <div class="row">
+        <div class="col">
 
-	<div id="preloader"></div>
-	<div class="saved-banner" id="camera-msg"></div>
-	<script>
-		function startRecord() {
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/start_record", true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-				
-				if (xhr.status == 200) {
-					addMsgToDiv("Запись включена");
-				} else if (xhr.status == 403) {
-					addMsgToDiv("Запись уже идет");
-				} else {
-					alert(xhr.status + ': ' + xhr.statusText);
-				}
-			}
-		}
-		
-		function finishRecord() {
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/finish_record", true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
+	    <div class="row py-4 d-flex justify-content-center">
+            	<p class="h2">Запись вкл/выкл</p>
+            </div>
+			
+	    <div class="row py-4 d-flex justify-content-center">
+		<button id="recButton"></button>
+	    </div>
+	    
+	    <div class="row py-4 d-flex justify-content-center">
+		<div class="saved-banner" id="camera-msg"></div>
+	    </div>
 
-				if (xhr.status == 200) {
-					addMsgToDiv("Запись закончена");
-				} else if (xhr.status == 403) {
-					addMsgToDiv("Запись не ведётся. Включите запись!");	
-				} else {
-					alert(xhr.status + ': ' + xhr.statusText);
-				}
-			}
-		}
-		
-		function removeFrames() {
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/remove_frames", true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
+	    <div class="row py-4 d-flex justify-content-center">
+		<div id="image_place" width=480 height=320></div>
+	    </div>
 
-				if (xhr.status == 200) {
-					addMsgToDiv("Старые кадры удалены");
-				} else if (xhr.status == 403) {
-					addMsgToDiv("Проблема с удалением");
-				} else {
-					alert(xhr.status + ': ' + xhr.statusText);
-				}
-			}
-		}
+	    <div class="row py-4 d-flex justify-content-center">
+		<div id="preloader"></div>
+	    </div>
 
-		function makeVideo() {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', '/make_video', true);
-			xhr.send();
-			$("#preloader").fadeIn();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-
-				if (xhr.status == 200) {
-					$("#preloader").fadeOut();
-					addMsgToDiv("Подготовка видео завершена");
-				} else if (xhr.status == 403) {
-					$("#preloader").fadeOut();
-					addMsgToDiv("Отсутствуют кадры для видео");	
-				} else {
-					alert(xhr.status + ': ' + xhr.statusText);
-				}
-			}
-		}
-		
-		function watchVideo() {
-			if (document.getElementById("image_place").childNodes.length == 0) {
-				var img = new Image(500, 500);
-				img.src = "../static/img/animation.gif";
-				img.onload = function() {
-					document.getElementById("image_place").appendChild(img);
-				} 
-			}
-
-		}
-
-		function addMsgToDiv(msg) {
-			var div = document.getElementById("camera-msg");
-			div.innerHTML = msg;
-			$("#camera-msg").fadeIn();
-			setTimeout(function() {
-				$("#camera-msg").fadeOut();
-			}, 2000);
-		}
-	</script>
+	    			
+        </div>
+    </div>
+</div>
 {% endblock %}
-

@@ -1,31 +1,60 @@
 {% extends "base.html" %}
-{% block headerScript %}
-    <link rel="stylesheet" href="../../static/css/settings_style.css">
-    <script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-{% endblock %}
 
 {% block content %}
+<div class="container-fluid">
+    <div class="col">
+        <div class="row">
+            <div class="col d-flex justify-content-center">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-hour" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-hour">Час</label>
+                </div>
+            </div>
 
-    <input type="radio" id="period-hour" name="period" onchange="setChanges()">
-    <label for="period-hour">Час</label>
-    <input type="radio" id="period-day" name="period" onchange="setChanges()">
-    <label for="period-day">День</label>
-    <input type="radio" id="period-week" name="period" onchange="setChanges()" checked=1>
-    <label for="period-week">Неделя</label>
-    <input type="radio" id="period-month" name="period" onchange="setChanges()">
-    <label for="period-month">Месяц</label>
+            <div class="col d-flex justify-content-center">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-day" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-day">День</label>
+                </div>
+            </div>
 
-    <canvas id="month_chart" width="600" height="400"></canvas>
+            <div class="col d-flex justify-content-center">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-week" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-week">Неделя</label>
+                </div>
+            </div>
 
-    <script>
+            <div class="col d-flex justify-content-center">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input" type="radio" id="period-month" name="period"
+                           onchange="setChanges()">
+                    <label class="custom-control-label" for="period-month">Месяц</label>
+                </div>
+            </div>
+        </div>
+        <div class="row pt-5">
+            <canvas id="month_chart" width="570" height="480"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+
+<script>
     Chart.defaults.global.responsive = false;
     var Canv = document.getElementById("month_chart").getContext('2d');
     var Data = {
       labels : [{% for item in labels %}
           "{{item}}",
            {% endfor %}],
-      datasets : [{
+    datasets: [{
         label : "{{label}}",
         fill : true,
         backgroundColor: "rgba(75,192,192,0.4)",

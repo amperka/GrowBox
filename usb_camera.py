@@ -10,6 +10,7 @@ class PiCamera:
         ret, im = self.cam.read()
         if not ret:
             raise RuntimeError("Unable to get image")
+        return im
     
     def capture(self, name, resize=None):
         try:
@@ -38,10 +39,3 @@ if __name__ == "__main__":
         print("The frame is not recorded.")    
     finally:    
         cam.close()
-
-
-
-
-
-
-

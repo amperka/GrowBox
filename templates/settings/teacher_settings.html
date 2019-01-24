@@ -1,108 +1,38 @@
 {% extends "base.html" %}
-{% block headerScript %}
-	<link rel="stylesheet" href="../../static/css/teacher_settings.css">
-	<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-{% endblock %}
-
 {% block content %}
-	<div id="net-settings">
-		<form method="POST" action="/apply_net_settings" class="settings-form">
-			<table>
-				<p>Введите имя сети и пароль</p>
-				<tr><td>Имя сети</td><td><input name="login" maxlength="25" size="40" type="text"></td></tr>
-				<tr><td>Пароль</td><td><input name="passwd" maxlength="25" size="40" type="text"></td></tr>
-			</table>
-			<p><input value="Подключиться" type="submit"></p>
-		</form>
-	</div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row py-2">
+                <!-- Сеть и обновления -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/net_settings" role="button">
+                    <p class="h2">Сеть и обновления</p>
+                </a>
+            </div>
 
-	<div id="time-settings">
-		<form id="time-form" class="settings-form" onsubmit="setTime(); return false;">
-			<table>
-				<p>Введите время и дату</p>
-				<tr><td>Время</td><td><input type="time" name="set-time"></td></tr>
-				<tr><td>Дата</td><td><input type="date" name="set-date"></td></tr>
-			</table>
-			<p><input value="OK" type="submit"></p>
-		</form>
-	</div>
-	<div class="saved-banner" id="time-saved">
-		Время установлено
-	</div>
-	<div id="calibration">
-			<table>
-				<p>Калибровка датчика кислотности</p>
-				<tr><td><p><input value="Калибровка 4.01" type="button" onclick="calibrateFour()"></p></td></tr>
-				<tr><td><p><input value="Калибровка 7.01" type="button" onclick="calibrateSeven()"></p></td></tr>
-			</table>
-	</div>
-	<div class="saved-banner" id="calibration-done"></div>
-	<script>
-		window.onload = function() {
+            <div class="row py-2">
+                <!-- Время и дата -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/time_settings" role="button">
+                    <p class="h2">Время и дата</p>
+                </a>
+            </div>
 
-			var currentdate = new Date();
-			month = currentdate.getMonth()+1;
-			year = currentdate.getFullYear();
-			day = currentdate.getDate();
+	    <div class="row py-2">
+                <!--Калибровка датчика pH -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/calibration_page" role="button">
+                    <p class="h2">Калибровка датчика pH</p>
+                </a>
+            </div>
 
-			document.getElementsByName("set-time")[0].value = currentdate.getHours()+":"+currentdate.getMinutes();
-			document.getElementsByName("set-date")[0].value = year+"-"+month+"-"+day;
-		}
+	    <div class="row py-2">
+                <!--Камера -->
+                <a class="btn btn-success btn-lg btn-block p-3" href="/camera_settings" role="button">
+                    <p class="h2">Камера</p>
+                </a>
+            </div>
 
-		function setTime() {	
-			var newTime = document.getElementsByName("set-time")[0].value;
-			var newDate = document.getElementsByName("set-date")[0].value;
-			
-			if (newTime === "" || newDate === "") {
-				return alert("Incorrect value");
-			}
-
-			$.ajax({
-				url: "/apply_time",
-				type: "POST",
-				data: JSON.stringify({"set-time" : newTime, "set-date" : newDate,}),	
-				contentType: "application/json; charset=utf8",
-				dataType:"json",
-				success: function() {
-                    				$("#time-saved").fadeIn();
-                    				setTimeout(function() {
-                        				$("#time-saved").fadeOut(1000);
-                    				}, 3000);
-					}
-				});
-		}
-
-		function calibrateFour() {
-			$.get("/calibration/four", function(data) {
-				respStatus = JSON.parse(data);
-				if (respStatus["success"] == true) {
-					var div = document.getElementById("calibration-done");
-					div.innerHTML = "Калибровка 4.01 завершена";
-					$("#calibration-done").fadeIn();
-					setTimeout(function() {
-                        			$("#calibration-done").fadeOut(1000);
-                    			}, 2000);
-				} else {
-					alert("Calibration false");
-				}
-			});
-		}
-		
-		function calibrateSeven() {
-			$.get("/calibration/seven", function(data) {
-				respStatus = JSON.parse(data);
-				if (respStatus["success"] == true) {
-					var div = document.getElementById("calibration-done");
-					div.innerHTML = "Калибровка 7.01 завершена";
-					$("#calibration-done").fadeIn();
-					setTimeout(function() {
-						$("#calibration-done").fadeOut(1000);
-					}, 2000);
-				} else {
-					alert("Calibration false");
-				}
-			});
-		}
-	</script>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

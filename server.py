@@ -6,15 +6,26 @@ from datetime import datetime
 import serial_port, threading, queue
 import sqlite
 import signal
-from crontab import CronTab
+import argparse
+sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
+
+MOCK = False
+DEBUG = False
+if len(sys.argv) > 1:
+    for i in sys.argv:
+        if i == '-mock':
+            MOCK = True
+        if i == '-debug':
+            DEBUG = True
 
 WINDOWS = False
 import platform
 if platform.system() == 'Windows':
     WINDOWS = True
 
-if not WINDOWS:
+if ((not WINDOWS) and (not MOCK)):
     import usb_camera
+    from crontab import CronTab
 
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
@@ -44,8 +55,12 @@ def measurements():
 ###############################################
 @app.route("/measurements/temp")
 def temp():
-    template_data = {'label' : "Температура"}
-    return render_template("measurements/temp.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Температура",
+        'goback': "/measurements",
+        'label' : "Температура"
+    }
+    return render_template("measurements/temp.html", **template_data)
 
 @app.route("/temp_measure")
 def temp_meas():
@@ -57,8 +72,13 @@ def temp_meas():
 #return pH page
 @app.route("/measurements/ph")
 def ph():
-    template_data = {'label' : "Уровень pH"}
-    return render_template("measurements/ph.html", **template_data, goback='/measurements')
+    template_data = {
+            'title' : "Кислотность",
+            'label' : "Уровень pH", 
+            'goback': "/measurements",
+    }
+    return render_template("measurements/ph.html", **template_data)
+
 @app.route("/ph_measure")
 def ph_meas():
     with lock:
@@ -68,8 +88,13 @@ def ph_meas():
 #return TDS updatePage
 @app.route("/measurements/tds")
 def tds():
-    template_data = {'label' : "Уровень солей"}
-    return render_template("measurements/tds.html", **template_data, goback='/measurements')
+    template_data = {
+        'title': "Солёность",
+        'goback': "/measurements",
+        'label' : "Уровень солей"
+    }
+    return render_template("measurements/tds.html", **template_data)
+
 @app.route("/tds_measure")
 def tds_meas():
     with lock:
@@ -79,8 +104,13 @@ def tds_meas():
 #return CO2 page
 @app.route("/measurements/co2")
 def co2():
-    template_data =  {'label' : "Уровень CO2"}
-    return render_template("measurements/co2.html", **template_data, goback='/measurements')
+    template_data =  {
+        'title': "Углекислый газ",
+        'goback': "/measurements",
+        'label' : "CO2"
+    }
+    return render_template("measurements/co2.html", **template_data)
+
 @app.route("/co2_measure")
 def co2_meas():
     with lock:
@@ -92,11 +122,14 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", title='Камера', goback='/index')
+    if (WINDOWS == True):
+        return render_template("camera/camera_windows.html", title='Камера', goback='/index')
+    else:
+        return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", title='Фотографии', goback='/index')
+    return render_template("camera/photo.html", title='Фото', goback='/camera')
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
@@ -106,7 +139,7 @@ def make_photo(img):
     elif img == "img2":
         name = "img2.jpg"
     try:
-        camera.capture("./static/img/" + name, resize=(500, 300)) #need to fix size
+        camera.capture("./static/img/" + name, resize=(640, 480)) #need to fix size
     except RuntimeError:
         print("Photo is not created")
         return make_response('', 403)
@@ -148,13 +181,16 @@ def finish_record():
 
 @app.route("/remove_frames")
 def remove_frames():
-    os.system("rm -f ~/Pictures/*")
-    return make_response('', 200)
+    if os.system("rm -f ~/Pictures/*") == 0:
+        return make_response('', 200)
+    else:
+        return make_response('', 403)
 
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0: 
-        os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        #os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
+        os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
         return make_response('', 200)
     return make_response('', 403)
 
@@ -187,6 +223,22 @@ def log_in():
 def teacher_page():
     return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
 
+@app.route("/time_settings")
+def time_settings():
+    return render_template('/settings/time_settings.html', title='Время и дата', goback='/teacher_page')
+
+@app.route("/net_settings")
+def net_settings():
+    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+
+@app.route("/calibration_page")
+def calibration_page():
+    return render_template('/settings/calibration.html', title='Калибровка датчика pH', goback='/teacher_page')
+
+@app.route("/camera_settings")
+def camera_settings():
+    return render_template('/settings/camera_settings.html', title='Удаление кадров камеры', goback='/teacher_page')
+
 @app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
@@ -204,7 +256,16 @@ def apply_net_settings():
             file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
     if not connect_flag:
         os.system("wpa_cli -i wlan0 reconfigure")
-    return render_template("/settings/teacher_settings.html", title="Настройки сети", goback='/index')
+    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+
+@app.route("/update_system")
+def update_system():
+    ret = os.system("echo Update") #testing
+    #ret = os.system("git pull origin master") #uncomment to update
+    if ret == 0:
+        return make_response('', 200)
+    else: 
+        return make_response('', 403)
 
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
@@ -276,7 +337,25 @@ def draw_chart():
 #return return page about plants
 @app.route("/info")
 def info():
-    return render_template("info.html", title='Справка', goback='/index')
+    return render_template("/info/info.html", title='Справка', goback='/index')
+
+@app.route("/info/<plant>")
+def select_plant(plant):
+    ret_val = "/info/" + plant + ".html"
+    if plant == "salad":
+        title = "Салат"
+    elif plant == "bean":
+        title = "Фасоль"
+    elif plant == "oats":
+        title = "Oвёс"
+    elif plant == "basil":
+        title = "Базилик"
+    template_data = {
+        'title': title,
+        'goback': "/index",
+    }
+    return render_template(ret_val, **template_data)
+
 
 @app.route("/dynamicCharts")
 def dynamicTemp():
@@ -341,6 +420,24 @@ def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
         sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
         arrayPivot = 0
 
+def mockArduino():
+    global temp, ph, tds, co2, lvl
+
+    while True:
+        if not input_queue.empty():
+            command_data = input_queue.get()
+            print("Write data to serial " + command_data) #testing
+
+        temp = round(random.uniform(20, 30), 2)
+        ph = round(random.uniform(4, 10), 1)
+        tds = round(random.uniform(500, 700))
+        co2 = round(random.uniform(500, 1100))
+        lvl = round(random.uniform(0.0, 1.0))
+        insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
+
+        time.sleep(1)
+
+
 def readArduino():
     global temp, hum, ph, tds, co2, lvl
     
@@ -371,7 +468,7 @@ def readArduino():
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                print(data) #testing
+                #print(data) #testing
                 if not first_data_pack_flag:
                     reconnect_count = 0 
                     print("First package") #testing
@@ -382,7 +479,7 @@ def readArduino():
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise RuntimeError("Time is over")
-        except RuntimeError:
+        except (RuntimeError, OSError):
             sp.close()
             print("Serial port disconnect")
             print("Try to reconnect")
@@ -433,9 +530,13 @@ if __name__ == "__main__":
     input_queue.put(current_state)
 
     print("IS IT WINDOWS? -" + str(WINDOWS))
+    print("SHOULD MOCK? -" + str(MOCK))
 
     lock = threading.Lock()
-    getThread = threading.Thread(target=readArduino)
+    if MOCK:
+        getThread = threading.Thread(target=mockArduino)
+    else:
+        getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
     getThread.start()
 
@@ -452,6 +553,10 @@ if __name__ == "__main__":
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
         sys.exit(1)
-     
+
     signal.signal(signal.SIGINT, sigint_handler)
-    app.run(host='0.0.0.0', debug=False, threaded=True)
+
+    if DEBUG:
+        app.run(host='0.0.0.0', debug=True, threaded=True)
+    else:
+        app.run(host='0.0.0.0', debug=False, threaded=True)
