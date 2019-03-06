@@ -1,6 +1,6 @@
-#temp-canv {
+#temp-canv, #ph-canv, #tds-canv {
 	position: absolute;
-	top: 700px;
+	top: 800px;
 	bottom: 0;
 	right: 0;
 	left: 0;

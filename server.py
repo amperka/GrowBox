@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request, Markup, Response 
+from flask import Flask, render_template, make_response, request, Markup, Response
 import os, datetime, random, json, time, sys
 from datetime import datetime
 import serial_port, threading, queue
@@ -30,11 +30,11 @@ if ((not WINDOWS) and (not MOCK)):
 temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
 
-# dbPeriod = 600 # seconds 
+# dbPeriod = 600 # seconds
 arrayLen = 10
 requestPeriod = 1 # seconds
-circularArray = [0] * arrayLen 
-arrayPivot = 0 
+circularArray = [0] * arrayLen
+arrayPivot = 0
 # itemPeriod = dbPeriod / arrayLen # seconds
 
 app = Flask(__name__)
@@ -74,7 +74,7 @@ def temp_meas():
 def ph():
     template_data = {
             'title' : "Кислотность",
-            'label' : "Уровень pH", 
+            'label' : "Уровень pH",
             'goback': "/measurements",
     }
     return render_template("measurements/ph.html", **template_data)
@@ -188,7 +188,7 @@ def remove_frames():
 
 @app.route("/make_video")
 def make_video():
-    if len(os.listdir("/home/pi/Pictures")) != 0: 
+    if len(os.listdir("/home/pi/Pictures")) != 0:
         #os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
         os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
         return make_response('', 200)
