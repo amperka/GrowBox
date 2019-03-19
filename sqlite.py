@@ -36,7 +36,7 @@ class Sqlite():
         fan = random.randrange(0, 100, 1)
         compressor = random.randrange(0, 100, 1)
 
-        print(curstate, lamp, fan, compressor)        
+        print(curstate, lamp, fan, compressor)
 
         self.updateActivity(curstate, lamp, fan, compressor)
 
@@ -148,7 +148,7 @@ class Sqlite():
         sql = sql + " ORDER BY date DESC"
 
         if limit:
-            sql = sql + " LIMIT " + str(int(limit)) 
+            sql = sql + " LIMIT " + str(int(limit))
 
         sql = "SELECT * from (" + sql + ") ORDER BY date ASC"
 
@@ -161,7 +161,8 @@ class Sqlite():
 
 if __name__=="__main__":
 
-    sq = Sqlite('./sensorsData.db')
+    #sq = Sqlite('./sensorsData.db')
+    sq = Sqlite("./testData.db") #for testing
 
     sq.create()
     sq.createActivity()

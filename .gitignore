@@ -1,8 +1,9 @@
 __pycache__/
 *.py[cod]
 server_win.py
-log.log
+*.log
 *.db
 static/img/animation.gif
 *.mp4
 *.jpg
+log.py

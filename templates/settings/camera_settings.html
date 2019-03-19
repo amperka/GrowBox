@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
+{% block stylesSection %}
+<link rel="stylesheet" href="../../static/css/camera.css">
+<link rel="stylesheet" href="../../static/css/confirm.css">
+{% endblock %}
+
 {% block scriptsSection %}
+<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../static/js/confirm.js"></script>
 <script>
 	function removeFrames() {
 		var xhr = new XMLHttpRequest();
@@ -19,6 +26,15 @@
 		}
 	}
 
+    function addMsgToDiv(msg) {
+			var div = document.getElementById("camera-msg");
+			div.innerHTML = msg;
+			$("#camera-msg").fadeIn();
+			setTimeout(function() {
+				$("#camera-msg").fadeOut();
+			}, 2000);
+    }
+
 </script>
 {% endblock %}
 
@@ -29,6 +45,10 @@
 			<input class="btn btn-lg btn-danger btn-block p-3 mt-4" value="Удаление кадров камеры" type="button" onclick="removeFrames()">
 		</div>
 	</div>
+
+    <div class="row py-4 d-flex justify-content-center">
+        <div class="saved-banner" id="camera-msg"></div>
+    </div>
 
 </div>
 {% endblock %}

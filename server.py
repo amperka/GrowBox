@@ -7,7 +7,9 @@ import serial_port, threading, queue
 import sqlite
 import signal
 import argparse
+import logging
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
+os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
 
 MOCK = False
 DEBUG = False
@@ -27,7 +29,7 @@ if ((not WINDOWS) and (not MOCK)):
     import usb_camera
     from crontab import CronTab
 
-temp, hum, ph, tds, co2, lvl = ('0', '0', '0', '0', '0', '0')
+temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
 
 # dbPeriod = 600 # seconds
@@ -141,12 +143,12 @@ def make_photo(img):
     try:
         camera.capture("./static/img/" + name, resize=(640, 480)) #need to fix size
     except RuntimeError:
-        print("Photo is not created")
+        logging.error("Photo is not created")
         return make_response('', 403)
     else:
         return make_response('', 200)
     finally:
-        print("Camera close") #test
+        logging.info("Camera close") #test
         camera.close()
 
 @app.route("/clear_photo")
@@ -264,7 +266,7 @@ def update_system():
     #ret = os.system("git pull origin master") #uncomment to update
     if ret == 0:
         return make_response('', 200)
-    else: 
+    else:
         return make_response('', 403)
 
 @app.route("/apply_time", methods=["POST"])
@@ -279,7 +281,7 @@ def apply_time():
     input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-@app.route("/calibration/<param>") 
+@app.route("/calibration/<param>")
 def calibration(param):
     if param == "four":
         command = json.dumps({"calibrate" : 4})
@@ -313,7 +315,7 @@ def temp_chart(param):
     if param == 'carbon':
         template_data = {'label': "Уровень CO2", 'banner': "уровня CO2"}
         title = "Журнал концентрации углекислого газа"
-    print(title)
+    logging.debug(title)
     return render_template("charts/month_chart.html", param=param, title=title, goback='/charts', **template_data)
 
 @app.route("/charts/draw_chart", methods=["POST"])
@@ -403,8 +405,8 @@ def prepareData(param, fromTime, toTime, limit):
         data = []
     else:
         for i in data:
-            print(i)
-        error = False        
+            logging.debug(i) #testing
+        error = False
         prep = [x for x in zip(*data)]
         labels = prep[0]
         data = prep[1]
@@ -414,8 +416,8 @@ def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
     global arrayPivot, arrayLen, circularArray
 
     circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
-    arrayPivot += 1 
-    if arrayPivot == arrayLen: 
+    arrayPivot += 1
+    if arrayPivot == arrayLen:
         s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
         sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
         arrayPivot = 0
@@ -439,14 +441,14 @@ def mockArduino():
 
 
 def readArduino():
-    global temp, hum, ph, tds, co2, lvl
-    
+    global temp, ph, tds, co2, lvl
+
     if not WINDOWS:
         arduino_path = auto_detect_serial()
         if arduino_path is not None:
             sp = serial_port.SerialPort(arduino_path)
         else:
-            print("Arduino not connected")
+            logging.error("Arduino not connected")
             sys.exit(1)
     else:
         arduino_path = "COM8"
@@ -463,17 +465,17 @@ def readArduino():
             if not input_queue.empty():
                 command_data = input_queue.get()
                 sp.write_serial(command_data.encode())
-                print("Write data to serial " + command_data) #testing
+                logging.debug("Write data to serial " + command_data) #testing
 
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
                 #print(data) #testing
                 if not first_data_pack_flag:
-                    reconnect_count = 0 
-                    print("First package") #testing
+                    reconnect_count = 0
+                    logging.debug("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])
-                    print(current_time) #testing
+                    logging.debug(current_time) #testing
                     set_systime(str(current_time))
                     first_data_pack_flag = True
             empty_loop_count += 1
@@ -481,22 +483,22 @@ def readArduino():
                 raise RuntimeError("Time is over")
         except (RuntimeError, OSError):
             sp.close()
-            print("Serial port disconnect")
-            print("Try to reconnect")
+            logging.error("Serial port disconnect")
+            logging.info("Try to reconnect")
             reconnect_count += 1
             if reconnect_count > 3:
-                print("Reconnection limit. Please restart your computer.")
+                logging.info("Reconnection limit. Please restart your computer.")
                 sys.exit(1)
             time.sleep(10) #testing
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
                 sp = serial_port.SerialPort(arduino_path)
             else:
-                print("Arduino not connected")
+                logging.error("Arduino not connected")
                 sys.exit(1)
             if sp.open():
                 empty_loop_count = 0
-                print("Connection succeful")
+                logging.info("Connection succeful")
                 input_queue.put(current_state)
 
         with lock:
@@ -521,10 +523,10 @@ def set_systime(datetime):
     os.system("sudo date --set='" + datetime + "'")
 
 if __name__ == "__main__":
+    logging.basicConfig(filename="mylog.log", level=logging.DEBUG)
 
     sql.create()
     sql.createActivity()
-    
     row = sql.selectActivity()
     current_state = Markup(row[0][0])
     input_queue.put(current_state)
