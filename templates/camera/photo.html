@@ -23,13 +23,17 @@
 					if (id == 'image1') {
 						img.src = "../../static/img/img1.jpg?" + Math.random();
 						placeid = "place1";
+                        img.onclick = function() {request_photo('/make_photo/img1', 'image1')};
 					} else if (id == 'image2') {
 						img.src = "../../static/img/img2.jpg?" + Math.random();
 						placeid = "place2";
+                        img.onclick = function() {request_photo('/make_photo/img2', 'image2')};
 					}
+                    img.style["border"] ="3px double black";
 					img.onload = function () {
 						document.getElementById(placeid).removeChild(document.getElementById(id));
 						document.getElementById(placeid).appendChild(img);
+                        document.getElementById(placeid).children[0].setAttribute("id", id);
 					}
 				} else if (xhr.status == 403) {
 					addMsgToDiv("Камера недоступна. Проверьте подключение камеры")
@@ -73,12 +77,12 @@
         <div class="col">
                 <!-- Сделать 1-ый снимок -->
 		<div class="row pt-2 pb-3 d-flex justify-content-center" id="place1">
-			<img src= "../../static/img/Camera.png" alt="Фотография №1" id="image1" width="330" height="300" style="padding:80px; border: 4px double black;" onclick="request_photo('/make_photo/img1', 'image1')"> 
+            <img src= "../../static/img/{{img1}}" alt="Фотография №1" id="image1" width="330" height="300" style="padding:{{pad1}}; border: 3px double black;" onclick="request_photo('/make_photo/img1', 'image1')">
 		</div>
 
 		<!-- Сделать 2-ой снимок -->
 		<div class="row pt-3 pb-4 d-flex justify-content-center" id="place2">
-			<img src= "../../static/img/Camera.png" alt="Фотография №2" id="image2" width="330" height="300" style="padding:80px; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
+            <img src= "../../static/img/{{img2}}" alt="Фотография №2" id="image2" width="330" height="300" style="padding:{{pad2}}; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
 		</div>
 
 		<div class="row py-2">

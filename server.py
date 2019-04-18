@@ -8,6 +8,7 @@ import sqlite
 import signal
 import argparse
 import logging
+import random
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
 
@@ -75,7 +76,7 @@ def temp_meas():
 @app.route("/measurements/ph")
 def ph():
     template_data = {
-            'title' : "Кислотность",
+            'title' : "Уровень pH",
             'label' : "Уровень pH",
             'goback': "/measurements",
     }
@@ -93,7 +94,7 @@ def tds():
     template_data = {
         'title': "Солёность",
         'goback': "/measurements",
-        'label' : "Уровень солей"
+        'label' : "Уровень солей",
     }
     return render_template("measurements/tds.html", **template_data)
 
@@ -109,7 +110,7 @@ def co2():
     template_data =  {
         'title': "Углекислый газ",
         'goback': "/measurements",
-        'label' : "CO2"
+        'label' : "CO2",
     }
     return render_template("measurements/co2.html", **template_data)
 
@@ -124,14 +125,43 @@ def co2_meas():
 ##################################################
 @app.route("/camera")
 def camera():
-    if (WINDOWS == True):
-        return render_template("camera/camera_windows.html", title='Камера', goback='/index')
-    else:
-        return render_template("camera/camera.html", title='Камера', goback='/index')
+    return render_template("camera/camera.html", title='Камера', goback='/index')
 
 @app.route("/camera/photo")
 def photo():
-    return render_template("camera/photo.html", title='Фото', goback='/camera')
+    img1_exist = os.path.isfile("./static/img/img1.jpg")
+    img2_exist = os.path.isfile("./static/img/img2.jpg")
+    img1_name = "img1.jpg?" + str(random.random())
+    img2_name = "img2.jpg?" + str(random.random())
+    if img1_exist and img2_exist:
+        template_data = {
+            'img1' : img1_name,
+            'img2' : img2_name,
+            'pad1' : "0px",
+            'pad2' : "0px",
+        }
+    elif img1_exist and not img2_exist:
+        template_data = {
+            'img1' : img1_name,
+            'img2' : "Camera.png",
+            'pad1' : "0px",
+            'pad2' : "80px",
+        }
+    elif not img1_exist and img2_exist:
+        template_data = {
+            'img1' : "Camera.png",
+            'img2' : img2_name,
+            'pad1' : "80px",
+            'pad2' : "0px"
+        }
+    else:
+        template_data = {
+            'img1' : "Camera.png",
+            'img2' : "Camera.png",
+            'pad1' : "80px",
+            'pad2' : "80px",
+        }
+    return render_template("camera/photo.html", title='Фото', goback='/camera', **template_data)
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
