@@ -34,7 +34,7 @@ if __name__ == "__main__":
     img_name = "/home/pi/Pictures/" + dt_str + ".jpg"
     cam = PiCamera(0)
     try:
-        cam.capture(img_name, resize=(300, 300))
+        cam.capture(img_name, resize=(480, 320))
     except RuntimeError:
         print("The frame is not recorded.")
     finally:

@@ -36,7 +36,7 @@
                         document.getElementById(placeid).children[0].setAttribute("id", id);
 					}
 				} else if (xhr.status == 403) {
-					addMsgToDiv("Камера недоступна. Проверьте подключение камеры")
+					Alert("Предупреждение!", "Камера недоступна. Проверьте подключение камеры.");
 				}
 			}
 		}

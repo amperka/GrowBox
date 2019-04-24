@@ -9,26 +9,13 @@ import signal
 import argparse
 import logging
 import random
+import usb_camera
+from crontab import CronTab
+
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
 
-MOCK = False
 DEBUG = False
-if len(sys.argv) > 1:
-    for i in sys.argv:
-        if i == '-mock':
-            MOCK = True
-        if i == '-debug':
-            DEBUG = True
-
-WINDOWS = False
-import platform
-if platform.system() == 'Windows':
-    WINDOWS = True
-
-if ((not WINDOWS) and (not MOCK)):
-    import usb_camera
-    from crontab import CronTab
 
 temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
@@ -188,7 +175,24 @@ def clear_photo():
 
 @app.route("/camera/video")
 def video():
-    return render_template("camera/video.html", title='Видео', goback='/camera')
+    record_status = check_videorecord()
+    if record_status:
+        print("Videorecord is on") #testing
+        record_message = "Остановить запись"
+    else:
+        print("Videorecord is off") #testing
+        record_message = "Включить запись"
+    video_exist = os.path.isfile("./static/img/timelapse.mp4")
+    video_path = "/static/img/timelapse.mp4?" + str(random.random())
+    template_data = {
+                'title' : "Видео",
+                'goback' : "/camera",
+                'recStatus': record_status,
+                'recMess' : record_message,
+                'videoExist' : video_exist,
+                'videoPath' : video_path,
+    }
+    return render_template("camera/video.html", **template_data)
 
 @app.route("/start_record")
 def start_record():
@@ -197,7 +201,8 @@ def start_record():
         if job.comment == "Growbox":
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
-    job.hour.every(1)
+    job.every(1).hours()
+    print(job)
     my_cron.write()
     return make_response('', 200)
 
@@ -221,8 +226,8 @@ def remove_frames():
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
-        #os.system("convert -delay 10 -loop 0 ~/Pictures/* ./static/img/animation.gif")
-        os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
+        ret = os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
+        print(ret >> 8) #testing
         return make_response('', 200)
     return make_response('', 403)
 
@@ -366,7 +371,7 @@ def draw_chart():
             template_data = {'error': error, 'labels': labels, 'data': data, 'param': param}
             return json.dumps(template_data), 200, {'ContentType':'application/json'}
 
-#return return page about plants
+#return page about plants
 @app.route("/info")
 def info():
     return render_template("/info/info.html", title='Справка', goback='/index')
@@ -428,7 +433,6 @@ def prepareHourData2Chart(param):
 def prepareData(param, fromTime, toTime, limit):
     data = sql.selectSensors(param, fromTime = fromTime, toTime = toTime, limit = limit)
 
-    #print('DATA length: '+str(len(data)))
     if len(data) == 0:
         error = "Нет данных"
         labels = ""
@@ -452,37 +456,22 @@ def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
         sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
         arrayPivot = 0
 
-def mockArduino():
-    global temp, ph, tds, co2, lvl
-
-    while True:
-        if not input_queue.empty():
-            command_data = input_queue.get()
-            print("Write data to serial " + command_data) #testing
-
-        temp = round(random.uniform(20, 30), 2)
-        ph = round(random.uniform(4, 10), 1)
-        tds = round(random.uniform(500, 700))
-        co2 = round(random.uniform(500, 1100))
-        lvl = round(random.uniform(0.0, 1.0))
-        insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl)
-
-        time.sleep(1)
-
+def check_videorecord():
+    my_cron = CronTab(user="pi")
+    for job in my_cron:
+        if job.comment == "Growbox":
+            return True
+    return False
 
 def readArduino():
     global temp, ph, tds, co2, lvl
 
-    if not WINDOWS:
-        arduino_path = auto_detect_serial()
-        if arduino_path is not None:
-            sp = serial_port.SerialPort(arduino_path)
-        else:
-            logging.error("Arduino not connected")
-            sys.exit(1)
-    else:
-        arduino_path = "COM8"
+    arduino_path = auto_detect_serial()
+    if arduino_path is not None:
         sp = serial_port.SerialPort(arduino_path)
+    else:
+        logging.error("Arduino not connected")
+        sys.exit(1)
 
     print("Arduino path is", arduino_path) #testing
     sp.open()
@@ -561,14 +550,9 @@ if __name__ == "__main__":
     current_state = Markup(row[0][0])
     input_queue.put(current_state)
 
-    print("IS IT WINDOWS? -" + str(WINDOWS))
-    print("SHOULD MOCK? -" + str(MOCK))
-
     lock = threading.Lock()
-    if MOCK:
-        getThread = threading.Thread(target=mockArduino)
-    else:
-        getThread = threading.Thread(target=readArduino)
+    #create and run Arduino thread
+    getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
     getThread.start()
 

@@ -8,31 +8,35 @@
 {% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script>
-	$('#recButton').addClass("notRec");
+    {% if recStatus %}
+        $('#recButton').addClass("Rec");
+    {% else %}
+        $('#recButton').addClass("notRec");
+    {% endif %}
 
 	$('#recButton').click(function(){
 		if($('#recButton').hasClass('notRec')){
 			$('#recButton').removeClass("notRec");
 			$('#recButton').addClass("Rec");
+            $('#recMess').html("Остановить запись");
 			startRecord();
 		}
 		else {
 			$('#recButton').removeClass("Rec");
 			$('#recButton').addClass("notRec");
+            $('#recMess').html("Включить запись");
 			finishRecord();
-			makeVideo();
 		}
 	});
-	
+
 	function startRecord() {
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "/start_record", true);
 		xhr.send();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
-			
 			if (xhr.status == 200) {
-				addMsgToDiv("Запись включена");
+				//addMsgToDiv("Запись включена");
 			} else if (xhr.status == 403) {
 				addMsgToDiv("Запись уже идет");
 			} else {
@@ -40,24 +44,23 @@
 			}
 		}
 	}
-	
+
 	function finishRecord() {
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "/finish_record", true);
 		xhr.send();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
-
 			if (xhr.status == 200) {
-				addMsgToDiv("Запись закончена");
+				//addMsgToDiv("Запись закончена");
 			} else if (xhr.status == 403) {
-				addMsgToDiv("Запись не ведётся. Включите запись!");	
+				//addMsgToDiv("Запись не ведётся. Включите запись!");
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
 		}
 	}
-	
+
 	function makeVideo() {
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', '/make_video', true);
@@ -69,35 +72,27 @@
 			if (xhr.status == 200) {
 				watchVideo();
 				$("#preloader").fadeOut();
-				addMsgToDiv("Подготовка видео завершена");
+				//addMsgToDiv("Подготовка видео завершена");
 			} else if (xhr.status == 403) {
 				$("#preloader").fadeOut();
-				addMsgToDiv("Отсутствуют кадры для видео");	
+				//addMsgToDiv("Отсутствуют кадры для видео");
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
 		}
 	}
-	
+
 	function watchVideo() {
-		if (document.getElementById("image_place").childNodes.length == 0) {
-			var video = document.createElement("video");
-			video.setAttribute("src", "../static/img/timelapse.mp4");
-			video.setAttribute("width", "480");
-			video.setAttribute("height", "320")
-			video.setAttribute("controls", "controls");
-			document.getElementById("image_place").appendChild(video);
-		}
+        $('#image-place').empty();
+		var video = document.createElement("video");
+        var videoPath = "/static/img/timelapse.mp4?" + Math.random();
+		video.setAttribute("src", videoPath);
+		video.setAttribute("width", "480");
+		video.setAttribute("height", "320")
+		video.setAttribute("controls", "controls");
+		document.getElementById("image-place").appendChild(video);
 	}
 
-	function addMsgToDiv(msg) {
-		var div = document.getElementById("camera-msg");
-		div.innerHTML = msg;
-		$("#camera-msg").fadeIn();
-		setTimeout(function() {
-			$("#camera-msg").fadeOut();
-		}, 2000);
-	}
 </script>
 {% endblock %}
 
@@ -106,27 +101,34 @@
     <div class="row">
         <div class="col">
 
-	    <div class="row py-4 d-flex justify-content-center">
-            	<p class="h2">Запись вкл/выкл</p>
+	        <div class="row py-4 d-flex justify-content-center">
+                <p class="h2" id="recMess">{{recMess}}</p>
             </div>
-			
-	    <div class="row py-4 d-flex justify-content-center">
-		<button id="recButton"></button>
-	    </div>
-	    
-	    <div class="row py-4 d-flex justify-content-center">
-		<div class="saved-banner" id="camera-msg"></div>
-	    </div>
 
-	    <div class="row py-4 d-flex justify-content-center">
-		<div id="image_place" width=480 height=320></div>
-	    </div>
+	        <div class="row py-4 d-flex justify-content-center">
+		        <button id="recButton"></button>
+	        </div>
 
-	    <div class="row py-4 d-flex justify-content-center">
-		<div id="preloader"></div>
-	    </div>
+	        <div class="row py-4 d-flex justify-content-center" id=image-place>
+            {% if videoExist %}
+                <video width="480" height="320" controls="controls">
+                    <source src="{{videoPath}}">
+                </video>
+            {% else %}
+                <img src="/static/img/Video.png" alt="Видео" width="480" height="320" style="padding:10px 80px; border: 3px double black;">
+            {% endif %}
+	        </div>
 
-	    			
+            <div class="row py-4 d-flex justify-content-center">
+                <button type="button" class="btn btn-primary btn-lg btn-block p-3" id="clear-button" onclick="makeVideo()">
+                    <p class="h2">Смонтировать</p>
+                </button>
+            </div>
+
+            <div class="row py-4 d-flex justify-content-center">
+		        <div id="preloader"></div>
+	        </div>
+
         </div>
     </div>
 </div>
