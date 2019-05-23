@@ -3,6 +3,27 @@
 {% block scriptsSection %}
     <link rel="stylesheet" href="../static/css/teacher_settings.css">
     <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+    <script>
+        function sendPasswd() {
+            var passwd = document.getElementsByName("passwd")[0].value;
+            $.ajax({
+                url: "/teacher_settings",
+                type: "POST",
+                data: JSON.stringify({"passwd" : passwd}),
+                    contentType: "application/json; charset=utf8",
+                    dataType: "json",
+            })
+            .fail(function() {
+                $("#wrong-passwd").fadeIn();
+                setTimeout(function() {
+                    $("#wrong-passwd").fadeOut();
+                }, 3000);
+            })
+            .done(function() {
+                window.location.href="/teacher_page";
+            });
+        }
+     </script>
 {% endblock %}
 
 {% block content %}
@@ -12,34 +33,11 @@
             <form onsubmit="sendPasswd(); return false;">
                 <div class="form-group">
                     <label class="col-form-label col-form-label-lg" for="exampleInputPassword1">Пароль</label>
-                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg" id="exampleInputPassword1" placeholder="Введите пароль">
+                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg" id="password" placeholder="Введите пароль">
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Войти</button>
             </form>
-
             <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
-            <script>
-                function sendPasswd() {
-                    var passwd = document.getElementsByName("passwd")[0].value;
-                    $.ajax({
-                        url: "/teacher_settings",
-                        type: "POST", 
-                        data: JSON.stringify({"passwd" : passwd}),
-                               contentType: "application/json; charset=utf8",    
-                        dataType: "json",
-                    })
-                    .fail(function() {
-                            $("#wrong-passwd").fadeIn();
-                            setTimeout(function() {
-                                $("#wrong-passwd").fadeOut();
-                            }, 3000);
-                                
-                        })    
-                    .done(function() {
-                            window.location.href="/teacher_page";
-                        });
-                }
-            </script>
         </div>
     </div>
 </div>

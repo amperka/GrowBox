@@ -34,7 +34,7 @@ sql = sqlite.Sqlite('./sensorsData.db')
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", title='Главная')
+    return render_template("index.html", title='Главная', lock='/lock')
 
 #return measurements page
 @app.route("/measurements")
@@ -280,6 +280,10 @@ def camera_settings():
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
 
+@app.route("/lock")
+def lock():
+    return render_template('/lock.html')
+
 @app.route("/apply_net_settings", methods=["POST"])
 def apply_net_settings():
     login = request.form["login"]
@@ -385,11 +389,9 @@ def select_plant(plant):
         title = "Фасоль"
     elif plant == "oats":
         title = "Oвёс"
-    elif plant == "basil":
-        title = "Базилик"
     template_data = {
         'title': title,
-        'goback': "/index",
+        'goback': "/info",
     }
     return render_template(ret_val, **template_data)
 
