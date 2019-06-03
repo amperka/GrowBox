@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/camera.css">
+<!-- <link rel="stylesheet" href="../../static/css/camera.css"> -->
 <link rel="stylesheet" href="../../static/css/confirm.css">
 {% endblock %}
 
@@ -11,15 +11,15 @@
 <script>
 	function removeFrames() {
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/remove_frames", true);
+		xhr.open("GET", "/download_log", true);
 		xhr.send();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
 
 			if (xhr.status == 200) {
-				addMsgToDiv("Старые кадры удалены");
+				addMsgToDiv("Журнал скачан успешно");
 			} else if (xhr.status == 403) {
-				addMsgToDiv("Проблема с удалением");
+				addMsgToDiv("Не удалось скачать журнал. Проверьте подключение");
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
@@ -35,8 +35,8 @@
 			}, 2000);
     }
 
-    $("#clear-button").click(function() {
-        Confirm("Удалить кадры", "Вы действительно хотите очистить кадры камеры?", "Да", "Нет", removeFrames);
+    $("#download-button").click(function() {
+        Confirm("Скачать журнал", "Вы действительно хотите скачать журнал?", "Да", "Нет", removeFrames);
     });
 </script>
 {% endblock %}
@@ -45,8 +45,10 @@
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<input class="btn btn-lg btn-danger btn-block p-3 mt-4" id="clear-button" value="Удаление кадров камеры" type="button">
+			<input class="btn btn-lg btn-primary btn-block p-3 mt-4" id="download-button" value="Скачать журнал" type="button">
+        	<input class="btn btn-lg btn-primary btn-block p-3 mt-4" id="extract" value="Извлечь USB-накопитель" type="button">
 		</div>
+
 	</div>
 
     <div class="row py-4 d-flex justify-content-center">

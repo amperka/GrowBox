@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, make_response, request, Markup, Response
-import os, datetime, random, json, time, sys
+import os, datetime, random, json, time, sys, shutil
 from datetime import datetime
 import serial_port, threading, queue
 import sqlite
@@ -14,8 +14,6 @@ from crontab import CronTab
 
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
-
-DEBUG = False
 
 temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
 input_queue = queue.Queue(1)
@@ -34,7 +32,7 @@ sql = sqlite.Sqlite('./sensorsData.db')
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", title='Главная', lock='/lock')
+    return render_template("index.html", title='Главное меню', lock='/lock')
 
 #return measurements page
 @app.route("/measurements")
@@ -160,18 +158,19 @@ def make_photo(img):
     try:
         camera.capture("./static/img/" + name, resize=(640, 480)) #need to fix size
     except RuntimeError:
-        logging.error("Photo is not created")
+        logger.error("Photo is not created")
         return make_response('', 403)
     else:
         return make_response('', 200)
     finally:
-        logging.info("Camera close") #test
+        logger.debug("Camera close") #test
         camera.close()
 
 @app.route("/clear_photo")
 def clear_photo():
     os.system("rm -f ./static/img/img*")
     return make_response('', 200)
+
 
 @app.route("/camera/video")
 def video():
@@ -194,6 +193,7 @@ def video():
     }
     return render_template("camera/video.html", **template_data)
 
+
 @app.route("/start_record")
 def start_record():
     my_cron = CronTab(user="pi")
@@ -206,6 +206,7 @@ def start_record():
     my_cron.write()
     return make_response('', 200)
 
+
 @app.route("/finish_record")
 def finish_record():
     my_cron = CronTab(user="pi")
@@ -216,6 +217,7 @@ def finish_record():
             return make_response('', 200)
     return make_response('', 403)
 
+
 @app.route("/remove_frames")
 def remove_frames():
     if os.system("rm -f ~/Pictures/*") == 0:
@@ -223,17 +225,22 @@ def remove_frames():
     else:
         return make_response('', 403)
 
+
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
-        ret = os.system("avconv -y -r 10 -i ~/Pictures/image%04d.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
+        ret = os.system("ffmpeg -y -r 10 -i ~/Pictures/%*.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
         print(ret >> 8) #testing
         return make_response('', 200)
     return make_response('', 403)
 
+
 ##################################################
 
-#return setting of GrowBox
+
+############## GrowBox settings ##################
+
+
 @app.route("/settings")
 def settings():
     row = sql.selectActivity()
@@ -246,43 +253,57 @@ def accept_setting():
     input_queue.put(str(content))
     sql.updateActivity(str(content))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-####################################################
 
-@app.route("/teacher_settings", methods=["POST"])
-def log_in():
-    content = request.json
-    passwd = content["passwd"]
-    if passwd == "secret":
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-    return make_response('', 403)
 
-@app.route("/teacher_page")
-def teacher_page():
-    return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
+###################################################
 
-@app.route("/time_settings")
-def time_settings():
-    return render_template('/settings/time_settings.html', title='Время и дата', goback='/teacher_page')
 
-@app.route("/net_settings")
-def net_settings():
-    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+############## Teacher settings ###################
 
-@app.route("/calibration_page")
-def calibration_page():
-    return render_template('/settings/calibration.html', title='Калибровка датчика pH', goback='/teacher_page')
-
-@app.route("/camera_settings")
-def camera_settings():
-    return render_template('/settings/camera_settings.html', title='Удаление кадров камеры', goback='/teacher_page')
 
 @app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
 
+
 @app.route("/lock")
 def lock():
     return render_template('/lock.html')
+
+
+@app.route("/teacher_settings", methods=["POST"])
+def log_in():
+    content = request.json
+    passwd = content["passwd"]
+    if passwd == "2486":
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return make_response('', 403)
+
+
+@app.route("/teacher_page")
+def teacher_page():
+    return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
+
+
+@app.route("/teacher_page/<settings>")
+def teacher_settings(settings):
+    ret_val = "/settings/" + settings + ".html"
+    if settings == "time_settings":
+        title = "Время и дата"
+    elif settings == "net_settings":
+        title = "Сеть и обновления"
+    elif settings == "calibration_page":
+        title = "Калибровка датчика pH"
+    elif settings == "camera_settings":
+        title = "Настройки камеры"
+    elif settings == "work_log":
+        title = "Журнал работы"
+    template_data = {
+        'title' : title,
+        'goback' : "/teacher_page",
+    }
+    return render_template(ret_val, **template_data)
+
 
 @app.route("/apply_net_settings", methods=["POST"])
 def apply_net_settings():
@@ -299,26 +320,30 @@ def apply_net_settings():
         os.system("wpa_cli -i wlan0 reconfigure")
     return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
 
+
 @app.route("/update_system")
 def update_system():
     ret = os.system("echo Update") #testing
     #ret = os.system("git pull origin master") #uncomment to update
     if ret == 0:
+        logger.info("System update")
         return make_response('', 200)
     else:
         return make_response('', 403)
+
 
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
     content = request.json
     datetime_set = content["set-date"] + ' ' + content["set-time"]
     print(datetime_set) #testing
-    set_systime(datetime_set) #uncomment to set system time
+    set_systime(datetime_set)
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     print(fmt_datetime)
     input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
 
 @app.route("/calibration/<param>")
 def calibration(param):
@@ -332,14 +357,37 @@ def calibration(param):
         input_queue.put(command)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+
+@app.route("/download_log")
+def download_log():
+    media_dir = os.listdir("/media/pi")
+    if len(media_dir) == 0:
+        return make_response('', 403)
+    usb_path = "/media/pi/" + media_dir[0]
+    try:
+        shutil.copy("./growbox.log", usb_path)
+    except Exception as e:
+        logger.error("Something go wrong") #testing
+        return make_response('', 403)
+    return make_response('', 200)
+
+
+@app.route("/extract_usb")
+def extract_usb():
+    os.system("sudo umount /dev/sda1") #TODO
+    return make_response('', 200)
+
+
 ###################################################
 
-#return charts page
+################ Charts pages #####################
+
+
 @app.route("/charts")
 def charts():
     return render_template("charts/charts.html", title='Журнал', goback='/index')
 
-#return chart
+
 @app.route("/charts/<param>")
 def temp_chart(param):
     if param == 'temp':
@@ -354,8 +402,8 @@ def temp_chart(param):
     if param == 'carbon':
         template_data = {'label': "Уровень CO2", 'banner': "уровня CO2"}
         title = "Журнал концентрации углекислого газа"
-    logging.debug(title)
     return render_template("charts/month_chart.html", param=param, title=title, goback='/charts', **template_data)
+
 
 @app.route("/charts/draw_chart", methods=["POST"])
 def draw_chart():
@@ -375,7 +423,11 @@ def draw_chart():
             template_data = {'error': error, 'labels': labels, 'data': data, 'param': param}
             return json.dumps(template_data), 200, {'ContentType':'application/json'}
 
-#return page about plants
+
+###################################################
+
+############## About plants #######################
+
 @app.route("/info")
 def info():
     return render_template("/info/info.html", title='Справка', goback='/index')
@@ -441,7 +493,7 @@ def prepareData(param, fromTime, toTime, limit):
         data = []
     else:
         for i in data:
-            logging.debug(i) #testing
+            print(i) #testing
         error = False
         prep = [x for x in zip(*data)]
         labels = prep[0]
@@ -472,7 +524,7 @@ def readArduino():
     if arduino_path is not None:
         sp = serial_port.SerialPort(arduino_path)
     else:
-        logging.error("Arduino not connected")
+        logger.error("Arduino not connected")
         sys.exit(1)
 
     print("Arduino path is", arduino_path) #testing
@@ -486,17 +538,14 @@ def readArduino():
             if not input_queue.empty():
                 command_data = input_queue.get()
                 sp.write_serial(command_data.encode())
-                logging.debug("Write data to serial " + command_data) #testing
+                logger.debug("Write data to serial " + command_data) #testing
 
             while sp.serial_available():
                 empty_loop_count = 0
                 data = json.loads(sp.read_serial())
-                #print(data) #testing
                 if not first_data_pack_flag:
                     reconnect_count = 0
-                    logging.debug("First package") #testing
                     current_time = datetime.fromtimestamp(data["time"])
-                    logging.debug(current_time) #testing
                     set_systime(str(current_time))
                     first_data_pack_flag = True
             empty_loop_count += 1
@@ -504,22 +553,22 @@ def readArduino():
                 raise RuntimeError("Time is over")
         except (RuntimeError, OSError):
             sp.close()
-            logging.error("Serial port disconnect")
-            logging.info("Try to reconnect")
+            logger.error("Serial port disconnect")
+            logger.info("Try to reconnect")
             reconnect_count += 1
             if reconnect_count > 3:
-                logging.info("Reconnection limit. Please restart your computer.")
+                logger.info("Reconnection limit. Please restart your computer.")
                 sys.exit(1)
             time.sleep(10) #testing
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
                 sp = serial_port.SerialPort(arduino_path)
             else:
-                logging.error("Arduino not connected")
+                logger.error("Arduino not connected")
                 sys.exit(1)
             if sp.open():
                 empty_loop_count = 0
-                logging.info("Connection succeful")
+                logger.info("Connection succeful")
                 input_queue.put(current_state)
 
         with lock:
@@ -544,7 +593,19 @@ def set_systime(datetime):
     os.system("sudo date --set='" + datetime + "'")
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="mylog.log", level=logging.DEBUG)
+    #create own logger
+    logger = logging.getLogger("server")
+    logger.setLevel(logging.DEBUG)
+
+    #create logging file handler
+    file_handler = logging.FileHandler("growbox.log")
+    date_format = "%Y-%m-%d %H:%M:%S"
+    message_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    formatter = logging.Formatter(message_format, date_format)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    logger.info("Server started")
 
     sql.create()
     sql.createActivity()
@@ -553,6 +614,7 @@ if __name__ == "__main__":
     input_queue.put(current_state)
 
     lock = threading.Lock()
+
     #create and run Arduino thread
     getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
@@ -574,7 +636,4 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, sigint_handler)
 
-    if DEBUG:
-        app.run(host='0.0.0.0', debug=True, threaded=True)
-    else:
-        app.run(host='0.0.0.0', debug=False, threaded=True)
+    app.run(host='0.0.0.0', debug=False, threaded=True)

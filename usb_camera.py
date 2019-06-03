@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import cv2
+import logging
+
+camera_logger = logging.getLogger("server.camera")
 
 class PiCamera:
     def __init__(self, port):
@@ -20,7 +23,7 @@ class PiCamera:
             if resize is not None:
                 cam_capture = cv2.resize(cam_capture, resize, interpolation=1)
         except RuntimeError:
-            print("Unable to get image. Check your camera connection.")
+            camera_logger.error("Unable to get image. Check your camera connection.")
             raise
         else:
             cv2.imwrite(name, cam_capture)
