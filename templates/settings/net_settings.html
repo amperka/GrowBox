@@ -3,11 +3,16 @@
 {% block stylesSection %}
 <link rel="stylesheet" href="../../static/css/teacher_settings.css">
 <link rel="stylesheet" href="../../static/css/confirm.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+<link rel="stylesheet" href="/static/css/keyboard.css">
+
 {% endblock %}
 
 {% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="../static/js/confirm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+<script src="/static/js/keyboard.js"></script>
 <script>
 	function updateSystem() {
 		var xhr = new XMLHttpRequest();
@@ -15,7 +20,6 @@
 		xhr.send();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
-			
 			if (xhr.status == 200) {
 				//addMsgToDiv("Запись включена");
 				alert("Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.");
@@ -26,13 +30,19 @@
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
 		}
-			
 	}
 
-$('#update-button').click(function () {
+    $('#update-button').click(function () {
 	        	Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
-		});
+	});
 
+    $("#netName").click(function() {
+        openKeyboard();
+    });
+
+    $("#netPassword").click(function() {
+        openKeyboard();
+    })
 </script>
 
 {% endblock %}
@@ -44,19 +54,23 @@ $('#update-button').click(function () {
             <form method="POST" action="/apply_net_settings">
                 <div class="form-group">
                     <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label>
-                    <input type="text" maxlength="25" name="login" class="form-control form-control-lg" id="netName"
+                    <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"
                            aria-describedby="emailHelp"
                            placeholder="Введите имя сети">
                 </div>
                 <div class="form-group">
                     <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label>
-                    <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg"
+                    <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg input"
                            id="netPassword" placeholder="Введите пароль">
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Подключиться</button>
             </form>
-	    <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
-
+	        <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
         </div>
     </div>
+</div>
+<div class="row my-5 mx-2" id="keyboard">
+    <div class="simple-keyboard"></div>
+</div>
+
 {% endblock %}

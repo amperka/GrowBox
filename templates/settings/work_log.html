@@ -3,40 +3,78 @@
 {% block stylesSection %}
 <!-- <link rel="stylesheet" href="../../static/css/camera.css"> -->
 <link rel="stylesheet" href="../../static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
+
 {% endblock %}
 
 {% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="../static/js/confirm.js"></script>
 <script>
-	function removeFrames() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/download_log", true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
+    function downloadLogs() {
+        var downloadMsg = {
+            msgYes: "Журнал успешно скачан.",
+            msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
+            msgError: "Возникла ошибка системы. Перезапустите гроукомпьютер",
+            callback: function(msg) {
+                addMsgToDiv(msg);
+            },
+        };
+        request("/download_log", downloadMsg, "preloader");
+    }
 
-			if (xhr.status == 200) {
-				addMsgToDiv("Журнал скачан успешно");
-			} else if (xhr.status == 403) {
-				addMsgToDiv("Не удалось скачать журнал. Проверьте подключение");
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
+    function extractUsb() {
+        var extractMsg = {
+            msgYes: "USB-устройство может быть извлечено.",
+            msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
+            msgError: "Возникла ошибка системы. Перезапустите гроукомпьютер",
+            callback: function(msg) {
+                addMsgToDiv(msg);
+            },
+        };
+        request("/extract_usb", extractMsg);
+    }
+
+    function request(url, obj, preloader) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.send();
+        if (typeof preloader !== "undefined") {
+            $("#preloader").fadeIn();
+        }
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState != 4) return;
+            if (xhr.status == 200) {
+                if (typeof preloader !== "undefined"){
+                    $("#preloader").fadeOut();
+                }
+                obj.callback(obj.msgYes);
+            } else if (xhr.status == 403) {
+                if (typeof preloader !== "undefined") {
+                    $("#preloader").fadeOut();
+                }
+                obj.callback(obj.msgNo);
+            } else {
+                obj.callback(obj.msgError);
+            }
+        }
+    }
 
     function addMsgToDiv(msg) {
-			var div = document.getElementById("camera-msg");
+			var div = document.getElementById("msg-box");
 			div.innerHTML = msg;
-			$("#camera-msg").fadeIn();
+			$("#msg-box").fadeIn();
 			setTimeout(function() {
-				$("#camera-msg").fadeOut();
-			}, 2000);
+				$("#msg-box").fadeOut();
+			}, 4000);
     }
 
     $("#download-button").click(function() {
-        Confirm("Скачать журнал", "Вы действительно хотите скачать журнал?", "Да", "Нет", removeFrames);
+        Confirm("Скачать журнал", "Вы действительно хотите скачать журнал?", "Да", "Нет", downloadLogs);
+    });
+
+    $("#extract").click(function() {
+        Confirm("Извлечь накопитель", "Вы действительно хотите извлечь накопитель?", "Да", "Нет", extractUsb);
     });
 </script>
 {% endblock %}
@@ -52,8 +90,12 @@
 	</div>
 
     <div class="row py-4 d-flex justify-content-center">
-        <div class="saved-banner" id="camera-msg"></div>
+        <div class="saved-banner" id="msg-box"></div>
     </div>
+
+    <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
+	</div>
 
 </div>
 {% endblock %}

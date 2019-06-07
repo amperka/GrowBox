@@ -3,10 +3,12 @@
 {% block stylesSection %}
 <link rel="stylesheet" href="../../static/css/camera.css">
 <link rel="stylesheet" href="../../static/css/preloader.css">
+<link rel="stylesheet" href="/static/css/confirm.css">
 {% endblock %}
 
 {% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
 <script>
     {% if recStatus %}
         $('#recButton').addClass("Rec");
@@ -38,7 +40,7 @@
 			if (xhr.status == 200) {
 				//addMsgToDiv("Запись включена");
 			} else if (xhr.status == 403) {
-				addMsgToDiv("Запись уже идет");
+				Alert("Камера недоступна. Проверьте подключение камеры!");
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
@@ -74,8 +76,9 @@
 				$("#preloader").fadeOut();
 				//addMsgToDiv("Подготовка видео завершена");
 			} else if (xhr.status == 403) {
-				$("#preloader").fadeOut();
-				//addMsgToDiv("Отсутствуют кадры для видео");
+                $("#preloader").fadeOut('slow', function() {
+                    Alert("Ошибка!", "Отсутствуют кадры для видео");
+                });
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}

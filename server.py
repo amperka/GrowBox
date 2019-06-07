@@ -6,7 +6,7 @@ from datetime import datetime
 import serial_port, threading, queue
 import sqlite
 import signal
-import argparse
+import subprocess
 import logging
 import random
 import usb_camera
@@ -130,23 +130,24 @@ def photo():
             'img1' : img1_name,
             'img2' : "Camera.png",
             'pad1' : "0px",
-            'pad2' : "80px",
+            'pad2' : "50px 120px",
         }
     elif not img1_exist and img2_exist:
         template_data = {
             'img1' : "Camera.png",
             'img2' : img2_name,
-            'pad1' : "80px",
+            'pad1' : "50px 120px",
             'pad2' : "0px"
         }
     else:
         template_data = {
             'img1' : "Camera.png",
             'img2' : "Camera.png",
-            'pad1' : "80px",
-            'pad2' : "80px",
+            'pad1' : "50px 120px",
+            'pad2' : "50px 120px",
         }
     return render_template("camera/photo.html", title='Фото', goback='/camera', **template_data)
+
 
 @app.route("/make_photo/<img>")
 def make_photo(img):
@@ -156,7 +157,7 @@ def make_photo(img):
     elif img == "img2":
         name = "img2.jpg"
     try:
-        camera.capture("./static/img/" + name, resize=(640, 480)) #need to fix size
+        camera.capture("./static/img/" + name, resize=(480, 320)) #need to fix size
     except RuntimeError:
         logger.error("Photo is not created")
         return make_response('', 403)
@@ -220,18 +221,33 @@ def finish_record():
 
 @app.route("/remove_frames")
 def remove_frames():
-    if os.system("rm -f ~/Pictures/*") == 0:
-        return make_response('', 200)
-    else:
+    if len(os.listdir("/home/pi/Pictures")) == 0:
+        print("Pictures directory is empty")
         return make_response('', 403)
+    try:
+        subprocess.run(["rm", "-f", "/home/pi/Pictures/*"], check=True)
+    except subprocess.CalledProcessError as err:
+        print("Error", err)
+        return make_response('', 403)
+    else:
+        print("Remove frame OK")
+        return make_response('', 200)
 
 
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
-        ret = os.system("ffmpeg -y -r 10 -i ~/Pictures/%*.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
-        print(ret >> 8) #testing
-        return make_response('', 200)
+        command = ["ffmpeg", "-y", "-r", "10", "-i", "/home/pi/Pictures/%*.jpg", "-r",
+                   "10", "-vcodec", "libx264", "vf", "scale=480:320", "./static/img/timelapse.mp4"]
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError as err:
+            print("Error", err) #testing
+            return make_response('', 403)
+        else:
+            print("Video is created") #testing
+            return make_response('', 200)
+        # ret = os.system("ffmpeg -y -r 10 -i ~/Pictures/%*.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
     return make_response('', 403)
 
 
@@ -362,6 +378,7 @@ def calibration(param):
 def download_log():
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
+        logger.error("download_log: USB-device not found")
         return make_response('', 403)
     usb_path = "/media/pi/" + media_dir[0]
     try:
@@ -374,7 +391,16 @@ def download_log():
 
 @app.route("/extract_usb")
 def extract_usb():
-    os.system("sudo umount /dev/sda1") #TODO
+    media_dir = os.listdir("/media/pi")
+    if len(media_dir) == 0:
+        logger.error("extract_usb: USB-device not found")
+        return make_response('', 403)
+    command = ['sudo', 'umount', '/dev/sda1']
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as err:
+        print("Something go wrong", err) #testing
+        return make_response('', 403)
     return make_response('', 200)
 
 

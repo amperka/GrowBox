@@ -50,6 +50,7 @@
 <script src="../static/js/bootstrap.min.js"></script>
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+<script src="/static/js/numkeyboard.js"></script>
 <script>
     function sendPasswd() {
         var passwd = $('#pincode').val();
@@ -71,53 +72,7 @@
                 window.location.href="/index";
             });
     }
-
-    let Keyboard = window.SimpleKeyboard.default;
-
-    let textsize = new Keyboard({
-          onChange: input => onChange(input),
-          onKeyPress: button => onKeyPress(button),
-          layout: {
-            'default': [
-                        '1 2 3',
-                        '4 5 6',
-                        '7 8 9',
-                        '* 0 #',
-                        '{bksp} x'
-            ],
-          },
-          display: {
-                    '{bksp}': '<',
-          },
-          theme: "textsize hg-theme-default hg-layout-dafault",
-          buttonTheme: [
-          {
-              class: "mybtn",
-              buttons: "1 2 3 4 5 6 7 8 9 0 * # {bksp} x"
-          },
-          ],
-          inputPattern: /^\d+$/,
-    });
-
-    function onChange(input) {
-        console.log("Input changed", input);
-        document.querySelector("#pincode").value = input;
-    }
-
-    function onKeyPress(button) {
-        console.log("Button pressed", button);
-        if (button === "x") {
-            closeKeyboard();
-        }
-    }
-
-    function openKeyboard() {
-        $("#keyboard").fadeIn();
-    }
-
-    function closeKeyboard() {
-        $("#keyboard").fadeOut();
-    }
+    createNumKeyboard("#pincode", "light");
 </script>
 
 </body>

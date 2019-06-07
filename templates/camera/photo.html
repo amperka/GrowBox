@@ -18,7 +18,7 @@
 
 				if (xhr.status == 200) {
 					addMsgToDiv("Снимок сделан успешно")
-					var img = new Image(330, 300);
+					var img = new Image(480, 320);
 					var placeid;
 					if (id == 'image1') {
 						img.src = "../../static/img/img1.jpg?" + Math.random();
@@ -56,45 +56,33 @@
 			}
 		}
 
-		function addMsgToDiv(msg) {
-			var div = document.getElementById("camera-msg");
-			div.innerHTML = msg;
-			$("#camera-msg").fadeIn();
-			setTimeout(function() {
-				$("#camera-msg").fadeOut();
-			}, 2000);
-		}
-
-        $('#clear-button').click(function () {
-	        	Confirm('Удалить снимки', 'Вы действительно хотите удалить снимки?', 'Да', 'Нет', clearPhoto);
+		$('#clear-button').click(function () {
+	        Confirm('Удалить снимки', 'Вы действительно хотите удалить снимки?', 'Да', 'Нет', clearPhoto);
 		});
-	</script>
+</script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
-                <!-- Сделать 1-ый снимок -->
-		<div class="row pt-2 pb-3 d-flex justify-content-center" id="place1">
-            <img src= "../../static/img/{{img1}}" alt="Фотография №1" id="image1" width="330" height="300" style="padding:{{pad1}}; border: 3px double black;" onclick="request_photo('/make_photo/img1', 'image1')">
-		</div>
+            <!-- Сделать 1-ый снимок -->
+		    <div class="row pt-2 pb-3 d-flex justify-content-center" id="place1">
+                <img src= "../../static/img/{{img1}}" alt="Фотография №1" id="image1" width="480" height="320" style="padding:{{pad1}}; border: 3px double black;" onclick="request_photo('/make_photo/img1', 'image1')">
+		    </div>
 
-		<!-- Сделать 2-ой снимок -->
-		<div class="row pt-3 pb-4 d-flex justify-content-center" id="place2">
-            <img src= "../../static/img/{{img2}}" alt="Фотография №2" id="image2" width="330" height="300" style="padding:{{pad2}}; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
-		</div>
+		    <!-- Сделать 2-ой снимок -->
+		    <div class="row pt-3 pb-4 d-flex justify-content-center" id="place2">
+                <img src= "../../static/img/{{img2}}" alt="Фотография №2" id="image2" width="480" height="320" style="padding:{{pad2}}; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
+		    </div>
 
-		<div class="row py-2">
+		    <div class="row py-2">
                 <!-- Очистить фото -->
-                	<button type="button" class="btn btn-danger btn-lg btn-block p-3" id="clear-button">
-                    		<p class="h2">Очистить фото</p>
-                	</button>
-		</div>
-		<div class="row py-4 d-flex justify-content-center">
-			<div class="saved-banner" id="camera-msg"></div>
-        </div>
-	</div>
+                <button type="button" class="btn btn-danger btn-lg btn-block p-3" id="clear-button">
+                    <p class="h2">Очистить фото</p>
+                </button>
+		    </div>
+	    </div>
     </div>
 </div>
 {% endblock %}
