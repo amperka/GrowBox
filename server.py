@@ -238,7 +238,7 @@ def remove_frames():
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
         command = ["ffmpeg", "-y", "-r", "10", "-i", "/home/pi/Pictures/%*.jpg", "-r",
-                   "10", "-vcodec", "libx264", "vf", "scale=480:320", "./static/img/timelapse.mp4"]
+                   "10", "-vcodec", "libx264", "-vf", "scale=480:320", "./static/img/timelapse.mp4"]
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
