@@ -1,39 +1,35 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/teacher_settings.css">
-<link rel="stylesheet" href="../../static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
+<link rel="stylesheet" href="/static/css/confirm.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
 <link rel="stylesheet" href="/static/css/keyboard.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
 
 {% endblock %}
 
 {% block scriptsSection %}
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="../static/js/confirm.js"></script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/request.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
 <script src="/static/js/keyboard.js"></script>
 <script>
-	function updateSystem() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/update_system", true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-			if (xhr.status == 200) {
-				//addMsgToDiv("Запись включена");
-				alert("Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.");
-			} else if (xhr.status == 403) {
-				//addMsgToDiv("Запись уже идет");
-				alert("Ошибка при обновлении.");
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
+    function updateSystem() {
+        var updateMsg = {
+            msgYes: "Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.",
+            msgNo: "Ошибка при обновлении. Проверьте подключение к сети.",
+            msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
+            callback: function(msg) {
+                Alert("Обновление системы", msg);
+            },
+        };
+        request("/update_system", updateMsg, true);
+    }
 
     $('#update-button').click(function () {
-	        	Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
+	    Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
 	});
 
     $("#netName").click(function() {
@@ -71,6 +67,9 @@
 </div>
 <div class="row my-5 mx-2" id="keyboard">
     <div class="simple-keyboard"></div>
+</div>
+<div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
 </div>
 
 {% endblock %}

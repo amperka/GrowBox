@@ -10,6 +10,7 @@
 {% block scriptsSection %}
 <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="../static/js/confirm.js"></script>
+<script src="/static/js/request.js"></script>
 <script>
     function downloadLogs() {
         var downloadMsg = {
@@ -20,7 +21,7 @@
                 addMsgToDiv(msg);
             },
         };
-        request("/download_log", downloadMsg, "preloader");
+        request("/download_log", downloadMsg, true);
     }
 
     function extractUsb() {
@@ -32,32 +33,7 @@
                 addMsgToDiv(msg);
             },
         };
-        request("/extract_usb", extractMsg);
-    }
-
-    function request(url, obj, preloader) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.send();
-        if (typeof preloader !== "undefined") {
-            $("#preloader").fadeIn();
-        }
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState != 4) return;
-            if (xhr.status == 200) {
-                if (typeof preloader !== "undefined"){
-                    $("#preloader").fadeOut();
-                }
-                obj.callback(obj.msgYes);
-            } else if (xhr.status == 403) {
-                if (typeof preloader !== "undefined") {
-                    $("#preloader").fadeOut();
-                }
-                obj.callback(obj.msgNo);
-            } else {
-                obj.callback(obj.msgError);
-            }
-        }
+        request("/extract_usb", extractMsg, false);
     }
 
     function addMsgToDiv(msg) {

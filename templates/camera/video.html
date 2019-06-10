@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block scriptsSection %}
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/confirm.js"></script>
 <script>
     {% if recStatus %}
@@ -18,15 +18,15 @@
 
 	$('#recButton').click(function(){
 		if($('#recButton').hasClass('notRec')){
-			$('#recButton').removeClass("notRec");
-			$('#recButton').addClass("Rec");
-            $('#recMess').html("Остановить запись");
+			//$('#recButton').removeClass("notRec");
+			//$('#recButton').addClass("Rec");
+            //$('#recMess').html("Остановить запись");
 			startRecord();
 		}
 		else {
-			$('#recButton').removeClass("Rec");
-			$('#recButton').addClass("notRec");
-            $('#recMess').html("Включить запись");
+			//$('#recButton').removeClass("Rec");
+			//$('#recButton').addClass("notRec");
+            //$('#recMess').html("Включить запись");
 			finishRecord();
 		}
 	});
@@ -38,9 +38,11 @@
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
 			if (xhr.status == 200) {
-				//addMsgToDiv("Запись включена");
+				$("#recButton").removeClass("notRec");
+                $("#recButton").addClass("Rec");
+                $("#recMess").html("Остановить запись");
 			} else if (xhr.status == 403) {
-				Alert("Камера недоступна. Проверьте подключение камеры!");
+				Alert("Предупреждение!","Камера недоступна. Проверьте подключение камеры!");
 			} else {
 				alert(xhr.status + ': ' + xhr.statusText);
 			}
@@ -54,7 +56,9 @@
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState != 4) return;
 			if (xhr.status == 200) {
-				//addMsgToDiv("Запись закончена");
+			    $("#recButton").removeClass("Rec");
+                $("#recButton").addClass("notRec");
+                $("#recMess").html("Включить запись");
 			} else if (xhr.status == 403) {
 				//addMsgToDiv("Запись не ведётся. Включите запись!");
 			} else {

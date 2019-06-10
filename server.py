@@ -157,7 +157,7 @@ def make_photo(img):
     elif img == "img2":
         name = "img2.jpg"
     try:
-        camera.capture("./static/img/" + name, resize=(480, 320)) #need to fix size
+        camera.capture("./static/img/" + name, resize=(480, 320))
     except RuntimeError:
         logger.error("Photo is not created")
         return make_response('', 403)
@@ -197,9 +197,19 @@ def video():
 
 @app.route("/start_record")
 def start_record():
+    try:
+        camera = usb_camera.PiCamera(0)
+        if not camera.check_connection():
+            raise RuntimeError
+    except RuntimeError:
+        logger.error("Camera is not connected")
+        return make_response('', 403)
+    finally:
+        camera.close()
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
+            print("Too many clicks") #testing
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
     job.every(1).hours()
@@ -227,10 +237,10 @@ def remove_frames():
     try:
         subprocess.run(["rm", "-f", "/home/pi/Pictures/*"], check=True)
     except subprocess.CalledProcessError as err:
-        print("Error", err)
+        print("Error", err) #testing
         return make_response('', 403)
     else:
-        print("Remove frame OK")
+        print("Remove frame OK") #testing
         return make_response('', 200)
 
 
@@ -340,6 +350,7 @@ def apply_net_settings():
 @app.route("/update_system")
 def update_system():
     ret = os.system("echo Update") #testing
+    time.sleep(5) #testing
     #ret = os.system("git pull origin master") #uncomment to update
     if ret == 0:
         logger.info("System update")

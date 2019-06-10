@@ -28,6 +28,9 @@ class PiCamera:
         else:
             cv2.imwrite(name, cam_capture)
 
+    def check_connection(self):
+        return self.cam.isOpened()
+
     def close(self):
         self.cam.release()
 

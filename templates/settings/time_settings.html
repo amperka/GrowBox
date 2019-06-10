@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/teacher_settings.css">
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
 {% endblock %}
 
 {% block scriptsSection %}
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var currentdate = new Date();
@@ -18,10 +17,10 @@
         document.getElementsByName("set-date")[0].value = year + "-" + month + "-" + day;
     });
 
-    function setTime() {    
+    function setTime() {
         var newTime = document.getElementsByName("set-time")[0].value;
         var newDate = document.getElementsByName("set-date")[0].value;
-        
+
         if (newTime === "" || newDate === "") {
             return alert("Incorrect value");
         }
@@ -40,6 +39,9 @@
             }
         });
     }
+
+$("#time").dateTimePicker();
+
 </script>
 {% endblock %}
 
@@ -50,19 +52,19 @@
 			<form id="time-form" onsubmit="setTime(); return false;">
                 		<div class="form-group">
                     			<label for="time" class="col-form-label col-form-label-lg">Время</label>
-                    			<input class="form-control form-control-lg" type="time" name="set-time" value="13:45:00" id="time">
+                    			<input class="form-control form-control-lg" type="text" name="set-time" value="13:45:00" id="time">
                 		</div>
 
                 		<div class="form-group">
                     			<label for="date" class="col-form-label col-form-label-lg">Дата</label>
-                    			<input class="form-control form-control-lg" type="date" name="set-date" value="2011-08-19" id="date">
+                    			<input class="form-control form-control-lg" type="text" name="set-date" value="2011-08-19" id="date">
                 		</div>
                 		<button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
             		</form>
             		<div class="saved-banner" id="time-saved">
                 		Время установлено
             		</div>
-		</div> 
+		</div>
 	</div>
 </div>
 {% endblock %}

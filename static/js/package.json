@@ -1,0 +1,25 @@
+{
+  "name": "growbox",
+  "version": "1.0.0",
+  "description": "grow plants system",
+  "main": "update_page.js",
+  "dependencies": {
+    "canvas-gauges": "^2.1.5",
+    "chart.js": "^2.8.0",
+    "jquery": "^3.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexErAmp/GrowBox.git"
+  },
+  "author": "AlexErAmp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexErAmp/GrowBox/issues"
+  },
+  "homepage": "https://github.com/AlexErAmp/GrowBox#readme"
+}
