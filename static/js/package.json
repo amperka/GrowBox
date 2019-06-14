@@ -6,6 +6,7 @@
   "dependencies": {
     "canvas-gauges": "^2.1.5",
     "chart.js": "^2.8.0",
+    "datetimepicker": "^0.1.39",
     "jquery": "^3.4.1"
   },
   "devDependencies": {},

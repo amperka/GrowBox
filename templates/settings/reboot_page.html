@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block stylesSection %}
+<!-- <link rel="stylesheet" href="../../static/css/teacher_settings.css"> -->
+<link rel="stylesheet" href="/static/css/confirm.css">
+
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/reboot.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Перезагрузка системы" type="button" id="reboot-btn">
+		</div>
+	</div>
+</div>
+{% endblock %}

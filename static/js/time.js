@@ -2,7 +2,6 @@ window.onload = function() {
 	function formatDisplayTime(time) {
 		var hours = time.getHours();
 		var minutes = time.getMinutes();
-		var seconds = time.getSeconds();
 		var day = time.getDate();
 		var month = time.getMonth() + 1;
 		var year = time.getFullYear();
@@ -15,10 +14,6 @@ window.onload = function() {
 			minutes = '0' + minutes;
 		}
 
-		if (seconds < 10) {
-			seconds = '0' + seconds;
-		}
-		
 		if (day < 10) {
 			day = '0' + day;
 		}
@@ -26,8 +21,7 @@ window.onload = function() {
 		if (month < 10) { 
 			month = '0' + month;
 		}
-		
-		return [hours, minutes, seconds].join(':') + ' ' + [day, month, year].join('.');
+		return [hours, minutes].join(':') + '&ensp;' + [day, month, year].join('.');
     }
 
     function tickTimer() {
@@ -36,4 +30,3 @@ window.onload = function() {
 	tickTimer();
 	window.setInterval(tickTimer, 1000);
 };
-						

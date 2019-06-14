@@ -12,21 +12,12 @@ import random
 import usb_camera
 from crontab import CronTab
 
+
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
 
-temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
-input_queue = queue.Queue(1)
+app = Flask(__name__) #Flask application
 
-# dbPeriod = 600 # seconds
-arrayLen = 10
-requestPeriod = 1 # seconds
-circularArray = [0] * arrayLen
-arrayPivot = 0
-# itemPeriod = dbPeriod / arrayLen # seconds
-
-app = Flask(__name__)
-sql = sqlite.Sqlite('./sensorsData.db')
 
 #return index page
 @app.route("/")
@@ -34,13 +25,16 @@ sql = sqlite.Sqlite('./sensorsData.db')
 def index():
     return render_template("index.html", title='Главное меню', lock='/lock')
 
+
 #return measurements page
 @app.route("/measurements")
 def measurements():
     return render_template("measurements/measurements.html", title='Измерения', goback='/index')
 
+
 #return temperature page with dynamic measurements
 ###############################################
+
 @app.route("/measurements/temp")
 def temp():
     template_data = {
@@ -55,6 +49,7 @@ def temp_meas():
     with lock:
         ret_val = str(temp)
     return ret_val
+
 
 #################################################
 #return pH page
@@ -324,6 +319,8 @@ def teacher_settings(settings):
         title = "Настройки камеры"
     elif settings == "work_log":
         title = "Журнал работы"
+    elif settings == "reboot_page":
+        title = "Перезагрузка"
     template_data = {
         'title' : title,
         'goback' : "/teacher_page",
@@ -362,12 +359,13 @@ def update_system():
 @app.route("/apply_time", methods=["POST"])
 def apply_time():
     content = request.json
-    datetime_set = content["set-date"] + ' ' + content["set-time"]
-    print(datetime_set) #testing
+    date = content["set-date"]
+    time = content["set-time"]
+    date = '-'.join(date.split('-')[::-1]) #reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
+    datetime_set = date + ' ' + time
     set_systime(datetime_set)
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
-    print(fmt_datetime)
     input_queue.put(json.dumps(fmt_datetime))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
@@ -414,6 +412,18 @@ def extract_usb():
         return make_response('', 403)
     return make_response('', 200)
 
+
+@app.route("/reboot")
+def reboot():
+    stop_ser_thread()
+    print("Serial port thread successfully terminated")
+    shutdown_server = request.environ.get('werkzeug.server.shutdown')
+    if shutdown_server is None:
+        raise RuntimeError("Shutdown server is not available")
+    else:
+        shutdown_server()
+        os.system("sleep 20 && sudo reboot &")
+        return make_response('', 200)
 
 ###################################################
 
@@ -574,6 +584,8 @@ def readArduino():
         try:
             if not input_queue.empty():
                 command_data = input_queue.get()
+                if command_data == "Exit":
+                    break
                 sp.write_serial(command_data.encode())
                 logger.debug("Write data to serial " + command_data) #testing
 
@@ -617,6 +629,8 @@ def readArduino():
             insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl) #TODO need to remove hum
 
         time.sleep(1)
+    sp.close()
+    print("Serial port thread successfully terminate")
 
 def auto_detect_serial():
     import glob
@@ -626,10 +640,37 @@ def auto_detect_serial():
     else:
         return None
 
+
 def set_systime(datetime):
     os.system("sudo date --set='" + datetime + "'")
 
+
+def stop_ser_thread():
+    input_queue.put("Exit")
+    getThread.join()
+
+def sigint_handler(signum, frame):
+    print("Process was terminated by pressing Ctrl+c")
+    stop_ser_thread()
+    print("Exit application")
+    sys.exit(1)
+
+
 if __name__ == "__main__":
+
+    temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
+    input_queue = queue.Queue(1)
+
+    # dbPeriod = 600 # seconds
+    arrayLen = 10
+    requestPeriod = 1 # seconds
+    circularArray = [0] * arrayLen
+    arrayPivot = 0
+    # itemPeriod = dbPeriod / arrayLen # seconds
+
+    app = Flask(__name__)
+    sql = sqlite.Sqlite('./sensorsData.db')
+
     #create own logger
     logger = logging.getLogger("server")
     logger.setLevel(logging.DEBUG)
@@ -656,20 +697,6 @@ if __name__ == "__main__":
     getThread = threading.Thread(target=readArduino)
     getThread.daemon = True
     getThread.start()
-
-    def sigint_handler(signum, frame):
-        print("Stop pressing the CTRL+C!")
-        # need to fix
-        sp.close()
-        getThread.join()
-        print("Join the thread. Is it alive?")
-        print(getThread.is_alive())
-        print("Exit application")
-        func = request.environ.get('werkzeug.server.shutdown')
-        if func is None:
-            raise RuntimeError('Not running with the Werkzeug Server')
-        func()
-        sys.exit(1)
 
     signal.signal(signal.SIGINT, sigint_handler)
 
