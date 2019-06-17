@@ -97,14 +97,16 @@
 			<form id="time-form" onsubmit="setTime(); return false;">
                 <div class="form-group">
                     <label for="time" class="col-form-label col-form-label-lg">Время</label>
-                    <input class="form-control form-control-lg" type="time" name="set-time" value="13:45:00" id="time" data-format="hh:mm">
+                    <input class="form-control form-control-lg" type="time" name="set-time" id="time" data-format="hh:mm">
                 </div>
 
                 <div class="form-group">
                     <label for="date" class="col-form-label col-form-label-lg">Дата</label>
-                    <input class="form-control form-control-lg" type="date" name="set-date" value="2011-08-19" id="date" data-format="dd-MMM-yyyy">
+                    <input class="form-control form-control-lg" type="date" name="set-date" id="date" data-format="dd-MMM-yyyy">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">ОК</button>
+                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+                    <p class="h2">OK</p>
+                </button>
             </form>
             <div class="saved-banner" id="time-saved">
             Время установлено

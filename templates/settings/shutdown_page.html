@@ -9,16 +9,21 @@
 {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/confirm.js"></script>
-<script src="/static/js/reboot.js"></script>
+<script src="/static/js/shutdown.js"></script>
 
 {% endblock %}
 
 {% block content %}
 <div class="container">
 	<div class="row">
-		<div class="col">
-			<input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Перезагрузка системы" type="button" id="reboot-btn">
-		</div>
+        <div class="col">
+            <button class="btn btn-lg btn-danger btn-block p-3 mt-4" type="button" id="shutdown-btn">
+                <p class="h2">Выключение</p>
+            </button>
+            <button class="btn btn-lg btn-danger btn-block p-3 mt-4" type="button" id="reboot-btn">
+                <p class="h2">Перезагрузка</p>
+            </button>
+        </div>
 	</div>
 </div>
 {% endblock %}

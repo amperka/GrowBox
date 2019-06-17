@@ -11,7 +11,7 @@ class Sqlite():
 
     #create table activity
     def createActivity(self):
-        sql = "CREATE TABLE IF NOT EXISTS activity(curstate TEXT, lamp INT DEFAULT 1, fan INT DEFAULT 10, compressor INT DEFAULT 1)"
+        sql = "CREATE TABLE IF NOT EXISTS activity(curstate TEXT, lamp INT DEFAULT 1, fan INT DEFAULT 1, compressor INT DEFAULT 1)"
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
         curs.execute(sql)
@@ -21,7 +21,7 @@ class Sqlite():
         if len(self.selectActivity()) == 0:
             conn = sqlite3.connect(self.dbname)
             curs = conn.cursor()
-            curstate = str({'compressor': 0, 'fan': [0, 10], 'lamp': [1, 18]})
+            curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [1, 18]})
             sql = "INSERT INTO activity(curstate) values(?)"
             val = (curstate, )
             curs.execute(sql, val)
@@ -31,7 +31,7 @@ class Sqlite():
     #test activity
     def testActivity(self):
 
-        curstate = str({'compressor': 0, 'fan': [0, 10], 'lamp': [1, 18]})
+        curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [1, 18]})
         lamp = random.randrange(0, 100, 1)
         fan = random.randrange(0, 100, 1)
         compressor = random.randrange(0, 100, 1)
@@ -41,7 +41,7 @@ class Sqlite():
         self.updateActivity(curstate, lamp, fan, compressor)
 
     #update a row of activity
-    def updateActivity(self, curstate={}, lampMode=1, fanMode=10, compressorMode=1):
+    def updateActivity(self, curstate={}, lampMode=1, fanMode=1, compressorMode=1):
 
         lamp = str(int(lampMode))
         fan = str(int(fanMode))
@@ -72,7 +72,7 @@ class Sqlite():
 
     #create table sensors
     def create(self):
-        sql = "CREATE TABLE IF NOT EXISTS sensors(date INT, temp REAL, humidity INT, carbon INT, acidity REAL, saline INT, level INT)"
+        sql = "CREATE TABLE IF NOT EXISTS sensors(date INT, temp REAL, carbon INT, acidity REAL, saline INT, level INT)"
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
         curs.execute(sql)
@@ -91,23 +91,22 @@ class Sqlite():
     #insert test row into sensors table
     def testDataInsert(self):
         temp = random.randrange(-10, 30, 1)
-        hum = random.randrange(0, 100, 1)
         carb = random.randrange(0, 1000, 10)
         acid = random.randrange(1, 15, 1)
         saline = random.randrange(0, 1000, 15)
         lvl = random.randint(0, 1)
 
-        self.insertSensors(temp, hum, carb, acid, saline, lvl)
+        self.insertSensors(temp, carb, acid, saline, lvl)
 
     #insert a row into sensors
-    def insertSensors(self, temp='NULL', humidity='NULL', carbon='NULL', acidity='NULL', saline='NULL', level='NULL'):
+    def insertSensors(self, temp='NULL', carbon='NULL', acidity='NULL', saline='NULL', level='NULL'):
         date = datetime.timestamp(datetime.now()) # FLOAT
         date = int(date) # INTEGER
 
         #print(date, temp, humidity, carbon, acidity, saline, level)
 
-        sql = "INSERT INTO sensors(date, temp, humidity, carbon, acidity, saline, level) values(?, ?, ?, ?, ?, ?, ?)"
-        val = (date, temp, humidity, carbon, acidity, saline, level)
+        sql = "INSERT INTO sensors(date, temp, carbon, acidity, saline, level) values(?, ?, ?, ?, ?, ?)"
+        val = (date, temp, carbon, acidity, saline, level)
 
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
@@ -178,17 +177,9 @@ if __name__=="__main__":
     sq.testDataInsert()
     print('total rows: '+str(sq.countSensors()))
     now = datetime.timestamp(datetime.now())
+    print("Time now", now)
     print('----------------')
     for row in sq.selectSensors():
-        print(row)
-    print('----------------')
-    for row in sq.selectSensors(now-3600*4):
-        print(row)
-    print('----------------')
-    for row in sq.selectSensors(now-3600*6):
-        print(row)
-    print('----------------')
-    for row in sq.selectSensors(now-3600*10, now):
         print(row)
     print('----------------')
     #tests end

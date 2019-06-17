@@ -2,7 +2,7 @@
 
 {% block stylesSection %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
-<link rel="stylesheet" href="../static/css/teacher_settings.css">
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
 <link rel="stylesheet" href="/static/css/keyboard.css">
 {% endblock %}
 
@@ -40,10 +40,12 @@
         <div class="col">
             <form onsubmit="sendPasswd(); return false;">
                 <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="exampleInputPassword1">Пароль</label>
-                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg" id="password" placeholder="Введите пароль" onclick="openKeyboard()">
+                    <!-- <label class="col-form-label col-form-label-lg" for="exampleInputPassword1">Пароль</label> -->
+                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg mt-5" id="password" placeholder="Введите пароль" onclick="openKeyboard()">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Войти</button>
+                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+                    <p class="h2">Войти</p>
+                </button>
             </form>
             <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
             <div class="row my-5 mx-5" id="keyboard">

@@ -49,19 +49,23 @@
         <div class="col">
             <form method="POST" action="/apply_net_settings">
                 <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label>
+                    <!-- <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label> -->
                     <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"
                            aria-describedby="emailHelp"
                            placeholder="Введите имя сети">
                 </div>
                 <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label>
+                    <!-- <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label> -->
                     <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg input"
                            id="netPassword" placeholder="Введите пароль">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Подключиться</button>
+                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+                    <p class="h2">Подключиться</p>
+                </button>
             </form>
-	        <input class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
+	        <button class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
+                <p class="h2">Обновить ПО</p>
+            </button>
         </div>
     </div>
 </div>

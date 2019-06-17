@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/camera.css">
-<link rel="stylesheet" href="../../static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/camera.css">
+<link rel="stylesheet" href="/static/css/confirm.css">
 {% endblock %}
 
 {% block scriptsSection %}
@@ -45,7 +45,9 @@
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<input class="btn btn-lg btn-danger btn-block p-3 mt-4" id="clear-button" value="Удаление кадров камеры" type="button">
+			<button class="btn btn-lg btn-danger btn-block p-3 mt-4" id="clear-button" type="button">
+                <p class="h2">Удалить кадры камеры</p>
+            </button>
 		</div>
 	</div>
 

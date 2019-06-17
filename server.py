@@ -319,8 +319,8 @@ def teacher_settings(settings):
         title = "Настройки камеры"
     elif settings == "work_log":
         title = "Журнал работы"
-    elif settings == "reboot_page":
-        title = "Перезагрузка"
+    elif settings == "shutdown_page":
+        title = "Завершение работы"
     template_data = {
         'title' : title,
         'goback' : "/teacher_page",
@@ -413,17 +413,20 @@ def extract_usb():
     return make_response('', 200)
 
 
-@app.route("/reboot")
-def reboot():
+@app.route("/shutdown/<param>")
+def shutdown(param):
     stop_ser_thread()
-    print("Serial port thread successfully terminated")
     shutdown_server = request.environ.get('werkzeug.server.shutdown')
     if shutdown_server is None:
         raise RuntimeError("Shutdown server is not available")
     else:
         shutdown_server()
-        os.system("sleep 20 && sudo reboot &")
-        return make_response('', 200)
+        if param == "reboot":
+            os.system("sleep 20 && sudo reboot &")
+            return make_response('', 200)
+        elif param == "shutdown":
+            os.system("sleep 20 && sudo shutdown -h now &")
+            return make_response('', 200)
 
 ###################################################
 
@@ -547,15 +550,17 @@ def prepareData(param, fromTime, toTime, limit):
         data = prep[1]
     return error, data, labels
 
-def insertSensorsIntoDB(temp, hum, ph, tds, co2, lvl):
+
+def insertSensorsIntoDB(temp, ph, tds, co2, lvl):
     global arrayPivot, arrayLen, circularArray
 
-    circularArray[arrayPivot] = (float(temp), float(hum), float(ph), float(tds), float(co2))
+    circularArray[arrayPivot] = (float(temp), float(ph), float(tds), float(co2))
     arrayPivot += 1
     if arrayPivot == arrayLen:
         s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
-        sql.insertSensors(temp=s[0], humidity=s[1], carbon=s[4], acidity=s[2], saline=s[3], level=lvl)
+        sql.insertSensors(temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl)
         arrayPivot = 0
+
 
 def check_videorecord():
     my_cron = CronTab(user="pi")
@@ -563,6 +568,7 @@ def check_videorecord():
         if job.comment == "Growbox":
             return True
     return False
+
 
 def readArduino():
     global temp, ph, tds, co2, lvl
@@ -626,11 +632,11 @@ def readArduino():
             tds = data["salin"]
             co2 = data["carb"]
             lvl = data["level"]
-            insertSensorsIntoDB(temp, '0', ph, tds, co2, lvl) #TODO need to remove hum
+            insertSensorsIntoDB(temp, ph, tds, co2, lvl)
 
         time.sleep(1)
     sp.close()
-    print("Serial port thread successfully terminate")
+    print("Serial port thread successfully terminated")
 
 def auto_detect_serial():
     import glob
@@ -668,7 +674,7 @@ if __name__ == "__main__":
     arrayPivot = 0
     # itemPeriod = dbPeriod / arrayLen # seconds
 
-    app = Flask(__name__)
+    #create database for sensors and activities
     sql = sqlite.Sqlite('./sensorsData.db')
 
     #create own logger
