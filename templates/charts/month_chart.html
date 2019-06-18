@@ -156,9 +156,11 @@
         });
     }
 
-    window.onload = function() {
+    $(document).ready(function() {
+        console.log("Window onload");
+        $("#period-hour").prop("checked", true);
         parameter = '{{param}}';
-        var request = {param: parameter, period: 'week'};
+        var request = {param: parameter, period: 'hour'};
 
         $.ajax({
             url: "/charts/draw_chart",
@@ -174,7 +176,7 @@
                 });
             }
         });
-    }
+    });
     </script>
 
 {% endblock %}

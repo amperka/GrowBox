@@ -505,32 +505,32 @@ def dynamicTemp():
 def prepareMonthData2Chart(param):
     now = int(datetime.timestamp(datetime.now()))
     monthEarlier = now - 2592000
-    # error, data, labels = prepareData(param, monthEarlier, now, 2592000 / (requestPeriod * arrayLen))
-    error, data, labels = prepareData(param, monthEarlier, now, 100)
+    error, data, labels = prepareData(param, monthEarlier, now, 2592000 // (requestPeriod * arrayLen))
+    #error, data, labels = prepareData(param, monthEarlier, now, 100)
     labels = [datetime.fromtimestamp(x).strftime("%d.%m") for x in labels]
     return error, data, labels
 
 def prepareWeekData2Chart(param):
     now = int(datetime.timestamp(datetime.now()))
     weekEarlier = now - 604800
-    # error, data, labels = prepareData(param, weekEarlier, now, 604800 / (requestPeriod * arrayLen))
-    error, data, labels = prepareData(param, weekEarlier, now, 50)
+    error, data, labels = prepareData(param, weekEarlier, now, 604800 // (requestPeriod * arrayLen))
+    #error, data, labels = prepareData(param, weekEarlier, now, 50)
     labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh") for x in labels]
     return error, data, labels
 
 def prepareDayData2Chart(param):
     now = int(datetime.timestamp(datetime.now()))
     dayEarlier = now - 86400
-    # error, data, labels = prepareData(param, dayEarlier, now, 86400 / (requestPeriod * arrayLen))
-    error, data, labels = prepareData(param, dayEarlier, now, 20)
+    error, data, labels = prepareData(param, dayEarlier, now, 86400 // (requestPeriod * arrayLen))
+    #error, data, labels = prepareData(param, dayEarlier, now, 20)
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
 def prepareHourData2Chart(param):
     now = int(datetime.timestamp(datetime.now()))
     hourEarlier = now - 3600
-    # error, data, labels = prepareData(param, hourEarlier, now, 3600 / (requestPeriod * arrayLen))
-    error, data, labels = prepareData(param, hourEarlier, now, 5)
+    error, data, labels = prepareData(param, hourEarlier, now, 3600 // (requestPeriod * arrayLen))
+    #error, data, labels = prepareData(param, hourEarlier, now, 5)
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
@@ -542,8 +542,8 @@ def prepareData(param, fromTime, toTime, limit):
         labels = ""
         data = []
     else:
-        for i in data:
-            print(i) #testing
+        #for i in data:
+        #    print(i) #testing
         error = False
         prep = [x for x in zip(*data)]
         labels = prep[0]
