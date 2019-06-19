@@ -3,7 +3,7 @@
 {% block stylesSection %}
 <link rel="stylesheet" href="/static/css/teacher_settings.css">
 <link rel="stylesheet" href="/static/css/confirm.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+<link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
 <link rel="stylesheet" href="/static/css/keyboard.css">
 <link rel="stylesheet" href="/static/css/preloader.css">
 
@@ -13,7 +13,7 @@
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/confirm.js"></script>
 <script src="/static/js/request.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+<script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
 <script src="/static/js/keyboard.js"></script>
 <script>
     function updateSystem() {
@@ -38,7 +38,32 @@
 
     $("#netPassword").click(function() {
         openKeyboard();
-    })
+    });
+
+    function connectToNet() {
+        var login = $("input[name=login]").val();
+        var passwd = $("input[name=passwd]").val();
+        if ((login === "") || (passwd === "")) {
+            Alert("Подключение к сети", "Введите имя сети и пароль");
+            return;
+        }
+        $("#preloader").fadeIn();
+        $.ajax({
+            url:  "/apply_net_settings",
+            type: "POST",
+            data: JSON.stringify({"login": login, "passwd": passwd,}),
+            contentType: "application/json; charset=utf8",
+            dataType: "json",
+        })
+            .done(function () {
+                Alert("Подключение к сети", "Подключение к сети " + login + " завершено");
+                $("#preloader").fadeOut();
+            })
+            .fail(function () {
+                Alert("Подключение к сети", "Не удалось подключиться к сети " + login);
+                $("#preloader").fadeOut();
+            });
+    }
 </script>
 
 {% endblock %}
@@ -47,7 +72,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <form method="POST" action="/apply_net_settings">
+            <form onsubmit="connectToNet(); return false;">
                 <div class="form-group">
                     <!-- <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label> -->
                     <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"

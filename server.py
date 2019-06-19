@@ -9,12 +9,14 @@ import signal
 import subprocess
 import logging
 import random
-import usb_camera
-from crontab import CronTab
-
+import requests
+from requests.exceptions import HTTPError
 
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
-os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart
+os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart change path
+
+import usb_camera
+from crontab import CronTab
 
 app = Flask(__name__) #Flask application
 
@@ -330,22 +332,30 @@ def teacher_settings(settings):
 
 @app.route("/apply_net_settings", methods=["POST"])
 def apply_net_settings():
-    login = request.form["login"]
-    passwd = request.form["passwd"]
-    connect_flag = False
-    with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r+") as file:
-        for line in file:
-            if login in line:
-                connect_flag = True
-        if not connect_flag:
-            file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
-    if not connect_flag:
-        os.system("wpa_cli -i wlan0 reconfigure")
-    return render_template('/settings/net_settings.html', title='Сеть и обновления', goback='/teacher_page')
+    content = request.json
+    login = content["login"]
+    passwd = content["passwd"]
+    print(login, passwd)
+
+    settings_str = ("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n" +
+                    "update_config=1\n" +
+                    "country=RU\n")
+    with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as file:
+        file.write(settings_str)
+        file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
+
+    os.system("wpa_cli -i wlan0 reconfigure")
+    time.sleep(10)
+    if is_connected():
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    else:
+        return json.dumps({'success':False}), 403, {'ContentType':'application/json'}
 
 
 @app.route("/update_system")
 def update_system():
+    if not is_connected():
+        return make_response('', 403)
     ret = os.system("echo Update") #testing
     time.sleep(5) #testing
     #ret = os.system("git pull origin master") #uncomment to update
@@ -568,6 +578,22 @@ def check_videorecord():
         if job.comment == "Growbox":
             return True
     return False
+
+
+def is_connected():
+    remote_server = "https://www.google.com"
+    try:
+        response = requests.get(remote_server)
+        #if response not successful, raise exception
+        response.raise_for_status()
+    except HTTPError as http_err:
+        print("HTTP error", http_err)
+        return False
+    except Exception as err:
+        print("Other error", err)
+    else:
+        print("Success connection")
+        return True
 
 
 def readArduino():

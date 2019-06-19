@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+<link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
 <link rel="stylesheet" href="/static/css/teacher_settings.css">
 <link rel="stylesheet" href="/static/css/keyboard.css">
 {% endblock %}
 
 {% block scriptsSection %}
-    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+    <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
     <script src="/static/js/numkeyboard.js"></script>
     <script>
         function sendPasswd() {
