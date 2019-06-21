@@ -249,10 +249,10 @@ def make_video():
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
-            print("Error", err) #testing
+            logger.error("Error", err) #testing
             return make_response('', 403)
         else:
-            print("Video is created") #testing
+            logger.debug("Video is created") #testing
             return make_response('', 200)
         # ret = os.system("ffmpeg -y -r 10 -i ~/Pictures/%*.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
     return make_response('', 403)
@@ -552,8 +552,6 @@ def prepareData(param, fromTime, toTime, limit):
         labels = ""
         data = []
     else:
-        #for i in data:
-        #    print(i) #testing
         error = False
         prep = [x for x in zip(*data)]
         labels = prep[0]
@@ -567,7 +565,7 @@ def insertSensorsIntoDB(temp, ph, tds, co2, lvl):
     circularArray[arrayPivot] = (float(temp), float(ph), float(tds), float(co2))
     arrayPivot += 1
     if arrayPivot == arrayLen:
-        s = tuple([sum(x)/arrayLen for x in zip(*circularArray)])
+        s = tuple([round(sum(x)/arrayLen, 2) for x in zip(*circularArray)])
         sql.insertSensors(temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl)
         arrayPivot = 0
 
@@ -694,7 +692,7 @@ if __name__ == "__main__":
     input_queue = queue.Queue(1)
 
     # dbPeriod = 600 # seconds
-    arrayLen = 10
+    arrayLen = 600
     requestPeriod = 1 # seconds
     circularArray = [0] * arrayLen
     arrayPivot = 0

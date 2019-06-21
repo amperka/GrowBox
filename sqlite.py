@@ -90,9 +90,9 @@ class Sqlite():
 
     #insert test row into sensors table
     def testDataInsert(self):
-        temp = random.randrange(-10, 30, 1)
-        carb = random.randrange(0, 1000, 10)
-        acid = random.randrange(1, 15, 1)
+        temp = random.randrange(20, 25, 1)
+        carb = random.randrange(400, 500, 10)
+        acid = random.randrange(1, 14, 1)
         saline = random.randrange(0, 1000, 15)
         lvl = random.randint(0, 1)
 
@@ -174,7 +174,8 @@ if __name__=="__main__":
     print('Activity length:')
     print(len(sq.selectActivity()))
     print('-----sensors-----')
-    sq.testDataInsert()
+    for i in range(100):
+        sq.testDataInsert()
     print('total rows: '+str(sq.countSensors()))
     now = datetime.timestamp(datetime.now())
     print("Time now", now)
