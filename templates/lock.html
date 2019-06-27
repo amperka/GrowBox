@@ -13,21 +13,7 @@
     <link rel="stylesheet" href="/static/css/teacher_settings.css">
     <link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
     <link rel="stylesheet" href="/static/css/disablehover.css">
-    <style type="text/css">
-      body {
-        background: rgb(33,37,41);
-      }
-      #keyboard {
-        display: none;
-      }
-      .textsize {
-        font-size: 2rem;
-      }
-      .mybtn {
-        height: 50px !important;
-        width: 50px;
-      }
-    </style>
+    <link rel="stylesheet" href="/static/css/lock.css">
 </head>
 <body>
 <div class="container mt-4">
@@ -38,8 +24,10 @@
                 <input type="password" maxlength="25" class="form-control form-control-lg mr-2 textsize" id="pincode" placeholder="ПИН-код" onclick="openKeyboard();">
                 <button type="button" class="btn btn-lg btn-primary textsize" onclick="sendPasswd();">▶</button>
             </div>
-            <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
-            <div class="row my-5 mx-5" id="keyboard">
+            <div class="row my-3 mx-2" id="banner">
+                <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
+            </div>
+            <div class="row my-4 mx-5" id="keyboard">
                 <div class="simple-keyboard"></div>
             </div>
         </div>
