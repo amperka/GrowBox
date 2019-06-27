@@ -2,23 +2,6 @@ body {
     background: rgb(33,37,41);
 }
 
-#keyboard {
-    display: none;
-}
-
-.textsize {
-    font-size: 2rem;
-}
-
-.mybtn {
-    height: 50px !important;
-    width: 50px;
-}
-
-#banner {
-    height:48px;
-}
-
 .saved-banner {
     color: white;
 }

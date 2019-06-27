@@ -22,3 +22,7 @@ input:not([type=button]) {
 .col-form-label-lg {
     font-size: 1.5rem;
 }
+
+#banner {
+    height: 48px;
+}
