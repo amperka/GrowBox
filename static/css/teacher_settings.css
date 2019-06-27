@@ -14,7 +14,7 @@ input:not([type=button]) {
 }
 .saved-banner {
 	margin: auto;
-	color: green;
+	color: rgb(52, 58, 64);
 	display: none;
 	text-align: center;
 	font-size: 2rem;

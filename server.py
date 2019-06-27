@@ -210,7 +210,7 @@ def start_record():
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
     job.every(1).hours()
-    print(job)
+    print(job) #testing
     my_cron.write()
     return make_response('', 200)
 
@@ -232,13 +232,29 @@ def remove_frames():
         print("Pictures directory is empty")
         return make_response('', 403)
     try:
-        subprocess.run(["rm", "-f", "/home/pi/Pictures/*"], check=True)
+        command = "rm -f /home/pi/Pictures/*"
+        subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as err:
         print("Error", err) #testing
         return make_response('', 403)
     else:
         print("Remove frame OK") #testing
         return make_response('', 200)
+
+
+@app.route("/remove_video")
+def remove_video():
+    if os.path.exists("./static/img/timelapse.mp4"):
+        try:
+            subprocess.run(["rm", "-f", "./static/img/timelapse.mp4"], check=True)
+        except subprocess.CalledProcessError as err:
+            print("Error", err) #testing
+            return make_response('', 403)
+        else:
+            print("Remove video OK") #testing
+            return make_response('', 200)
+    print("File not exist, nothing to delete")
+    return make_response('', 403)
 
 
 @app.route("/make_video")
@@ -254,7 +270,6 @@ def make_video():
         else:
             logger.debug("Video is created") #testing
             return make_response('', 200)
-        # ret = os.system("ffmpeg -y -r 10 -i ~/Pictures/%*.jpg -r 10 -vcodec libx264 -vf scale=480:320 ./static/img/timelapse.mp4")
     return make_response('', 403)
 
 
