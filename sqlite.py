@@ -31,7 +31,7 @@ class Sqlite():
     #test activity
     def testActivity(self):
 
-        curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [1, 18]})
+        curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [0, 12]})
         lamp = random.randrange(0, 100, 1)
         fan = random.randrange(0, 100, 1)
         compressor = random.randrange(0, 100, 1)
@@ -174,7 +174,7 @@ if __name__=="__main__":
     print('Activity length:')
     print(len(sq.selectActivity()))
     print('-----sensors-----')
-    for i in range(100):
+    for i in range(10):
         sq.testDataInsert()
     print('total rows: '+str(sq.countSensors()))
     now = datetime.timestamp(datetime.now())

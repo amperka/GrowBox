@@ -85,46 +85,45 @@
         var isFanSwitchChecked = !!currentState.fan[0];
         var isCompressorSwitchChecked = !!currentState.compressor;
 
-        document.getElementById("lamp-switch").checked = isLampSwitchChecked;
         var lampRadios = document.getElementsByName("lamp-radio");
+        switch (currentState.lamp[1]) {
+            case 18:
+                lampRadios[0].checked = true;
+                break;
+            case 12:
+                lampRadios[1].checked = true;
+                break;
+            default:
+                break;
+        }
+        var fanRadios = document.getElementsByName("fan-radio");
+        switch (currentState.fan[1]) {
+            case 1:
+                fanRadios[0].checked = true;
+                break;
+            case 2:
+                fanRadios[1].checked = true;
+                break;
+            case 4:
+                fanRadios[2].checked = true;
+                break;
+            case 8:
+                fanRadios[3].checked = true;
+                break;
+            default:
+                break;
+        }
+
+        document.getElementById("lamp-switch").checked = isLampSwitchChecked;
         if (isLampSwitchChecked) {
             enableRadiosButtons(lampRadios);
-
-            switch (currentState.lamp[1]) {
-                case 18:
-                    lampRadios[0].checked = true;
-                    break;
-                case 12:
-                    lampRadios[1].checked = true;
-                    break;
-                default:
-                    break;
-            }
         } else {
             disableRadioButtons(lampRadios);
         }
 
         document.getElementById("fan-switch").checked = isFanSwitchChecked;
-        var fanRadios = document.getElementsByName("fan-radio");
         if (isFanSwitchChecked) {
             enableRadiosButtons(fanRadios);
-
-            switch (currentState.fan[1]) {
-                case 1:
-                    fanRadios[0].checked = true;
-                    break;
-                case 2:
-                    fanRadios[1].checked = true;
-                    break;
-                case 4:
-                    fanRadios[2].checked = true;
-                    break;
-                case 8:
-                    fanRadios[3].checked = true;
-                    break;
-                default:
-                    break;
-            }
         } else {
             disableRadioButtons(fanRadios);
         }
