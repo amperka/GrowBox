@@ -3,62 +3,26 @@
 {% block stylesSection %}
 <link rel="stylesheet" href="/static/css/teacher_settings.css">
 <link rel="stylesheet" href="/static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
 {% endblock %}
 
 {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/confirm.js"></script>
-<script src=/static/js/request.js></script>
-<script>
-	function removeFrames() {
-        var removeFrameMsg = {
-            msgYes: "Старые кадры успешно удалены",
-            msgNo: "Кадры отсутствуют",
-            msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
-            callback: function(msg) {
-                addMsgToDiv(msg);
-            },
-        };
-
-        request("/remove_frames", removeFrameMsg, false);
-    }
-
-    function removeVideo() {
-        var removeVideoMsg = {
-            msgYes: "Видеозапись успешно удалена",
-            msgNo: "Видеозапись отсутствует",
-            msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
-            callback: function(msg) {
-                addMsgToDiv(msg);
-            },
-        };
-
-        request("/remove_video", removeVideoMsg, false);
-    }
-
-    function addMsgToDiv(msg) {
-			var div = document.getElementById("camera-msg");
-			div.innerHTML = msg;
-			$("#camera-msg").fadeIn();
-			setTimeout(function() {
-				$("#camera-msg").fadeOut();
-			}, 2000);
-    }
-
-    $("#del-img-button").click(function () {
-        Confirm("Удалить кадры", "Вы действительно хотите удалить кадры камеры?", "Да", "Нет", removeFrames);
-    });
-
-    $("#del-video-button").click(function () {
-        Confirm("Удалить видео", "Вы действительно хотите удалить видеозапись?", "Да", "Нет", removeVideo);
-    });
-</script>
+<script src="/static/js/request.js"></script>
+<script src="/static/js/settings/camera_settings.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
 	<div class="row">
 		<div class="col">
+            <button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="load-video-button" type="button">
+                <p class="h2">Скачать видеозапись</p>
+            </button>
+            <button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="extract" type="button">
+                <p class="h2">Извлечь USB-накопитель</p>
+            </button>
 			<button class="btn btn-lg btn-danger btn-block p-3 mt-4" id="del-img-button" type="button">
                 <p class="h2">Удалить кадры камеры</p>
             </button>
@@ -70,6 +34,8 @@
     <div class="row py-4 d-flex justify-content-center">
         <div class="saved-banner" id="camera-msg"></div>
     </div>
-
+    <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
+	</div>
 </div>
 {% endblock %}

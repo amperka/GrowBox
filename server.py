@@ -254,7 +254,7 @@ def remove_video():
             print("Remove video OK") #testing
             return make_response('', 200)
     print("File not exist, nothing to delete")
-    return make_response('', 403)
+    return make_response('', 404)
 
 
 @app.route("/make_video")
@@ -408,19 +408,31 @@ def calibration(param):
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 
-@app.route("/download_log")
-def download_log():
+@app.route("/download/<param>")
+def download(param):
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
-        logger.error("download_log: USB-device not found")
+        logger.error("download/" + param + ": USB-device not found")
         return make_response('', 403)
     usb_path = "/media/pi/" + media_dir[0]
-    try:
-        shutil.copy("./growbox.log", usb_path)
-    except Exception as e:
-        logger.error("Something go wrong") #testing
-        return make_response('', 403)
-    return make_response('', 200)
+    if param == "log":
+        try:
+            shutil.copy("./growbox.log", usb_path)
+        except Exception as e:
+            logger.error("download/" + param + ": Copy error")
+            return make_response('', 500)
+        return make_response('', 200)
+    elif param == "video":
+        if os.path.exists("./static/img/timelapse.mp4"):
+            try:
+                shutil.copy("./static/img/timelapse.mp4", usb_path)
+            except Exception as e:
+                logger.error("download/" + param + ": Copy error")
+                return make_response('', 500)
+            return make_response('', 200)
+        else:
+            logger.error("download/" + param + ": Video not exist")
+            return make_response('', 404)
 
 
 @app.route("/extract_usb")
@@ -433,8 +445,8 @@ def extract_usb():
     try:
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as err:
-        print("Something go wrong", err) #testing
-        return make_response('', 403)
+        logger.error("extract_usb: umount error", err)
+        return make_response('', 500)
     return make_response('', 200)
 
 
