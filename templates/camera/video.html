@@ -1,105 +1,33 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/camera.css">
-<link rel="stylesheet" href="../../static/css/preloader.css">
+<link rel="stylesheet" href="/static/css/camera.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
 <link rel="stylesheet" href="/static/css/confirm.css">
 {% endblock %}
 
 {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/confirm.js"></script>
+<script src="/static/js/camera/video.js"></script>
 <script>
-    {% if recStatus %}
-        $('#recButton').addClass("Rec");
-    {% else %}
-        $('#recButton').addClass("notRec");
-    {% endif %}
-
-	$('#recButton').click(function(){
-		if($('#recButton').hasClass('notRec')){
-			//$('#recButton').removeClass("notRec");
-			//$('#recButton').addClass("Rec");
-            //$('#recMess').html("Остановить запись");
-			startRecord();
-		}
-		else {
-			//$('#recButton').removeClass("Rec");
-			//$('#recButton').addClass("notRec");
-            //$('#recMess').html("Включить запись");
-			finishRecord();
-		}
-	});
-
-	function startRecord() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/start_record", true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-			if (xhr.status == 200) {
-				$("#recButton").removeClass("notRec");
-                $("#recButton").addClass("Rec");
-                $("#recMess").html("Остановить запись");
-			} else if (xhr.status == 403) {
-				Alert("Предупреждение!","Камера недоступна. Проверьте подключение камеры!");
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
-
-	function finishRecord() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/finish_record", true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-			if (xhr.status == 200) {
-			    $("#recButton").removeClass("Rec");
-                $("#recButton").addClass("notRec");
-                $("#recMess").html("Включить запись");
-			} else if (xhr.status == 403) {
-				//addMsgToDiv("Запись не ведётся. Включите запись!");
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
-
-	function makeVideo() {
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', '/make_video', true);
-		xhr.send();
-		$("#preloader").fadeIn();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-
-			if (xhr.status == 200) {
-				watchVideo();
-				$("#preloader").fadeOut();
-				//addMsgToDiv("Подготовка видео завершена");
-			} else if (xhr.status == 403) {
-                $("#preloader").fadeOut('slow', function() {
-                    Alert("Ошибка!", "Отсутствуют кадры для видео");
-                });
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
-
-	function watchVideo() {
-        $('#image-place').empty();
-		var video = document.createElement("video");
-        var videoPath = "/static/img/timelapse.mp4?" + Math.random();
-		video.setAttribute("src", videoPath);
-		video.setAttribute("width", "480");
-		video.setAttribute("height", "320")
-		video.setAttribute("controls", "controls");
-		document.getElementById("image-place").appendChild(video);
-	}
-
+    $(function() {
+        {% if recStatus %}
+            $('#recButton').addClass("Rec");
+        {% else %}
+            $('#recButton').addClass("notRec");
+        {% endif %}
+        $('#recButton').click(function(){
+	        if($('#recButton').hasClass('notRec')){
+		        startRecord();
+    	    } else {
+		        finishRecord();
+	        }
+        });
+        $('#make-button').click(function() {
+            makeVideo();
+        });
+    });
 </script>
 {% endblock %}
 
@@ -127,7 +55,7 @@
 	        </div>
 
             <div class="row py-4 d-flex justify-content-center">
-                <button type="button" class="btn btn-primary btn-lg btn-block p-3" id="clear-button" onclick="makeVideo()">
+                <button type="button" class="btn btn-primary btn-lg btn-block p-3" id="make-button">
                     <p class="h2">Смонтировать</p>
                 </button>
             </div>

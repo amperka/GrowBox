@@ -1,5 +1,5 @@
 function removeFrames() {
-    var removeFrameMsg = {
+    let removeFrameMsg = {
         msgYes: "Старые кадры успешно удалены",
         msgNo: "Кадры отсутствуют",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
@@ -11,7 +11,7 @@ function removeFrames() {
 }
 
 function removeVideo() {
-    var removeVideoMsg = {
+    let removeVideoMsg = {
         msgYes: "Видеозапись успешно удалена.",
         msgNotFound: "Видеозапись не найдена.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
@@ -23,7 +23,7 @@ function removeVideo() {
 }
 
 function downloadVideo() {
-    var downloadVideoMsg = {
+    let downloadVideoMsg = {
         msgYes: "Видео успешно скачано.",
         msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
         msgNotFound: "Видеозапись не найдена. Создайте видеозапись.",
@@ -36,7 +36,7 @@ function downloadVideo() {
 }
 
 function extractUsb() {
-    var extractMsg = {
+    let extractMsg = {
         msgYes: "USB-устройство может быть извлечено.",
         msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
@@ -48,12 +48,12 @@ function extractUsb() {
 }
 
 function addMsgToDiv(msg) {
-	var div = document.getElementById("camera-msg");
+	let div = document.getElementById("camera-msg");
 	div.innerHTML = msg;
 	$("#camera-msg").fadeIn();
 	setTimeout(function() {
 		$("#camera-msg").fadeOut();
-	}, 3000);
+	}, 4000);
 }
 
 $("#del-img-button").click(function () {

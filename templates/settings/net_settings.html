@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
 <link rel="stylesheet" href="/static/css/keyboard.css">
 <link rel="stylesheet" href="/static/css/preloader.css">
-
 {% endblock %}
 
 {% block scriptsSection %}
@@ -15,57 +14,7 @@
 <script src="/static/js/request.js"></script>
 <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
 <script src="/static/js/keyboard.js"></script>
-<script>
-    function updateSystem() {
-        var updateMsg = {
-            msgYes: "Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.",
-            msgNo: "Ошибка при обновлении. Проверьте подключение к сети.",
-            msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
-            callback: function(msg) {
-                Alert("Обновление системы", msg);
-            },
-        };
-        request("/update_system", updateMsg, true);
-    }
-
-    $('#update-button').click(function () {
-	    Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
-	});
-
-    $("#netName").click(function() {
-        openKeyboard();
-    });
-
-    $("#netPassword").click(function() {
-        openKeyboard();
-    });
-
-    function connectToNet() {
-        var login = $("input[name=login]").val();
-        var passwd = $("input[name=passwd]").val();
-        if ((login === "") || (passwd === "")) {
-            Alert("Подключение к сети", "Введите имя сети и пароль");
-            return;
-        }
-        $("#preloader").fadeIn();
-        $.ajax({
-            url:  "/apply_net_settings",
-            type: "POST",
-            data: JSON.stringify({"login": login, "passwd": passwd,}),
-            contentType: "application/json; charset=utf8",
-            dataType: "json",
-        })
-            .done(function () {
-                Alert("Подключение к сети", "Подключение к сети " + login + " завершено");
-                $("#preloader").fadeOut();
-            })
-            .fail(function () {
-                Alert("Подключение к сети", "Не удалось подключиться к сети " + login);
-                $("#preloader").fadeOut();
-            });
-    }
-</script>
-
+<script src="/static/js/settings/net_settings.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -74,13 +23,10 @@
         <div class="col">
             <form onsubmit="connectToNet(); return false;">
                 <div class="form-group">
-                    <!-- <label class="col-form-label col-form-label-lg" for="netName">Имя сети</label> -->
                     <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"
-                           aria-describedby="emailHelp"
-                           placeholder="Введите имя сети">
+                           aria-describedby="emailHelp" placeholder="Введите имя сети">
                 </div>
                 <div class="form-group">
-                    <!-- <label class="col-form-label col-form-label-lg" for="netPassword">Пароль</label> -->
                     <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg input"
                            id="netPassword" placeholder="Введите пароль">
                 </div>

@@ -34,18 +34,31 @@ def measurements():
     return render_template("measurements/measurements.html", title='Измерения', goback='/index')
 
 
+#return a specific sensor measurement
+@app.route("/measurements/<param>")
+def spec_measurements(param):
+    if param == "temp":
+        title = "Температура"
+        label = title
+    elif param == "ph":
+        title = "Уровень pH"
+        label = title
+    elif param == "tds":
+        title = "Солёность"
+        label = "Уровень солей"
+    elif param == "co2":
+        title = "Углекислый газ"
+        label = "CO2"
+    template_data = {
+        'title': title,
+        'goback': "/measurements",
+        'label': label,
+    }
+    return render_template("measurements/" + param + ".html", **template_data)
+
+
 #return temperature page with dynamic measurements
 ###############################################
-
-@app.route("/measurements/temp")
-def temp():
-    template_data = {
-        'title': "Температура",
-        'goback': "/measurements",
-        'label' : "Температура"
-    }
-    return render_template("measurements/temp.html", **template_data)
-
 @app.route("/temp_measure")
 def temp_meas():
     with lock:
@@ -53,61 +66,34 @@ def temp_meas():
     return ret_val
 
 
-#################################################
-#return pH page
-@app.route("/measurements/ph")
-def ph():
-    template_data = {
-            'title' : "Уровень pH",
-            'label' : "Уровень pH",
-            'goback': "/measurements",
-    }
-    return render_template("measurements/ph.html", **template_data)
-
 @app.route("/ph_measure")
 def ph_meas():
     with lock:
         ret_val = str(ph)
     return ret_val
-#################################################
-#return TDS updatePage
-@app.route("/measurements/tds")
-def tds():
-    template_data = {
-        'title': "Солёность",
-        'goback': "/measurements",
-        'label' : "Уровень солей",
-    }
-    return render_template("measurements/tds.html", **template_data)
+
 
 @app.route("/tds_measure")
 def tds_meas():
     with lock:
         ret_val = str(tds)
     return ret_val
-#################################################
-#return CO2 page
-@app.route("/measurements/co2")
-def co2():
-    template_data =  {
-        'title': "Углекислый газ",
-        'goback': "/measurements",
-        'label' : "CO2",
-    }
-    return render_template("measurements/co2.html", **template_data)
+
 
 @app.route("/co2_measure")
 def co2_meas():
     with lock:
         ret_val = str(co2)
     return ret_val
-##################################################
+#################################################
+
 
 #camera control
-##################################################
+#################################################
 @app.route("/camera")
 def camera():
     return render_template("camera/camera.html", title='Камера', goback='/index')
+
 
 @app.route("/camera/photo")
 def photo():
@@ -161,7 +147,7 @@ def make_photo(img):
     else:
         return make_response('', 200)
     finally:
-        logger.debug("Camera close") #test
+        logger.debug("Camera close")
         camera.close()
 
 @app.route("/clear_photo")
@@ -174,10 +160,8 @@ def clear_photo():
 def video():
     record_status = check_videorecord()
     if record_status:
-        print("Videorecord is on") #testing
         record_message = "Остановить запись"
     else:
-        print("Videorecord is off") #testing
         record_message = "Включить запись"
     video_exist = os.path.isfile("./static/img/timelapse.mp4")
     video_path = "/static/img/timelapse.mp4?" + str(random.random())
@@ -210,7 +194,6 @@ def start_record():
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
     job.every(1).hours()
-    print(job) #testing
     my_cron.write()
     return make_response('', 200)
 
@@ -235,10 +218,10 @@ def remove_frames():
         command = "rm -f /home/pi/Pictures/*"
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as err:
-        print("Error", err) #testing
-        return make_response('', 403)
+        logger.error("remove_frames: Delete error", err)
+        return make_response('', 500)
     else:
-        print("Remove frame OK") #testing
+        logger.info("remove_frames: Frames successfully deleted")
         return make_response('', 200)
 
 
@@ -248,12 +231,12 @@ def remove_video():
         try:
             subprocess.run(["rm", "-f", "./static/img/timelapse.mp4"], check=True)
         except subprocess.CalledProcessError as err:
-            print("Error", err) #testing
-            return make_response('', 403)
+            logger.error("remove_video: Delete error", err)
+            return make_response('', 500)
         else:
-            print("Remove video OK") #testing
+            logger.info("remove_video: Video successfully deleted")
             return make_response('', 200)
-    print("File not exist, nothing to delete")
+    logger.warning("remove_video: Video not exist, nothing to delete")
     return make_response('', 404)
 
 
@@ -265,25 +248,22 @@ def make_video():
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
-            logger.error("Error", err) #testing
-            return make_response('', 403)
+            logger.error("make_video: Video creating error", err)
+            return make_response('', 500)
         else:
-            logger.debug("Video is created") #testing
+            logger.info("make_video: Video is created")
             return make_response('', 200)
     return make_response('', 403)
-
-
 ##################################################
 
 
 ############## GrowBox settings ##################
-
-
 @app.route("/settings")
 def settings():
     row = sql.selectActivity()
     data = Markup(row[0][0])
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
+
 
 @app.route("/accept_settings", methods=["POST"])
 def accept_setting():
@@ -291,14 +271,10 @@ def accept_setting():
     input_queue.put(str(content))
     sql.updateActivity(str(content))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
-
 ###################################################
 
 
 ############## Teacher settings ###################
-
-
 @app.route("/login")
 def secret_page():
     return render_template('/settings/login.html', title='Регистрация', goback='/index')
@@ -612,12 +588,12 @@ def is_connected():
         #if response not successful, raise exception
         response.raise_for_status()
     except HTTPError as http_err:
-        print("HTTP error", http_err)
+        logger.error("is_connected: HTTP error", http_err)
         return False
     except Exception as err:
-        print("Other error", err)
+        logger.error("is_connected: Other error", err)
     else:
-        print("Success connection")
+        logger.info("is_connected: Success connection")
         return True
 
 
