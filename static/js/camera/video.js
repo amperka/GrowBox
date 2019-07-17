@@ -60,8 +60,10 @@ function watchVideo() {
     var videoPath = "/static/img/timelapse.mp4?" + Math.random();
 	video.setAttribute("src", videoPath);
 	video.setAttribute("width", "480");
-	video.setAttribute("height", "320")
-	video.setAttribute("controls", "controls");
+    video.setAttribute("height", "320");
+    video.controls = true;
+    video.disablePictureInPicture = true;
+    video.setAttribute("controlsList", "nodownload noremoteplayback");
 	document.getElementById("image-place").appendChild(video);
 }
 

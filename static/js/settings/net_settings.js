@@ -40,10 +40,10 @@ $('#update-button').click(function () {
 });
 
 $("#netName").click(function() {
-    openKeyboard();
+    keyboardModule.openKeyboard();
 });
 
 $("#netPassword").click(function() {
-    openKeyboard();
+    keyboardModule.openKeyboard();
 });
 

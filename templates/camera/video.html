@@ -46,7 +46,7 @@
 
 	        <div class="row py-4 d-flex justify-content-center" id=image-place>
             {% if videoExist %}
-                <video width="480" height="320" controls="controls">
+                <video width="480" height="320" controls disablePictureInPicture controlsList="nodownload noremoteplayback">
                     <source src="{{videoPath}}">
                 </video>
             {% else %}
