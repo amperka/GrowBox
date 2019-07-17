@@ -8,4 +8,5 @@ img {
 	height: 200px;
 	float: left;
 	margin: 10px 7px 0px 0px;
+	border: 4px double;
 }

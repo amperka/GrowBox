@@ -22,7 +22,7 @@ class SerialPort():
 
     def read_serial(self):
             return self.sp.readline().decode('utf-8')
-    
+
     def write_serial(self, data):
         self.sp.write(data)
 
@@ -31,7 +31,6 @@ class SerialPort():
 
 
 if __name__ == "__main__":
-    
     sp = SerialProcess("/dev/ttyACM0")
     sp.open()
     while(True):

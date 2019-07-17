@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block stylesSection %}
+<!-- <link rel="stylesheet" href="../../static/css/teacher_settings.css"> -->
+<link rel="stylesheet" href="/static/css/confirm.css">
+
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/settings/shutdown.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+        <div class="col">
+            <button class="btn btn-lg btn-danger btn-block p-3 mt-4" type="button" id="shutdown-btn">
+                <p class="h2">Выключение</p>
+            </button>
+            <button class="btn btn-lg btn-danger btn-block p-3 mt-4" type="button" id="reboot-btn">
+                <p class="h2">Перезагрузка</p>
+            </button>
+        </div>
+	</div>
+</div>
+{% endblock %}

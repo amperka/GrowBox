@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 
+{% block stylesSection %}
+<link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
+<link rel="stylesheet" href="/static/css/keyboard.css">
+{% endblock %}
+
 {% block scriptsSection %}
-    <link rel="stylesheet" href="../static/css/teacher_settings.css">
-    <script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
+<script src="/static/js/numkeyboard.js"></script>
+<script src="/static/js/settings/login.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -11,35 +19,18 @@
         <div class="col">
             <form onsubmit="sendPasswd(); return false;">
                 <div class="form-group">
-                    <label class="col-form-label col-form-label-lg" for="exampleInputPassword1">Пароль</label>
-                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg" id="exampleInputPassword1" placeholder="Введите пароль">
+                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg mt-5" id="password" placeholder="Введите ПИН-код">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">Войти</button>
+                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+                    <p class="h2">Войти</p>
+                </button>
             </form>
-
-            <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
-            <script>
-                function sendPasswd() {
-                    var passwd = document.getElementsByName("passwd")[0].value;
-                    $.ajax({
-                        url: "/teacher_settings",
-                        type: "POST", 
-                        data: JSON.stringify({"passwd" : passwd}),
-                               contentType: "application/json; charset=utf8",    
-                        dataType: "json",
-                    })
-                    .fail(function() {
-                            $("#wrong-passwd").fadeIn();
-                            setTimeout(function() {
-                                $("#wrong-passwd").fadeOut();
-                            }, 3000);
-                                
-                        })    
-                    .done(function() {
-                            window.location.href="/teacher_page";
-                        });
-                }
-            </script>
+            <div class="row my-3 mx-2" id="banner">
+                <div id="wrong-passwd" class="saved-banner">Введён неправильный ПИН-код</div>
+            </div>
+            <div class="row my-4 mx-5" id="keyboard">
+                <div class="simple-keyboard"></div>
+            </div>
         </div>
     </div>
 </div>

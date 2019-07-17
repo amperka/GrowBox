@@ -14,6 +14,7 @@
     box-shadow: 0 0 20px rgba(0,0,0,.2);
     border-radius: 3px;
     overflow: hidden;
+    font-size: 20px;
 }
 .dialog-ovelay .dialog header {
     padding: 10px 8px;
@@ -21,7 +22,7 @@
     border-bottom: 1px solid #e5e5e5;
 }
 .dialog-ovelay .dialog header h3 {
-    font-size: 14px;
+    font-size: 20px;
     margin: 0;
     color: #555;
     display: inline-block;
@@ -32,7 +33,7 @@
     cursor: pointer;
     transition: all .5s ease;
     padding: 0 2px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .dialog-ovelay .dialog header .fa-close:hover {
     color: #b9b9b9;
@@ -46,7 +47,7 @@
 }
 .dialog-ovelay .dialog .dialog-msg p{
     margin: 0;
-    font-size: 15px;
+    font-size: 20px;
     color: #333;
 }
 .dialog-ovelay .dialog footer {

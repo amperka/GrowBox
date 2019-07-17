@@ -1,34 +1,41 @@
 {% extends "base.html" %}
 
+{% block stylesSection %}
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
+<link rel="stylesheet" href="/static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
+{% endblock %}
+
 {% block scriptsSection %}
-<script>
-	function removeFrames() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/remove_frames", true);
-		xhr.send();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState != 4) return;
-
-			if (xhr.status == 200) {
-				addMsgToDiv("Старые кадры удалены");
-			} else if (xhr.status == 403) {
-				addMsgToDiv("Проблема с удалением");
-			} else {
-				alert(xhr.status + ': ' + xhr.statusText);
-			}
-		}
-	}
-
-</script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/request.js"></script>
+<script src="/static/js/settings/camera_settings.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<input class="btn btn-lg btn-danger btn-block p-3 mt-4" value="Удаление кадров камеры" type="button" onclick="removeFrames()">
-		</div>
+            <button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="load-video-button" type="button">
+                <p class="h2">Скачать видеозапись</p>
+            </button>
+            <button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="extract" type="button">
+                <p class="h2">Извлечь USB-накопитель</p>
+            </button>
+			<button class="btn btn-lg btn-danger btn-block p-3 mt-4" id="del-img-button" type="button">
+                <p class="h2">Удалить кадры камеры</p>
+            </button>
+            <button class="btn btn-lg btn-danger btn-block p-3 mt-4" id="del-video-button" type="button">
+                <p class="h2">Удалить видеозапись</p>
+            </button>
+	    </div>
+    </div>
+    <div class="row py-4 d-flex justify-content-center">
+        <div class="saved-banner" id="camera-msg"></div>
+    </div>
+    <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
 	</div>
-
 </div>
 {% endblock %}

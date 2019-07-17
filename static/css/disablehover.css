@@ -1,0 +1,16 @@
+.btn-success:hover {
+    background-color: rgb(40,167,69) !important;
+    border-color: rgb(40,167,69) !important;
+}
+.btn-primary:hover {
+    background-color: rgb(0,123,255) !important;
+    border-color: rgb(0,123,255) !important;
+}
+.btn-danger:hover {
+    background-color: rgb(220,53,69) !important;
+    border-color: rgb(220,53,69) !important;
+}
+.text-light:hover {
+    color: rgb(248, 249, 250) !important;
+    text-decoration: none;
+}

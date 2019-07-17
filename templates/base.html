@@ -8,9 +8,10 @@
     <title>{{title}}</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <!-- Other CSS -->
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/disablehover.css">
 
     {% block stylesSection %}{% endblock %}
 </head>
@@ -30,6 +31,10 @@
                         <a class="text-light" href="{{goback}}">
                             <p class="h3 text-light text-center p-2 m-0"><&nbsp;Назад</p>
                         </a>
+                        {% elif lock %}
+                        <a class="btn btn-sm" href="{{lock}}" role="button" style="border-radius: 4.8px; background: rgb(255,255,255)">
+                          <img src="/static/img/Lock.png" style="width: 40px; height: 40px;">
+                        </a>
                         {% endif %}
                     </div>
                     <div class="col d-flex align-items-center justify-content-end">
@@ -46,12 +51,12 @@
 </div>
 
 <!-- Bootstrap Scripts-->
-<script src="../static/js/jquery-3.3.1.slim.min.js"></script>
-<script src="../static/js/popper.min.js"></script>
-<script src="../static/js/bootstrap.min.js"></script>
+<script src="/static/js/jquery-3.3.1.slim.min.js"></script>
+<script src="/static/js/popper.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
 
 <!-- Scripts section -->
 {% block scriptsSection %}{% endblock %}
-<script src="../static/js/time.js"></script>
+<script src="/static/js/time.js"></script>
 </body>
 </html>

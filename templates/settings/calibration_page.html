@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block stylesSection %}
+<!-- <link rel="stylesheet" href="../../static/css/teacher_settings.css"> -->
+<link rel="stylesheet" href="/static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/preloader.css">
+
+{% endblock %}
+
+{% block scriptsSection %}
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/settings/calibration.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<button class="btn btn-lg btn-primary btn-block p-3 mt-4" type="button" id="calibrateFour">
+                <p class="h2">Калибровка 4.01</p>
+            </button>
+
+			<button class="btn btn-lg btn-primary btn-block p-3 mt-4" type="button" id="calibrateSeven">
+                <p class="h2">Калибровка 7.01</p>
+            </button>
+		</div>
+	</div>
+    <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
+	</div>
+</div>
+{% endblock %}
