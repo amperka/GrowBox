@@ -2,8 +2,8 @@ __pycache__/
 *.py[cod]
 *.log
 *.db
-static/img/animation.gif
 *.mp4
 img1.jpg
 img2.jpg
 *.sh
+static/js/node_modules/
