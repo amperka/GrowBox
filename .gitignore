@@ -5,5 +5,4 @@ __pycache__/
 *.mp4
 static/img/img1.jpg
 static/img/img2.jpg
-*.sh
 static/js/node_modules/
