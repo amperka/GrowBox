@@ -3,7 +3,7 @@ __pycache__/
 *.log
 *.db
 *.mp4
-img1.jpg
-img2.jpg
+static/img/img1.jpg
+static/img/img2.jpg
 *.sh
 static/js/node_modules/
