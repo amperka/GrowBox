@@ -8,6 +8,8 @@
 <br>
 <p>$ python3 -m pip install Flask </p>
 <p>$ python3 -m pip install pyserial</p>
+<p>$ cd GrowBox/static/js/
+<p>$ npm install
 <h2>Запуск сервера:</h2>
 
 <p>$ cd GrowBox</p>
