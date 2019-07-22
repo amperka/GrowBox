@@ -1,0 +1,4 @@
+bootstrap.min.js
+jquery-3.3.1.slim.min.js
+popper.min.js
+node_modules/*
