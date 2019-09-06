@@ -611,7 +611,12 @@ def read_arduino():
         logger.error("Arduino not connected")
         sys.exit(1)
 
-    sp.open()
+    try:
+        sp.open()
+    except OSError as err:
+        logger.error(err)
+        return
+
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
     reconnect_count = 0
