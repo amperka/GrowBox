@@ -13,28 +13,28 @@ import requests
 from requests.exceptions import HTTPError
 
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
-os.chdir("/home/pi/Projects/Test1/GrowBox/") #for autostart change path
+os.chdir("/home/pi/Projects/Test1/GrowBox/") # For autostart change path
 
 import usb_camera
 from crontab import CronTab
 
-app = Flask(__name__) #Flask application
+app = Flask(__name__)
 
 
-#return index page
+# Return index page
 @app.route("/")
 @app.route("/index")
 def index():
     return render_template("index.html", title='Главное меню', lock='/lock')
 
 
-#return measurements page
+# Return measurements page
 @app.route("/measurements")
 def measurements():
     return render_template("measurements/measurements.html", title='Измерения', goback='/index')
 
 
-#return a specific sensor measurement
+# Return a specific sensor measurement
 @app.route("/measurements/<param>")
 def spec_measurements(param):
     if param == "temp":
@@ -57,7 +57,7 @@ def spec_measurements(param):
     return render_template("measurements/" + param + ".html", **template_data)
 
 
-#return temperature page with dynamic measurements
+# Return dynamic measurements
 ###############################################
 @app.route("/temp_measure")
 def temp_meas():
@@ -88,7 +88,7 @@ def co2_meas():
 #################################################
 
 
-#camera control
+# Camera control
 #################################################
 @app.route("/camera")
 def camera():
@@ -150,6 +150,7 @@ def make_photo(img):
         logger.debug("Camera close")
         camera.close()
 
+
 @app.route("/clear_photo")
 def clear_photo():
     os.system("rm -f ./static/img/img*")
@@ -190,7 +191,6 @@ def start_record():
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
-            print("Too many clicks") #testing
             return make_response('', 403)
     job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
     job.every(1).hours()
@@ -260,7 +260,7 @@ def make_video():
 ############## GrowBox settings ##################
 @app.route("/settings")
 def settings():
-    row = sql.selectActivity()
+    row = sql.select_activity()
     data = Markup(row[0][0])
     return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
 
@@ -269,7 +269,7 @@ def settings():
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
-    sql.updateActivity(str(content))
+    sql.update_activity(str(content))
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 ###################################################
 
@@ -281,7 +281,7 @@ def secret_page():
 
 
 @app.route("/lock")
-def lock():
+def lock_page():
     return render_template('/lock.html')
 
 
@@ -326,7 +326,6 @@ def apply_net_settings():
     content = request.json
     login = content["login"]
     passwd = content["passwd"]
-    print(login, passwd)
 
     settings_str = ("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n" +
                     "update_config=1\n" +
@@ -347,9 +346,9 @@ def apply_net_settings():
 def update_system():
     if not is_connected():
         return make_response('', 403)
-    ret = os.system("echo Update") #testing
-    time.sleep(5) #testing
-    #ret = os.system("git pull origin master") #uncomment to update
+    ret = os.system("echo Update") # Testing
+    time.sleep(5) # Testing
+    #ret = os.system("git pull origin master") # Uncomment to update
     if ret == 0:
         logger.info("System update")
         return make_response('', 200)
@@ -362,12 +361,16 @@ def apply_time():
     content = request.json
     date = content["set-date"]
     time = content["set-time"]
-    date = '-'.join(date.split('-')[::-1]) #reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
+
+    # Reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
+    date = '-'.join(date.split('-')[::-1])
     datetime_set = date + ' ' + time
     set_systime(datetime_set)
+
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     input_queue.put(json.dumps(fmt_datetime))
+
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 
@@ -375,11 +378,9 @@ def apply_time():
 def calibration(param):
     if param == "four":
         command = json.dumps({"calibrate" : 4})
-        print(command)
         input_queue.put(command)
     if param == "seven":
         command = json.dumps({"calibrate" : 7})
-        print(command)
         input_queue.put(command)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
@@ -441,6 +442,7 @@ def shutdown(param):
             os.system("sleep 20 && sudo shutdown -h now &")
             return make_response('', 200)
 
+
 ###################################################
 
 ################ Charts pages #####################
@@ -475,13 +477,13 @@ def draw_chart():
         period = request.json['period']
         if period:
             if period == 'hour':
-                error, data, labels = prepareHourData2Chart(param = [param])
+                error, data, labels = hour_data(param = [param])
             if period == 'day':
-                error, data, labels = prepareDayData2Chart(param = [param])
+                error, data, labels = day_data(param = [param])
             if period == 'week':
-                error, data, labels = prepareWeekData2Chart(param = [param])
+                error, data, labels = week_data(param = [param])
             if period == 'month':
-                error, data, labels = prepareMonthData2Chart(param = [param])
+                error, data, labels = month_data(param = [param])
 
             template_data = {'error': error, 'labels': labels, 'data': data, 'param': param}
             return json.dumps(template_data), 200, {'ContentType':'application/json'}
@@ -494,6 +496,7 @@ def draw_chart():
 @app.route("/info")
 def info():
     return render_template("/info/info.html", title='Справка', goback='/index')
+
 
 @app.route("/info/<plant>")
 def select_plant(plant):
@@ -512,43 +515,44 @@ def select_plant(plant):
 
 
 @app.route("/dynamicCharts")
-def dynamicTemp():
+def dynamic_temp():
     return render_template("dynamicCharts.html")
 
-def prepareMonthData2Chart(param):
+
+def month_data(param):
     now = int(datetime.timestamp(datetime.now()))
-    monthEarlier = now - 2592000
-    error, data, labels = prepareData(param, monthEarlier, now, 2592000 // (requestPeriod * arrayLen))
-    #error, data, labels = prepareData(param, monthEarlier, now, 100)
+    prev_month = now - 2592000
+    error, data, labels = prepare_data(param, prev_month, now, 2592000 // ARRAY_LEN)
     labels = [datetime.fromtimestamp(x).strftime("%d.%m") for x in labels]
     return error, data, labels
 
-def prepareWeekData2Chart(param):
+
+def week_data(param):
     now = int(datetime.timestamp(datetime.now()))
-    weekEarlier = now - 604800
-    error, data, labels = prepareData(param, weekEarlier, now, 604800 // (requestPeriod * arrayLen))
-    #error, data, labels = prepareData(param, weekEarlier, now, 50)
+    prev_week = now - 604800
+    error, data, labels = prepare_data(param, prev_week, now, 604800 // ARRAY_LEN)
     labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh") for x in labels]
     return error, data, labels
 
-def prepareDayData2Chart(param):
+
+def day_data(param):
     now = int(datetime.timestamp(datetime.now()))
-    dayEarlier = now - 86400
-    error, data, labels = prepareData(param, dayEarlier, now, 86400 // (requestPeriod * arrayLen))
-    #error, data, labels = prepareData(param, dayEarlier, now, 20)
+    prev_day = now - 86400
+    error, data, labels = prepare_data(param, prev_day, now, 86400 // ARRAY_LEN)
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
-def prepareHourData2Chart(param):
+
+def hour_data(param):
     now = int(datetime.timestamp(datetime.now()))
-    hourEarlier = now - 3600
-    error, data, labels = prepareData(param, hourEarlier, now, 3600 // (requestPeriod * arrayLen))
-    #error, data, labels = prepareData(param, hourEarlier, now, 5)
+    prev_hour = now - 3600
+    error, data, labels = prepare_data(param, prev_hour, now, 3600 // ARRAY_LEN)
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
-def prepareData(param, fromTime, toTime, limit):
-    data = sql.selectSensors(param, fromTime = fromTime, toTime = toTime, limit = limit)
+
+def prepare_data(param, from_time, to_time, limit):
+    data = sql.select_sensors(param, from_time=from_time, to_time=to_time, limit=limit)
 
     if len(data) == 0:
         error = "Нет данных"
@@ -562,15 +566,15 @@ def prepareData(param, fromTime, toTime, limit):
     return error, data, labels
 
 
-def insertSensorsIntoDB(temp, ph, tds, co2, lvl):
-    global arrayPivot, arrayLen, circularArray
+def insert_data_into_db(temp, ph, tds, co2, lvl):
+    global array_pivot, circular_array
 
-    circularArray[arrayPivot] = (float(temp), float(ph), float(tds), float(co2))
-    arrayPivot += 1
-    if arrayPivot == arrayLen:
-        s = tuple([round(sum(x)/arrayLen, 2) for x in zip(*circularArray)])
-        sql.insertSensors(temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl)
-        arrayPivot = 0
+    circular_array[array_pivot] = (float(temp), float(ph), float(tds), float(co2))
+    array_pivot += 1
+    if array_pivot == ARRAY_LEN:
+        s = tuple([round(sum(x)/ARRAY_LEN, 2) for x in zip(*circular_array)])
+        sql.insert_sensors(temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl)
+        array_pivot = 0
 
 
 def check_videorecord():
@@ -585,7 +589,7 @@ def is_connected():
     remote_server = "https://www.google.com"
     try:
         response = requests.get(remote_server)
-        #if response not successful, raise exception
+        # If response not successful, raise exception
         response.raise_for_status()
     except HTTPError as http_err:
         logger.error("is_connected: HTTP error", http_err)
@@ -597,7 +601,7 @@ def is_connected():
         return True
 
 
-def readArduino():
+def read_arduino():
     global temp, ph, tds, co2, lvl
 
     arduino_path = auto_detect_serial()
@@ -607,7 +611,6 @@ def readArduino():
         logger.error("Arduino not connected")
         sys.exit(1)
 
-    print("Arduino path is", arduino_path) #testing
     sp.open()
     data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
     empty_loop_count = 0
@@ -620,7 +623,7 @@ def readArduino():
                 if command_data == "Exit":
                     break
                 sp.write_serial(command_data.encode())
-                logger.debug("Write data to serial " + command_data) #testing
+                logger.debug("Write data to serial " + command_data)
 
             while sp.serial_available():
                 empty_loop_count = 0
@@ -641,7 +644,7 @@ def readArduino():
             if reconnect_count > 3:
                 logger.info("Reconnection limit. Please restart your computer.")
                 sys.exit(1)
-            time.sleep(10) #testing
+            time.sleep(10)
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
                 sp = serial_port.SerialPort(arduino_path)
@@ -659,11 +662,12 @@ def readArduino():
             tds = data["salin"]
             co2 = data["carb"]
             lvl = data["level"]
-            insertSensorsIntoDB(temp, ph, tds, co2, lvl)
+            insert_data_into_db(temp, ph, tds, co2, lvl)
 
         time.sleep(1)
     sp.close()
-    print("Serial port thread successfully terminated")
+    logger.debug("Serial port thread successfully terminated")
+
 
 def auto_detect_serial():
     import glob
@@ -680,7 +684,8 @@ def set_systime(datetime):
 
 def stop_ser_thread():
     input_queue.put("Exit")
-    getThread.join()
+    arduino_thread.join()
+
 
 def sigint_handler(signum, frame):
     print("Process was terminated by pressing Ctrl+c")
@@ -694,21 +699,15 @@ if __name__ == "__main__":
     temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
     input_queue = queue.Queue(1)
 
-    # dbPeriod = 600 # seconds
-    arrayLen = 600
-    requestPeriod = 1 # seconds
-    circularArray = [0] * arrayLen
-    arrayPivot = 0
-    # itemPeriod = dbPeriod / arrayLen # seconds
+    ARRAY_LEN = 600
+    circular_array = [0] * ARRAY_LEN
+    array_pivot = 0
 
-    #create database for sensors and activities
-    sql = sqlite.Sqlite('./sensorsData.db')
-
-    #create own logger
+    # Create own logger
     logger = logging.getLogger("server")
     logger.setLevel(logging.DEBUG)
 
-    #create logging file handler
+    # Create logging file handler
     file_handler = logging.FileHandler("growbox.log")
     date_format = "%Y-%m-%d %H:%M:%S"
     message_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -718,18 +717,22 @@ if __name__ == "__main__":
 
     logger.info("Server started")
 
-    sql.create()
-    sql.createActivity()
-    row = sql.selectActivity()
+    # Create database for sensors and activities
+    sql = sqlite.Sqlite('./sensorsData.db')
+    # Create sensors and activity tables in database
+    sql.create_sensors()
+    sql.create_activity()
+    row = sql.select_activity()
     current_state = Markup(row[0][0])
     input_queue.put(current_state)
 
+    # Create mutex for sensors data
     lock = threading.Lock()
 
-    #create and run Arduino thread
-    getThread = threading.Thread(target=readArduino)
-    getThread.daemon = True
-    getThread.start()
+    # Create and run Arduino thread
+    arduino_thread = threading.Thread(target=read_arduino)
+    arduino_thread.daemon = True
+    arduino_thread.start()
 
     signal.signal(signal.SIGINT, sigint_handler)
 
