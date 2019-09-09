@@ -1,17 +1,18 @@
 #!/usr/bin/python3
-import time
 import sqlite3
 from datetime import datetime
 import random
 
-class Sqlite():
+
+class Sqlite:
 
     def __init__(self, db_filename):
         self.dbname = db_filename
 
     # Create table activity
     def create_activity(self):
-        sql = "CREATE TABLE IF NOT EXISTS activity(curstate TEXT, lamp INT DEFAULT 1, fan INT DEFAULT 1, compressor INT DEFAULT 1)"
+        sql = ("CREATE TABLE IF NOT EXISTS activity(curstate TEXT, lamp INT "
+               "DEFAULT 1, fan INT DEFAULT 1, compressor INT DEFAULT 1)")
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
         curs.execute(sql)
@@ -21,9 +22,9 @@ class Sqlite():
         if len(self.select_activity()) == 0:
             conn = sqlite3.connect(self.dbname)
             curs = conn.cursor()
-            curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [1, 18]})
+            curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [0, 18]})
             sql = "INSERT INTO activity(curstate) values(?)"
-            val = (curstate, )
+            val = (curstate,)
             curs.execute(sql, val)
             conn.commit()
             conn.close()
@@ -31,7 +32,7 @@ class Sqlite():
     # Test activity
     def test_activity(self):
 
-        curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [0, 12]})
+        curstate = str({'compressor': 0, 'fan': [0, 1], 'lamp': [0, 18]})
         lamp = random.randrange(0, 100, 1)
         fan = random.randrange(0, 100, 1)
         compressor = random.randrange(0, 100, 1)
@@ -41,13 +42,15 @@ class Sqlite():
         self.update_activity(curstate, lamp, fan, compressor)
 
     # Update a row of activity
-    def update_activity(self, curstate={}, lampMode=1, fanMode=1, compressorMode=1):
+    def update_activity(
+            self, curstate={}, lampMode=1, fanMode=1, compressorMode=1):
 
         lamp = str(int(lampMode))
         fan = str(int(fanMode))
         compressor = str(int(compressorMode))
 
-        sql = "UPDATE activity SET curstate=?, lamp=?, fan=?, compressor=? WHERE 1=1"
+        sql = ("UPDATE activity SET curstate=?, "
+               "lamp=?, fan=?, compressor=? WHERE 1=1")
         val = (curstate, lamp, fan, compressor)
 
         conn = sqlite3.connect(self.dbname)
@@ -69,7 +72,8 @@ class Sqlite():
 
     # Create table sensors
     def create_sensors(self):
-        sql = "CREATE TABLE IF NOT EXISTS sensors(date INT, temp REAL, carbon INT, acidity REAL, saline INT, level INT)"
+        sql = ("CREATE TABLE IF NOT EXISTS sensors(date INT, temp REAL, "
+               "carbon INT, acidity REAL, saline INT, level INT)")
         conn = sqlite3.connect(self.dbname)
         curs = conn.cursor()
         curs.execute(sql)
@@ -96,11 +100,14 @@ class Sqlite():
         self.insert_sensors(temp, carb, acid, saline, lvl)
 
     # Insert a row into sensors
-    def insert_sensors(self, temp='NULL', carbon='NULL', acidity='NULL', saline='NULL', level='NULL'):
-        date = datetime.timestamp(datetime.now()) # FLOAT
-        date = int(date) # INTEGER
+    def insert_sensors(
+            self, temp='NULL', carbon='NULL',
+            acidity='NULL', saline='NULL', level='NULL'):
+        date = datetime.timestamp(datetime.now())
+        date = int(date)
 
-        sql = "INSERT INTO sensors(date, temp, carbon, acidity, saline, level) values(?, ?, ?, ?, ?, ?)"
+        sql = ("INSERT INTO sensors(date, temp, carbon, acidity, "
+               "saline, level) values(?, ?, ?, ?, ?, ?)")
         val = (date, temp, carbon, acidity, saline, level)
 
         conn = sqlite3.connect(self.dbname)
@@ -121,9 +128,9 @@ class Sqlite():
         conn.close()
         return rows[0][0]
 
-
-    # Select dsensors data of [from_time; to_time] period
-    def select_sensors(self, param = [], from_time = None, to_time = None, limit = None):
+    # Select sensors data of [from_time; to_time] period
+    def select_sensors(
+            self, param=[], from_time=None, to_time=None, limit=None):
 
         select = "*"
         if type(param) is str:
@@ -131,7 +138,6 @@ class Sqlite():
         else:
             if len(param) > 0:
                 select = "date," + ",".join(param)
-
 
         sql = "SELECT " + select + " FROM sensors"
         if from_time:
@@ -153,14 +159,15 @@ class Sqlite():
         conn.close()
         return rows
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
 
     sq = Sqlite("./testData.db")
 
     sq.create_sensors()
     sq.create_activity()
 
-    #tests begin
+    # Tests begin
     print('-----activity-----')
     sq.test_activity()
     for row in sq.select_activity():
@@ -177,4 +184,4 @@ if __name__=="__main__":
     for row in sq.select_sensors():
         print(row)
     print('----------------')
-    #tests end
+    # Tests end
