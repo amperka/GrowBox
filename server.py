@@ -34,7 +34,7 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", title='Главное меню', lock='/lock')
+    return render_template("index.html", title="Главное меню", lock="/lock")
 
 
 # Return measurements page
@@ -59,11 +59,7 @@ def spec_measurements(param):
     elif param == "co2":
         title = "Углекислый газ"
         label = "CO2"
-    template_data = {
-        'title': title,
-        'goback': "/measurements",
-        'label': label,
-    }
+    template_data = {"title": title, "goback": "/measurements", "label": label}
     return render_template("measurements/" + param + ".html", **template_data)
 
 
@@ -111,31 +107,31 @@ def photo():
     img2_name = "img2.jpg?" + str(random.random())
     if img1_exist and img2_exist:
         template_data = {
-            'img1': img1_name,
-            'img2': img2_name,
-            'pad1': "0px",
-            'pad2': "0px",
+            "img1": img1_name,
+            "img2": img2_name,
+            "pad1": "0px",
+            "pad2": "0px",
         }
     elif img1_exist and not img2_exist:
         template_data = {
-            'img1': img1_name,
-            'img2': "Camera.png",
-            'pad1': "0px",
-            'pad2': "50px 120px",
+            "img1": img1_name,
+            "img2": "Camera.png",
+            "pad1": "0px",
+            "pad2": "50px 120px",
         }
     elif not img1_exist and img2_exist:
         template_data = {
-            'img1': "Camera.png",
-            'img2': img2_name,
-            'pad1': "50px 120px",
-            'pad2': "0px"
+            "img1": "Camera.png",
+            "img2": img2_name,
+            "pad1": "50px 120px",
+            "pad2": "0px",
         }
     else:
         template_data = {
-            'img1': "Camera.png",
-            'img2': "Camera.png",
-            'pad1': "50px 120px",
-            'pad2': "50px 120px",
+            "img1": "Camera.png",
+            "img2": "Camera.png",
+            "pad1": "50px 120px",
+            "pad2": "50px 120px",
         }
     template_data.update({"title": "Фото", "goback": "/camera"})
     return render_template("camera/photo.html", **template_data)
@@ -152,9 +148,9 @@ def make_photo(img):
         camera.capture("./static/img/" + name, resize=(480, 320))
     except RuntimeError:
         logger.error("Photo is not created")
-        return make_response('', 403)
+        return make_response("", 403)
     else:
-        return make_response('', 200)
+        return make_response("", 200)
     finally:
         logger.debug("Camera close")
         camera.close()
@@ -163,7 +159,7 @@ def make_photo(img):
 @app.route("/clear_photo")
 def clear_photo():
     os.system("rm -f ./static/img/img*")
-    return make_response('', 200)
+    return make_response("", 200)
 
 
 @app.route("/camera/video")
@@ -194,19 +190,19 @@ def start_record():
             raise RuntimeError
     except RuntimeError:
         logger.error("Camera is not connected")
-        return make_response('', 403)
+        return make_response("", 403)
     finally:
         camera.close()
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
-            return make_response('', 403)
+            return make_response("", 403)
     curr_dir = os.getcwd()
     command = curr_dir + "/usb_camera.py"
     job = my_cron.new(command=command, comment="Growbox")
     job.every(1).hours()
     my_cron.write()
-    return make_response('', 200)
+    return make_response("", 200)
 
 
 @app.route("/finish_record")
@@ -216,24 +212,24 @@ def finish_record():
         if job.comment == "Growbox":
             my_cron.remove(job)
             my_cron.write()
-            return make_response('', 200)
-    return make_response('', 403)
+            return make_response("", 200)
+    return make_response("", 403)
 
 
 @app.route("/remove_frames")
 def remove_frames():
     if len(os.listdir("/home/pi/Pictures")) == 0:
         logger.debug("Pictures directory is empty")
-        return make_response('', 403)
+        return make_response("", 403)
     try:
         command = "rm -f /home/pi/Pictures/*"
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as err:
         logger.error("remove_frames: Delete error", err)
-        return make_response('', 500)
+        return make_response("", 500)
     else:
         logger.info("remove_frames: Frames successfully deleted")
-        return make_response('', 200)
+        return make_response("", 200)
 
 
 @app.route("/remove_video")
@@ -244,32 +240,41 @@ def remove_video():
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
             logger.error("remove_video: Delete error", err)
-            return make_response('', 500)
+            return make_response("", 500)
         else:
             logger.info("remove_video: Video successfully deleted")
-            return make_response('', 200)
+            return make_response("", 200)
     logger.warning("remove_video: Video not exist, nothing to delete")
-    return make_response('', 404)
+    return make_response("", 404)
 
 
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
         command = [
-                "ffmpeg", "-y", "-r", "10", "-i",
-                "/home/pi/Pictures/%*.jpg", "-r",
-                "10", "-vcodec", "libx264", "-vf",
-                "scale=480:320", "./static/img/timelapse.mp4"
+            "ffmpeg",
+            "-y",
+            "-r",
+            "10",
+            "-i",
+            "/home/pi/Pictures/%*.jpg",
+            "-r",
+            "10",
+            "-vcodec",
+            "libx264",
+            "-vf",
+            "scale=480:320",
+            "./static/img/timelapse.mp4",
         ]
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
             logger.error("make_video: Video creating error", err)
-            return make_response('', 500)
+            return make_response("", 500)
         else:
             logger.info("make_video: Video is created")
-            return make_response('', 200)
-    return make_response('', 403)
+            return make_response("", 200)
+    return make_response("", 403)
 
 
 # GrowBox settings
@@ -280,8 +285,8 @@ def settings():
     return render_template(
         "/settings/settings.html",
         json_str=data,
-        title='Управление',
-        goback='/index'
+        title="Управление",
+        goback="/index",
     )
 
 
@@ -291,9 +296,9 @@ def accept_setting():
     input_queue.put(str(content))
     sql.update_activity(str(content))
     return (
-        json.dumps({'success': True}),
+        json.dumps({"success": True}),
         200,
-        {'ContentType': 'application/json'}
+        {"ContentType": "application/json"},
     )
 
 
@@ -301,12 +306,12 @@ def accept_setting():
 @app.route("/login")
 def secret_page():
     template_data = {"title": "Регистрация", "goback": "/index"}
-    return render_template('/settings/login.html', **template_data)
+    return render_template("/settings/login.html", **template_data)
 
 
 @app.route("/lock")
 def lock_page():
-    return render_template('/lock.html')
+    return render_template("/lock.html")
 
 
 @app.route("/teacher_settings", methods=["POST"])
@@ -315,17 +320,17 @@ def log_in():
     passwd = content["passwd"]
     if passwd == "2486":
         return (
-            json.dumps({'success': True}),
+            json.dumps({"success": True}),
             200,
-            {'ContentType': 'application/json'}
+            {"ContentType": "application/json"},
         )
-    return make_response('', 403)
+    return make_response("", 403)
 
 
 @app.route("/teacher_page")
 def teacher_page():
     template_data = {"title": "Настройки", "goback": "/index"}
-    return render_template('/settings/teacher_settings.html', **template_data)
+    return render_template("/settings/teacher_settings.html", **template_data)
 
 
 @app.route("/teacher_page/<settings>")
@@ -343,10 +348,7 @@ def teacher_settings(settings):
         title = "Журнал работы"
     elif settings == "shutdown_page":
         title = "Завершение работы"
-    template_data = {
-        'title': title,
-        'goback': "/teacher_page",
-    }
+    template_data = {"title": title, "goback": "/teacher_page"}
     return render_template(ret_val, **template_data)
 
 
@@ -375,30 +377,30 @@ def apply_net_settings():
     time.sleep(10)
     if is_connected():
         return (
-            json.dumps({'success': True}),
+            json.dumps({"success": True}),
             200,
-            {'ContentType': 'application/json'}
+            {"ContentType": "application/json"},
         )
     else:
         return (
-            json.dumps({'success': False}),
+            json.dumps({"success": False}),
             403,
-            {'ContentType': 'application/json'}
+            {"ContentType": "application/json"},
         )
 
 
 @app.route("/update_system")
 def update_system():
     if not is_connected():
-        return make_response('', 403)
+        return make_response("", 403)
     ret = os.system("echo Update")  # Testing
     time.sleep(5)  # Testing
     # ret = os.system("git pull origin master") # Uncomment to update
     if ret == 0:
         logger.info("System update")
-        return make_response('', 200)
+        return make_response("", 200)
     else:
-        return make_response('', 403)
+        return make_response("", 403)
 
 
 @app.route("/apply_time", methods=["POST"])
@@ -408,8 +410,8 @@ def apply_time():
     time = content["set-time"]
 
     # Reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
-    date = '-'.join(date.split('-')[::-1])
-    datetime_set = date + ' ' + time
+    date = "-".join(date.split("-")[::-1])
+    datetime_set = date + " " + time
     set_systime(datetime_set)
 
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
@@ -417,9 +419,9 @@ def apply_time():
     input_queue.put(json.dumps(fmt_datetime))
 
     return (
-        json.dumps({'success': True}),
+        json.dumps({"success": True}),
         200,
-        {'ContentType': 'application/json'}
+        {"ContentType": "application/json"},
     )
 
 
@@ -432,9 +434,9 @@ def calibration(param):
         command = json.dumps({"calibrate": 7})
         input_queue.put(command)
     return (
-        json.dumps({'success': True}),
+        json.dumps({"success": True}),
         200,
-        {'ContentType': 'application/json'}
+        {"ContentType": "application/json"},
     )
 
 
@@ -443,7 +445,7 @@ def download(param):
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
         logger.error("download/" + param + ": USB-device not found")
-        return make_response('', 403)
+        return make_response("", 403)
     usb_path = "/media/pi/" + media_dir[0]
     if param == "log":
         try:
@@ -451,8 +453,8 @@ def download(param):
         except Exception as err:
             logger.error("download/" + param + ": Copy error")
             logger.error(err)
-            return make_response('', 500)
-        return make_response('', 200)
+            return make_response("", 500)
+        return make_response("", 200)
     elif param == "video":
         if os.path.exists("./static/img/timelapse.mp4"):
             try:
@@ -460,11 +462,11 @@ def download(param):
             except Exception as err:
                 logger.error("download/" + param + ": Copy error")
                 logger.error(err)
-                return make_response('', 500)
-            return make_response('', 200)
+                return make_response("", 500)
+            return make_response("", 200)
         else:
             logger.error("download/" + param + ": Video not exist")
-            return make_response('', 404)
+            return make_response("", 404)
 
 
 @app.route("/extract_usb")
@@ -472,30 +474,30 @@ def extract_usb():
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
         logger.error("extract_usb: USB-device not found")
-        return make_response('', 403)
-    command = ['sudo', 'umount', '/dev/sda1']
+        return make_response("", 403)
+    command = ["sudo", "umount", "/dev/sda1"]
     try:
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as err:
         logger.error("extract_usb: umount error", err)
-        return make_response('', 500)
-    return make_response('', 200)
+        return make_response("", 500)
+    return make_response("", 200)
 
 
 @app.route("/shutdown/<param>")
 def shutdown(param):
     stop_ser_thread()
-    shutdown_server = request.environ.get('werkzeug.server.shutdown')
+    shutdown_server = request.environ.get("werkzeug.server.shutdown")
     if shutdown_server is None:
         raise RuntimeError("Shutdown server is not available")
     else:
         shutdown_server()
         if param == "reboot":
             os.system("sleep 20 && sudo reboot &")
-            return make_response('', 200)
+            return make_response("", 200)
         elif param == "shutdown":
             os.system("sleep 20 && sudo shutdown -h now &")
-            return make_response('', 200)
+            return make_response("", 200)
 
 
 # Charts pages
@@ -507,26 +509,26 @@ def charts():
 
 @app.route("/charts/<param>")
 def temp_chart(param):
-    if param == 'temp':
-        template_data = {'label': "Температура", 'banner': "температуры"}
+    if param == "temp":
+        template_data = {"label": "Температура", "banner": "температуры"}
         title = "Журнал температуры"
-    if param == 'acidity':
+    if param == "acidity":
         template_data = {
-            'label': "Уровень кислотности pH",
-            'banner': "уровня кислотности pH"
+            "label": "Уровень кислотности pH",
+            "banner": "уровня кислотности pH",
         }
         title = "Журнал уровня кислотности"
-    if param == 'saline':
-        template_data = {'label': "Уровень солей", 'banner': "уровня солей"}
+    if param == "saline":
+        template_data = {"label": "Уровень солей", "banner": "уровня солей"}
         title = "Журнал уровня солей"
-    if param == 'carbon':
-        template_data = {'label': "Уровень CO2", 'banner': "уровня CO2"}
+    if param == "carbon":
+        template_data = {"label": "Уровень CO2", "banner": "уровня CO2"}
         title = "Журнал концентрации углекислого газа"
     return render_template(
         "charts/month_chart.html",
         param=param,
         title=title,
-        goback='/charts',
+        goback="/charts",
         **template_data
     )
 
@@ -534,28 +536,28 @@ def temp_chart(param):
 @app.route("/charts/draw_chart", methods=["POST"])
 def draw_chart():
     if request.json:
-        param = request.json['param']
-        period = request.json['period']
+        param = request.json["param"]
+        period = request.json["period"]
         if period:
-            if period == 'hour':
+            if period == "hour":
                 error, data, labels = hour_data(param=[param])
-            if period == 'day':
+            if period == "day":
                 error, data, labels = day_data(param=[param])
-            if period == 'week':
+            if period == "week":
                 error, data, labels = week_data(param=[param])
-            if period == 'month':
+            if period == "month":
                 error, data, labels = month_data(param=[param])
 
             template_data = {
-                'error': error,
-                'labels': labels,
-                'data': data,
-                'param': param,
+                "error": error,
+                "labels": labels,
+                "data": data,
+                "param": param,
             }
             return (
                 json.dumps(template_data),
                 200,
-                {'ContentType': 'application/json'}
+                {"ContentType": "application/json"},
             )
 
 
@@ -575,10 +577,7 @@ def select_plant(plant):
         title = "Фасоль"
     elif plant == "oats":
         title = "Oвёс"
-    template_data = {
-        'title': title,
-        'goback': "/info",
-    }
+    template_data = {"title": title, "goback": "/info"}
     return render_template(ret_val, **template_data)
 
 
@@ -655,9 +654,7 @@ def insert_data_into_db(temp, ph, tds, co2, lvl):
     )
     array_pivot += 1
     if array_pivot == ARRAY_LEN:
-        s = tuple(
-            [round(sum(x) / ARRAY_LEN, 2) for x in zip(*circular_array)]
-        )
+        s = tuple([round(sum(x) / ARRAY_LEN, 2) for x in zip(*circular_array)])
         sql.insert_sensors(
             temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl
         )
@@ -791,7 +788,7 @@ def sigint_handler(signum, frame):
 
 if __name__ == "__main__":
 
-    temp, ph, tds, co2, lvl = ('0', '0', '0', '0', '0')
+    temp, ph, tds, co2, lvl = ("0", "0", "0", "0", "0")
     input_queue = queue.Queue(1)
 
     ARRAY_LEN = 600
@@ -813,7 +810,7 @@ if __name__ == "__main__":
     logger.info("Server started")
 
     # Create database for sensors and activities
-    sql = sqlite.Sqlite('./sensorsData.db')
+    sql = sqlite.Sqlite("./sensorsData.db")
     # Create sensors and activity tables in database
     sql.create_sensors()
     sql.create_activity()
@@ -831,4 +828,4 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, sigint_handler)
 
-    app.run(host='0.0.0.0', debug=False, threaded=True)
+    app.run(host="0.0.0.0", debug=False, threaded=True)

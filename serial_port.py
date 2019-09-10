@@ -9,8 +9,9 @@ class SerialPort:
 
     def open(self):
         try:
-            self.sp = serial.Serial(self.serial_port, self.baudrate,
-                                    timeout=self.timeout)
+            self.sp = serial.Serial(
+                self.serial_port, self.baudrate, timeout=self.timeout
+            )
             self.sp.flushInput()
         except serial.SerialException:
             raise
@@ -19,7 +20,7 @@ class SerialPort:
         self.sp.close()
 
     def read_serial(self):
-        return self.sp.readline().decode('utf-8')
+        return self.sp.readline().decode("utf-8")
 
     def write_serial(self, data):
         self.sp.write(data)
