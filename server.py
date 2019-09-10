@@ -1,22 +1,31 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, make_response, request, Markup, Response
-import os, datetime, random, json, time, sys, shutil
-from datetime import datetime
-import serial_port, threading, queue
-import sqlite
+# Standard library imports
+import os
+import sys
 import signal
 import subprocess
-import logging
+import shutil
+import threading
+import queue
 import random
+import json
+import time
+import logging
+from datetime import datetime
+
+# Third party imports
+from flask import Flask, render_template, make_response, request, Markup
 import requests
 from requests.exceptions import HTTPError
-
-sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
-os.chdir("/home/pi/Projects/Test1/GrowBox/") # For autostart change path
-
-import usb_camera
 from crontab import CronTab
+
+# Local application imports
+import usb_camera
+import serial_port
+import sqlite
+
+os.chdir("/home/pi/Projects/Test1/GrowBox/")  # For autostart change path
 
 app = Flask(__name__)
 
@@ -31,7 +40,8 @@ def index():
 # Return measurements page
 @app.route("/measurements")
 def measurements():
-    return render_template("measurements/measurements.html", title='Измерения', goback='/index')
+    template_data = {"title": "Измерения", "goback": "/index"}
+    return render_template("measurements/measurements.html", **template_data)
 
 
 # Return a specific sensor measurement
@@ -58,7 +68,6 @@ def spec_measurements(param):
 
 
 # Return dynamic measurements
-###############################################
 @app.route("/temp_measure")
 def temp_meas():
     with lock:
@@ -85,14 +94,13 @@ def co2_meas():
     with lock:
         ret_val = str(co2)
     return ret_val
-#################################################
 
 
 # Camera control
-#################################################
 @app.route("/camera")
 def camera():
-    return render_template("camera/camera.html", title='Камера', goback='/index')
+    template_data = {"title": "Камера", "goback": "/index"}
+    return render_template("camera/camera.html", **template_data)
 
 
 @app.route("/camera/photo")
@@ -103,33 +111,34 @@ def photo():
     img2_name = "img2.jpg?" + str(random.random())
     if img1_exist and img2_exist:
         template_data = {
-            'img1' : img1_name,
-            'img2' : img2_name,
-            'pad1' : "0px",
-            'pad2' : "0px",
+            'img1': img1_name,
+            'img2': img2_name,
+            'pad1': "0px",
+            'pad2': "0px",
         }
     elif img1_exist and not img2_exist:
         template_data = {
-            'img1' : img1_name,
-            'img2' : "Camera.png",
-            'pad1' : "0px",
-            'pad2' : "50px 120px",
+            'img1': img1_name,
+            'img2': "Camera.png",
+            'pad1': "0px",
+            'pad2': "50px 120px",
         }
     elif not img1_exist and img2_exist:
         template_data = {
-            'img1' : "Camera.png",
-            'img2' : img2_name,
-            'pad1' : "50px 120px",
-            'pad2' : "0px"
+            'img1': "Camera.png",
+            'img2': img2_name,
+            'pad1': "50px 120px",
+            'pad2': "0px"
         }
     else:
         template_data = {
-            'img1' : "Camera.png",
-            'img2' : "Camera.png",
-            'pad1' : "50px 120px",
-            'pad2' : "50px 120px",
+            'img1': "Camera.png",
+            'img2': "Camera.png",
+            'pad1': "50px 120px",
+            'pad2': "50px 120px",
         }
-    return render_template("camera/photo.html", title='Фото', goback='/camera', **template_data)
+    template_data.update({"title": "Фото", "goback": "/camera"})
+    return render_template("camera/photo.html", **template_data)
 
 
 @app.route("/make_photo/<img>")
@@ -167,12 +176,12 @@ def video():
     video_exist = os.path.isfile("./static/img/timelapse.mp4")
     video_path = "/static/img/timelapse.mp4?" + str(random.random())
     template_data = {
-                'title' : "Видео",
-                'goback' : "/camera",
-                'recStatus': record_status,
-                'recMess' : record_message,
-                'videoExist' : video_exist,
-                'videoPath' : video_path,
+        "title": "Видео",
+        "goback": "/camera",
+        "recStatus": record_status,
+        "recMess": record_message,
+        "videoExist": video_exist,
+        "videoPath": video_path,
     }
     return render_template("camera/video.html", **template_data)
 
@@ -192,7 +201,9 @@ def start_record():
     for job in my_cron:
         if job.comment == "Growbox":
             return make_response('', 403)
-    job = my_cron.new(command="/home/pi/Projects/Test1/GrowBox/usb_camera.py", comment="Growbox") #there will be new path
+    curr_dir = os.getcwd()
+    command = curr_dir + "/usb_camera.py"
+    job = my_cron.new(command=command, comment="Growbox")
     job.every(1).hours()
     my_cron.write()
     return make_response('', 200)
@@ -212,7 +223,7 @@ def finish_record():
 @app.route("/remove_frames")
 def remove_frames():
     if len(os.listdir("/home/pi/Pictures")) == 0:
-        print("Pictures directory is empty")
+        logger.debug("Pictures directory is empty")
         return make_response('', 403)
     try:
         command = "rm -f /home/pi/Pictures/*"
@@ -229,7 +240,8 @@ def remove_frames():
 def remove_video():
     if os.path.exists("./static/img/timelapse.mp4"):
         try:
-            subprocess.run(["rm", "-f", "./static/img/timelapse.mp4"], check=True)
+            command = ["rm", "-f", "./static/img/timelapse.mp4"]
+            subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
             logger.error("remove_video: Delete error", err)
             return make_response('', 500)
@@ -243,8 +255,12 @@ def remove_video():
 @app.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
-        command = ["ffmpeg", "-y", "-r", "10", "-i", "/home/pi/Pictures/%*.jpg", "-r",
-                   "10", "-vcodec", "libx264", "-vf", "scale=480:320", "./static/img/timelapse.mp4"]
+        command = [
+                "ffmpeg", "-y", "-r", "10", "-i",
+                "/home/pi/Pictures/%*.jpg", "-r",
+                "10", "-vcodec", "libx264", "-vf",
+                "scale=480:320", "./static/img/timelapse.mp4"
+        ]
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
@@ -254,15 +270,19 @@ def make_video():
             logger.info("make_video: Video is created")
             return make_response('', 200)
     return make_response('', 403)
-##################################################
 
 
-############## GrowBox settings ##################
+# GrowBox settings
 @app.route("/settings")
 def settings():
     row = sql.select_activity()
     data = Markup(row[0][0])
-    return render_template("/settings/settings.html", jsonStr=data, title='Управление', goback='/index')
+    return render_template(
+        "/settings/settings.html",
+        json_str=data,
+        title='Управление',
+        goback='/index'
+    )
 
 
 @app.route("/accept_settings", methods=["POST"])
@@ -270,14 +290,18 @@ def accept_setting():
     content = request.json
     input_queue.put(str(content))
     sql.update_activity(str(content))
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-###################################################
+    return (
+        json.dumps({'success': True}),
+        200,
+        {'ContentType': 'application/json'}
+    )
 
 
-############## Teacher settings ###################
+# Teacher settings
 @app.route("/login")
 def secret_page():
-    return render_template('/settings/login.html', title='Регистрация', goback='/index')
+    template_data = {"title": "Регистрация", "goback": "/index"}
+    return render_template('/settings/login.html', **template_data)
 
 
 @app.route("/lock")
@@ -290,13 +314,18 @@ def log_in():
     content = request.json
     passwd = content["passwd"]
     if passwd == "2486":
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        return (
+            json.dumps({'success': True}),
+            200,
+            {'ContentType': 'application/json'}
+        )
     return make_response('', 403)
 
 
 @app.route("/teacher_page")
 def teacher_page():
-    return render_template('/settings/teacher_settings.html', title='Настройки', goback='/index')
+    template_data = {"title": "Настройки", "goback": "/index"}
+    return render_template('/settings/teacher_settings.html', **template_data)
 
 
 @app.route("/teacher_page/<settings>")
@@ -315,8 +344,8 @@ def teacher_settings(settings):
     elif settings == "shutdown_page":
         title = "Завершение работы"
     template_data = {
-        'title' : title,
-        'goback' : "/teacher_page",
+        'title': title,
+        'goback': "/teacher_page",
     }
     return render_template(ret_val, **template_data)
 
@@ -327,28 +356,44 @@ def apply_net_settings():
     login = content["login"]
     passwd = content["passwd"]
 
-    settings_str = ("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n" +
-                    "update_config=1\n" +
-                    "country=RU\n")
+    settings_str = (
+        "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n"
+        + "update_config=1\n"
+        + "country=RU\n"
+    )
     with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as file:
         file.write(settings_str)
-        file.write('\nnetwork={\n\tssid="'+ login +'"\n\tpsk="' + passwd + '"\n\tkey_mgmt=WPA-PSK\n}\n')
+        file.write(
+            '\nnetwork={\n\tssid="'
+            + login
+            + '"\n\tpsk="'
+            + passwd
+            + '"\n\tkey_mgmt=WPA-PSK\n}\n'
+        )
 
     os.system("wpa_cli -i wlan0 reconfigure")
     time.sleep(10)
     if is_connected():
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        return (
+            json.dumps({'success': True}),
+            200,
+            {'ContentType': 'application/json'}
+        )
     else:
-        return json.dumps({'success':False}), 403, {'ContentType':'application/json'}
+        return (
+            json.dumps({'success': False}),
+            403,
+            {'ContentType': 'application/json'}
+        )
 
 
 @app.route("/update_system")
 def update_system():
     if not is_connected():
         return make_response('', 403)
-    ret = os.system("echo Update") # Testing
-    time.sleep(5) # Testing
-    #ret = os.system("git pull origin master") # Uncomment to update
+    ret = os.system("echo Update")  # Testing
+    time.sleep(5)  # Testing
+    # ret = os.system("git pull origin master") # Uncomment to update
     if ret == 0:
         logger.info("System update")
         return make_response('', 200)
@@ -368,21 +413,29 @@ def apply_time():
     set_systime(datetime_set)
 
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
-    fmt_datetime = {"setTime"  : datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
+    fmt_datetime = {"setTime": datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
     input_queue.put(json.dumps(fmt_datetime))
 
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return (
+        json.dumps({'success': True}),
+        200,
+        {'ContentType': 'application/json'}
+    )
 
 
 @app.route("/calibration/<param>")
 def calibration(param):
     if param == "four":
-        command = json.dumps({"calibrate" : 4})
+        command = json.dumps({"calibrate": 4})
         input_queue.put(command)
     if param == "seven":
-        command = json.dumps({"calibrate" : 7})
+        command = json.dumps({"calibrate": 7})
         input_queue.put(command)
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    return (
+        json.dumps({'success': True}),
+        200,
+        {'ContentType': 'application/json'}
+    )
 
 
 @app.route("/download/<param>")
@@ -395,16 +448,18 @@ def download(param):
     if param == "log":
         try:
             shutil.copy("./growbox.log", usb_path)
-        except Exception as e:
+        except Exception as err:
             logger.error("download/" + param + ": Copy error")
+            logger.error(err)
             return make_response('', 500)
         return make_response('', 200)
     elif param == "video":
         if os.path.exists("./static/img/timelapse.mp4"):
             try:
                 shutil.copy("./static/img/timelapse.mp4", usb_path)
-            except Exception as e:
+            except Exception as err:
                 logger.error("download/" + param + ": Copy error")
+                logger.error(err)
                 return make_response('', 500)
             return make_response('', 200)
         else:
@@ -443,14 +498,11 @@ def shutdown(param):
             return make_response('', 200)
 
 
-###################################################
-
-################ Charts pages #####################
-
-
+# Charts pages
 @app.route("/charts")
 def charts():
-    return render_template("charts/charts.html", title='Журнал', goback='/index')
+    template_data = {"title": "Журнал", "goback": "/index"}
+    return render_template("charts/charts.html", **template_data)
 
 
 @app.route("/charts/<param>")
@@ -459,7 +511,10 @@ def temp_chart(param):
         template_data = {'label': "Температура", 'banner': "температуры"}
         title = "Журнал температуры"
     if param == 'acidity':
-        template_data = {'label': "Уровень кислотности pH", 'banner': "уровня кислотности pH"}
+        template_data = {
+            'label': "Уровень кислотности pH",
+            'banner': "уровня кислотности pH"
+        }
         title = "Журнал уровня кислотности"
     if param == 'saline':
         template_data = {'label': "Уровень солей", 'banner': "уровня солей"}
@@ -467,7 +522,13 @@ def temp_chart(param):
     if param == 'carbon':
         template_data = {'label': "Уровень CO2", 'banner': "уровня CO2"}
         title = "Журнал концентрации углекислого газа"
-    return render_template("charts/month_chart.html", param=param, title=title, goback='/charts', **template_data)
+    return render_template(
+        "charts/month_chart.html",
+        param=param,
+        title=title,
+        goback='/charts',
+        **template_data
+    )
 
 
 @app.route("/charts/draw_chart", methods=["POST"])
@@ -477,25 +538,32 @@ def draw_chart():
         period = request.json['period']
         if period:
             if period == 'hour':
-                error, data, labels = hour_data(param = [param])
+                error, data, labels = hour_data(param=[param])
             if period == 'day':
-                error, data, labels = day_data(param = [param])
+                error, data, labels = day_data(param=[param])
             if period == 'week':
-                error, data, labels = week_data(param = [param])
+                error, data, labels = week_data(param=[param])
             if period == 'month':
-                error, data, labels = month_data(param = [param])
+                error, data, labels = month_data(param=[param])
 
-            template_data = {'error': error, 'labels': labels, 'data': data, 'param': param}
-            return json.dumps(template_data), 200, {'ContentType':'application/json'}
+            template_data = {
+                'error': error,
+                'labels': labels,
+                'data': data,
+                'param': param,
+            }
+            return (
+                json.dumps(template_data),
+                200,
+                {'ContentType': 'application/json'}
+            )
 
 
-###################################################
-
-############## About plants #######################
-
+# About plants
 @app.route("/info")
 def info():
-    return render_template("/info/info.html", title='Справка', goback='/index')
+    template_data = {"title": "Справка", "goback": "/index"}
+    return render_template("/info/info.html", **template_data)
 
 
 @app.route("/info/<plant>")
@@ -522,7 +590,9 @@ def dynamic_temp():
 def month_data(param):
     now = int(datetime.timestamp(datetime.now()))
     prev_month = now - 2592000
-    error, data, labels = prepare_data(param, prev_month, now, 2592000 // ARRAY_LEN)
+    error, data, labels = prepare_data(
+        param, prev_month, now, 2592000 // ARRAY_LEN
+    )
     labels = [datetime.fromtimestamp(x).strftime("%d.%m") for x in labels]
     return error, data, labels
 
@@ -530,7 +600,9 @@ def month_data(param):
 def week_data(param):
     now = int(datetime.timestamp(datetime.now()))
     prev_week = now - 604800
-    error, data, labels = prepare_data(param, prev_week, now, 604800 // ARRAY_LEN)
+    error, data, labels = prepare_data(
+        param, prev_week, now, 604800 // ARRAY_LEN
+    )
     labels = [datetime.fromtimestamp(x).strftime("%d.%m %Hh") for x in labels]
     return error, data, labels
 
@@ -538,7 +610,9 @@ def week_data(param):
 def day_data(param):
     now = int(datetime.timestamp(datetime.now()))
     prev_day = now - 86400
-    error, data, labels = prepare_data(param, prev_day, now, 86400 // ARRAY_LEN)
+    error, data, labels = prepare_data(
+        param, prev_day, now, 86400 // ARRAY_LEN
+    )
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
@@ -546,13 +620,17 @@ def day_data(param):
 def hour_data(param):
     now = int(datetime.timestamp(datetime.now()))
     prev_hour = now - 3600
-    error, data, labels = prepare_data(param, prev_hour, now, 3600 // ARRAY_LEN)
+    error, data, labels = prepare_data(
+        param, prev_hour, now, 3600 // ARRAY_LEN
+    )
     labels = [datetime.fromtimestamp(x).strftime("%H:%M") for x in labels]
     return error, data, labels
 
 
 def prepare_data(param, from_time, to_time, limit):
-    data = sql.select_sensors(param, from_time=from_time, to_time=to_time, limit=limit)
+    data = sql.select_sensors(
+        param, from_time=from_time, to_time=to_time, limit=limit
+    )
 
     if len(data) == 0:
         error = "Нет данных"
@@ -569,11 +647,20 @@ def prepare_data(param, from_time, to_time, limit):
 def insert_data_into_db(temp, ph, tds, co2, lvl):
     global array_pivot, circular_array
 
-    circular_array[array_pivot] = (float(temp), float(ph), float(tds), float(co2))
+    circular_array[array_pivot] = (
+        float(temp),
+        float(ph),
+        float(tds),
+        float(co2),
+    )
     array_pivot += 1
     if array_pivot == ARRAY_LEN:
-        s = tuple([round(sum(x)/ARRAY_LEN, 2) for x in zip(*circular_array)])
-        sql.insert_sensors(temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl)
+        s = tuple(
+            [round(sum(x) / ARRAY_LEN, 2) for x in zip(*circular_array)]
+        )
+        sql.insert_sensors(
+            temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl
+        )
         array_pivot = 0
 
 
@@ -617,7 +704,7 @@ def read_arduino():
         logger.error(err)
         return
 
-    data = {"temp" : 0, "carb" : 0, "acid" : 0, "salin" : 0, "level" : 0}
+    data = {"temp": 0, "carb": 0, "acid": 0, "salin": 0, "level": 0}
     empty_loop_count = 0
     reconnect_count = 0
     first_data_pack_flag = False
@@ -647,7 +734,9 @@ def read_arduino():
             logger.info("Try to reconnect")
             reconnect_count += 1
             if reconnect_count > 3:
-                logger.info("Reconnection limit. Please restart your computer.")
+                logger.info(
+                    "Reconnection limit. Please restart your computer."
+                )
                 sys.exit(1)
             time.sleep(10)
             arduino_path = auto_detect_serial()
@@ -676,6 +765,7 @@ def read_arduino():
 
 def auto_detect_serial():
     import glob
+
     path = glob.glob("/dev/ttyACM*")
     if len(path) > 0:
         return path[0]
@@ -683,8 +773,8 @@ def auto_detect_serial():
         return None
 
 
-def set_systime(datetime):
-    os.system("sudo date --set='" + datetime + "'")
+def set_systime(date_time):
+    os.system("sudo date --set='" + date_time + "'")
 
 
 def stop_ser_thread():
