@@ -1,64 +1,14 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/camera.css">
-<link rel="stylesheet" href="../../static/css/confirm.css">
+<link rel="stylesheet" href="/static/css/camera.css">
+<link rel="stylesheet" href="/static/css/confirm.css">
 {% endblock %}
 
 {% block scriptsSection %}
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="../static/js/confirm.js"></script>
-<script>
-		function request_photo(url, id) {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', url, true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-
-				if (xhr.status == 200) {
-					var img = new Image(480, 320);
-					var placeid;
-					if (id == 'image1') {
-						img.src = "../../static/img/img1.jpg?" + Math.random();
-						placeid = "place1";
-                        img.onclick = function() {request_photo('/make_photo/img1', 'image1')};
-					} else if (id == 'image2') {
-						img.src = "../../static/img/img2.jpg?" + Math.random();
-						placeid = "place2";
-                        img.onclick = function() {request_photo('/make_photo/img2', 'image2')};
-					}
-                    img.style["border"] ="3px double black";
-					img.onload = function () {
-						document.getElementById(placeid).removeChild(document.getElementById(id));
-						document.getElementById(placeid).appendChild(img);
-                        document.getElementById(placeid).children[0].setAttribute("id", id);
-					}
-				} else if (xhr.status == 403) {
-					Alert("Предупреждение!", "Камера недоступна. Проверьте подключение камеры.");
-				}
-			}
-		}
-
-		function clearPhoto() {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', '/clear_photo', true);
-			xhr.send();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState != 4) return;
-
-				if (xhr.status != 200) {
-					alert(xhr.status + ': ' + xhr.statusText);
-				} else {
-					location.reload(true);
-				}
-			}
-		}
-
-		$('#clear-button').click(function () {
-	        Confirm('Удалить снимки', 'Вы действительно хотите удалить снимки?', 'Да', 'Нет', clearPhoto);
-		});
-</script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/camera/photo.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -67,12 +17,12 @@
         <div class="col">
             <!-- Сделать 1-ый снимок -->
 		    <div class="row pt-2 pb-3 d-flex justify-content-center" id="place1">
-                <img src= "../../static/img/{{img1}}" alt="Фотография №1" id="image1" width="480" height="320" style="padding:{{pad1}}; border: 3px double black;" onclick="request_photo('/make_photo/img1', 'image1')">
+                <img src= "/static/img/{{img1}}" alt="Фотография №1" id="image1" width="480" height="320" style="padding:{{pad1}}; border: 4px double black;">
 		    </div>
 
 		    <!-- Сделать 2-ой снимок -->
 		    <div class="row pt-3 pb-4 d-flex justify-content-center" id="place2">
-                <img src= "../../static/img/{{img2}}" alt="Фотография №2" id="image2" width="480" height="320" style="padding:{{pad2}}; border: 4px double black;" onclick="request_photo('/make_photo/img2', 'image2')">
+                <img src= "/static/img/{{img2}}" alt="Фотография №2" id="image2" width="480" height="320" style="padding:{{pad2}}; border: 4px double black;">
 		    </div>
 
 		    <div class="row py-2">

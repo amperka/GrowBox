@@ -158,8 +158,15 @@ def make_photo(img):
 
 @app.route("/clear_photo")
 def clear_photo():
-    os.system("rm -f ./static/img/img*")
-    return make_response("", 200)
+    command = "rm -f ./static/img/img*"
+    try:
+        subprocess.run(command, shell=True, check=True)
+    except subprocess.CalledProcessError as err:
+        logger.error("clear_photo: Delete error", err)
+        return make_response("", 403)
+    else:
+        logger.info("clear_photo: Frames successfully deleted")
+        return make_response("", 200)
 
 
 @app.route("/camera/video")
