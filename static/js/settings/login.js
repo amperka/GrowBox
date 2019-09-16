@@ -14,12 +14,12 @@ function sendPasswd() {
         }, 3000);
     })
     .done(function() {
-        window.location.href="/teacher_page";
+        window.location.href = "/teacher_page";
     });
 }
 
-$("#password").click(function () {
-    openKeyboard();
-});
+numKeyboardModule.createKeyboard("#password", "dark");
 
-createNumKeyboard("#password", "dark");
+$("#password").click(function () {
+    numKeyboardModule.openKeyboard();
+});
