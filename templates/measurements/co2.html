@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<link rel="stylesheet" href="../../static/css/canvas.css">
+<link rel="stylesheet" href="/static/css/canvas.css">
 {% endblock %}
 
 {% block scriptsSection %}
-<script src="../static/js/node_modules/canvas-gauges/gauge.min.js"></script>
-<script src="../static/js/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="../static/js/node_modules/chart.js/dist/Chart.js"></script>
-<script src="../static/js/update_page.js"></script>
+<script src="/static/js/node_modules/canvas-gauges/gauge.min.js"></script>
+<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/static/js/node_modules/chart.js/dist/Chart.js"></script>
+<script src="/static/js/update_page.js"></script>
 
 <script>
-    var url = "/co2_measure";
+    const url = "/co2_measure";
     getReading(url);
 </script>
 {% endblock %}
