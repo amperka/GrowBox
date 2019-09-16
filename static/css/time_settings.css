@@ -1,0 +1,20 @@
+.dtpicker-content {
+    max-width: 550px;
+}
+.dtpicker-header .dtpicker-title {
+    font-size: 2.2em;
+}
+.dtpicker-header .dtpicker-value {
+    font-size: 2em;
+}
+.dtpicker-components {
+    font-size: 2em;
+}
+.dtpicker-buttonCont .dtpicker-button {
+    font-size: 2em;
+    background: rgb(0, 123, 255);
+    color: rgb(255, 255, 255) !important;
+    border-radius: .3rem;
+    border-color: rgb(0, 123, 255);
+}
+
