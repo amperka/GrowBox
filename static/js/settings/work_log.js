@@ -4,7 +4,7 @@ function downloadLogs() {
         msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#msg-box", msg);
         },
     };
     request("/download/log", downloadMsg, true);
@@ -16,20 +16,12 @@ function extractUsb() {
         msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#msg-box", msg);
         },
     };
     request("/extract_usb", extractMsg, false);
 }
 
-function addMsgToDiv(msg) {
-	let div = document.getElementById("msg-box");
-	div.innerHTML = msg;
-	$("#msg-box").fadeIn();
-	setTimeout(function() {
-		$("#msg-box").fadeOut();
-	}, 4000);
-}
 
 $("#download-button").click(function() {
     Confirm("Скачать журнал", "Вы действительно хотите скачать журнал?", "Да", "Нет", downloadLogs);

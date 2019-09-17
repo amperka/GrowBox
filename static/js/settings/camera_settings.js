@@ -4,7 +4,7 @@ function removeFrames() {
         msgNo: "Кадры отсутствуют",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#camera-msg",msg);
         },
     };
     request("/remove_frames", removeFrameMsg, false);
@@ -16,7 +16,7 @@ function removeVideo() {
         msgNotFound: "Видеозапись не найдена.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#camera-msg", msg);
         },
     };
     request("/remove_video", removeVideoMsg, false);
@@ -29,7 +29,7 @@ function downloadVideo() {
         msgNotFound: "Видеозапись не найдена. Создайте видеозапись.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#camera-msg", msg);
         },
     };
     request("/download/video", downloadVideoMsg, true);
@@ -41,20 +41,12 @@ function extractUsb() {
         msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
         callback: function(msg) {
-            addMsgToDiv(msg);
+            addMsgToDiv("#camera-msg", msg);
         },
     };
     request("/extract_usb", extractMsg, false);
 }
 
-function addMsgToDiv(msg) {
-	let div = document.getElementById("camera-msg");
-	div.innerHTML = msg;
-	$("#camera-msg").fadeIn();
-	setTimeout(function() {
-		$("#camera-msg").fadeOut();
-	}, 4000);
-}
 
 $("#del-img-button").click(function () {
     Confirm("Удалить кадры", "Вы действительно хотите удалить кадры камеры?", "Да", "Нет", removeFrames);

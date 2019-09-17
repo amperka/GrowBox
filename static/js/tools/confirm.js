@@ -55,3 +55,12 @@ function Alert(title, msg) {
 	      });
       });
 }
+
+function addMsgToDiv(selector, msg) {
+	$(selector).html(msg);
+	$(selector).fadeIn();
+	setTimeout(function() {
+		$(selector).fadeOut();
+	}, 4000);
+}
+
