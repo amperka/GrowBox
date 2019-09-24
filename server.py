@@ -25,7 +25,6 @@ import usb_camera
 import serial_port
 import sqlite
 
-os.chdir("/home/pi/Projects/Test1/GrowBox/")  # For autostart change path
 
 app = Flask(__name__)
 
@@ -502,10 +501,9 @@ def shutdown(param):
         shutdown_server()
         if param == "reboot":
             os.system("sleep 10 && sudo reboot &")
-            return make_response("", 200)
         elif param == "shutdown":
             os.system("sleep 10 && sudo shutdown -h now &")
-            return make_response("", 200)
+        return make_response("", 200)
 
 
 # Charts pages
