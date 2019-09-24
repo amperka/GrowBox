@@ -1,60 +1,68 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/camera.css">
-<link rel="stylesheet" href="/static/css/preloader.css">
-<link rel="stylesheet" href="/static/css/confirm.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/camera.css" />
+<link rel="stylesheet" href="/static/css/preloader.css" />
+<link rel="stylesheet" href="/static/css/confirm.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/tools/confirm.js"></script>
 <script src="/static/js/camera/video.js" type="module"></script>
 <script src="/static/js/tools/request.js" type="module"></script>
 <script src="/static/js/tools/response.js" type="module"></script>
 <script>
-    {% if recStatus %}
-        $('#recButton').addClass("Rec");
-    {% else %}
-        $('#recButton').addClass("notRec");
-    {% endif %}
+  {% if recStatus %}
+      $('#recButton').addClass("Rec");
+  {% else %}
+      $('#recButton').addClass("notRec");
+  {% endif %}
 </script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
+  <div class="row">
+    <div class="col">
+      <div class="row py-4 d-flex justify-content-center">
+        <p class="h2" id="recMess">{{recMess}}</p>
+      </div>
 
-	        <div class="row py-4 d-flex justify-content-center">
-                <p class="h2" id="recMess">{{recMess}}</p>
-            </div>
+      <div class="row py-4 d-flex justify-content-center">
+        <button id="recButton"></button>
+      </div>
 
-	        <div class="row py-4 d-flex justify-content-center">
-		        <button id="recButton"></button>
-	        </div>
+      <div class="row py-4 d-flex justify-content-center" id="image-place">
+        {% if videoExist %}
+        <video
+          width="480"
+          height="320"
+          controls
+          disablePictureInPicture
+          controlsList="nodownload noremoteplayback"
+        >
+          <source src="{{videoPath}}" />
+        </video>
+        {% else %}
+        <img
+          src="/static/img/Video.png"
+          alt="Видео"
+          width="480"
+          height="320"
+          style="padding:10px 80px; border: 3px double black;"
+        />
+        {% endif %}
+      </div>
 
-	        <div class="row py-4 d-flex justify-content-center" id=image-place>
-            {% if videoExist %}
-                <video width="480" height="320" controls disablePictureInPicture controlsList="nodownload noremoteplayback">
-                    <source src="{{videoPath}}">
-                </video>
-            {% else %}
-                <img src="/static/img/Video.png" alt="Видео" width="480" height="320" style="padding:10px 80px; border: 3px double black;">
-            {% endif %}
-	        </div>
+      <div class="row py-4 d-flex justify-content-center">
+        <button
+          type="button"
+          class="btn btn-primary btn-lg btn-block p-3"
+          id="make-button"
+        >
+          <p class="h2">Смонтировать</p>
+        </button>
+      </div>
 
-            <div class="row py-4 d-flex justify-content-center">
-                <button type="button" class="btn btn-primary btn-lg btn-block p-3" id="make-button">
-                    <p class="h2">Смонтировать</p>
-                </button>
-            </div>
-
-            <div class="row py-4 d-flex justify-content-center">
-		        <div id="preloader"></div>
-	        </div>
-
-        </div>
+      <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

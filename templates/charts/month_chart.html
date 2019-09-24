@@ -1,51 +1,67 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container-fluid">
-    <div class="col">
-        <div class="row">
-            <div class="col d-flex justify-content-center">
-                <div class="custom-control custom-radio">
-                    <input class="custom-control-input" type="radio" id="period-hour" name="period">
-                    <label class="custom-control-label" for="period-hour">Час</label>
-                </div>
-            </div>
-
-            <div class="col d-flex justify-content-center">
-                <div class="custom-control custom-radio">
-                    <input class="custom-control-input" type="radio" id="period-day" name="period">
-                    <label class="custom-control-label" for="period-day">День</label>
-                </div>
-            </div>
-
-            <div class="col d-flex justify-content-center">
-                <div class="custom-control custom-radio">
-                    <input class="custom-control-input" type="radio" id="period-week" name="period">
-                    <label class="custom-control-label" for="period-week">Неделя</label>
-                </div>
-            </div>
-
-            <div class="col d-flex justify-content-center">
-                <div class="custom-control custom-radio">
-                    <input class="custom-control-input" type="radio" id="period-month" name="period">
-                    <label class="custom-control-label" for="period-month">Месяц</label>
-                </div>
-            </div>
+  <div class="col">
+    <div class="row">
+      <div class="col d-flex justify-content-center">
+        <div class="custom-control custom-radio">
+          <input
+            class="custom-control-input"
+            type="radio"
+            id="period-hour"
+            name="period"
+          />
+          <label class="custom-control-label" for="period-hour">Час</label>
         </div>
-        <div class="row d-flex justify-content-center mt-5">
-            <canvas id="month_chart" width="570" height="480"></canvas>
+      </div>
+
+      <div class="col d-flex justify-content-center">
+        <div class="custom-control custom-radio">
+          <input
+            class="custom-control-input"
+            type="radio"
+            id="period-day"
+            name="period"
+          />
+          <label class="custom-control-label" for="period-day">День</label>
         </div>
+      </div>
+
+      <div class="col d-flex justify-content-center">
+        <div class="custom-control custom-radio">
+          <input
+            class="custom-control-input"
+            type="radio"
+            id="period-week"
+            name="period"
+          />
+          <label class="custom-control-label" for="period-week">Неделя</label>
+        </div>
+      </div>
+
+      <div class="col d-flex justify-content-center">
+        <div class="custom-control custom-radio">
+          <input
+            class="custom-control-input"
+            type="radio"
+            id="period-month"
+            name="period"
+          />
+          <label class="custom-control-label" for="period-month">Месяц</label>
+        </div>
+      </div>
     </div>
+    <div class="row d-flex justify-content-center mt-5">
+      <canvas id="month_chart" width="570" height="480"></canvas>
+    </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block scriptsSection %}
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/chart.js/dist/Chart.js"></script>
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/month_chart.js"></script>
 <script>
-    $(function() {
-        initChart("{{label}}","{{param}}");
-    });
+  $(function() {
+    initChart("{{label}}", "{{param}}");
+  });
 </script>
 {% endblock %}

@@ -1,61 +1,61 @@
 body {
-	margin: 0
+  margin: 0;
 }
 
 #btn {
-	width: 89%;
-	margin: unset;
+  width: 89%;
+  margin: unset;
 }
 
 a {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 .button-group {
-	list-style: none;
-	display: inline-block;
-	padding: 0px;
-	margin: 1%;
-	text-align:center;
-	width: 86%;
-	font-size: 50px;
+  list-style: none;
+  display: inline-block;
+  padding: 0px;
+  margin: 1%;
+  text-align: center;
+  width: 86%;
+  font-size: 50px;
 }
 .button-group li a {
-	text-align:center;
-	font-family: calibri;
-	margin-top: 1.5px;
-	margin-bottom: 1.5px;
-	-webkit-appearance: button;
-	-moz-appearance: button;
-	appearance: button;
-	text-decoration: none;
-	background: green;
-	color: white;
-	padding: .7em 1.5em;
-	min-width: 180px;
-	min-height: 20px;
-	width: 96%;
+  text-align: center;
+  font-family: calibri;
+  margin-top: 1.5px;
+  margin-bottom: 1.5px;
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  appearance: button;
+  text-decoration: none;
+  background: green;
+  color: white;
+  padding: 0.7em 1.5em;
+  min-width: 180px;
+  min-height: 20px;
+  width: 96%;
 }
 
 .banner {
-	color:white;
-	background:green;
-	font-size: 30px;
+  color: white;
+  background: green;
+  font-size: 30px;
 }
 
 div.banner div {
-	position: relative;
-	#float: right;
+  position: relative;
+  #float: right;
 }
 
 div.banner a {
-	color: #FFF
+  color: #fff;
 }
 
 .custom-control-label::after,
 .custom-control-label::before {
-    top: -4px !important;
-    left: -15px !important;
-    width: 2rem !important;
-    height: 2rem !important;
+  top: -4px !important;
+  left: -15px !important;
+  width: 2rem !important;
+  height: 2rem !important;
 }

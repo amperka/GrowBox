@@ -1,144 +1,204 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/settings_style.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/settings_style.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/settings/settings.js"></script>
 <script>
-    $(function() {
-        setCurrState({{json_str}});
-    });
+  $(function() {
+      setCurrState({{json_str}});
+  });
 </script>
 
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="card mb-5">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <h2>Лампа</h2>
-                        </div>
-                        <div class="col">
-                            <div class="row d-flex justify-content-center p-3">
-                                <div class="switch">
-                                    <input type="checkbox" id="lamp-switch" class="switch-check"
-                                           onchange="setChanges()">
-                                    <label for="lamp-switch" class="switch-label">
-                                        <span class="switch-slider switch-slider-on"></span>
-                                        <span class="switch-slider switch-slider-off"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-control custom-radio">
-                                <input class="custom-control-input" type="radio" id="lamp-value1" name="lamp-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label" for="lamp-value1">18/6</label>
-                            </div>
-                        </div>
-
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-control-lg custom-radio">
-                                <input class="custom-control-input" type="radio" id="lamp-value2" name="lamp-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label" for="lamp-value2">12/12</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="row">
+    <div class="col">
+      <div class="card mb-5">
+        <div class="card-body">
+          <div class="row">
+            <div class="col d-flex justify-content-center align-items-center">
+              <h2>Лампа</h2>
             </div>
-
-
-            <div class="card mb-5">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <h2>Вентилятор</h2>
-                        </div>
-                        <div class="col">
-                            <div class="row d-flex justify-content-center p-3">
-                                <div class="switch">
-                                    <input type="checkbox" id="fan-switch" class="switch-check" onchange="setChanges()">
-                                    <label for="fan-switch" class="switch-label">
-                                        <span class="switch-slider switch-slider-on"></span>
-                                        <span class="switch-slider switch-slider-off"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col">
+              <div class="row d-flex justify-content-center p-3">
+                <div class="switch">
+                  <input
+                    type="checkbox"
+                    id="lamp-switch"
+                    class="switch-check"
+                    onchange="setChanges()"
+                  />
+                  <label for="lamp-switch" class="switch-label">
+                    <span class="switch-slider switch-slider-on"></span>
+                    <span class="switch-slider switch-slider-off"></span>
+                  </label>
                 </div>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-radio">
-                                <input class="custom-control-input" type="radio" id="fan-value1" name="fan-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label fan-label" for="fan-value1">1 m</label>
-                            </div>
-                        </div>
-
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-radio">
-                                <input class="custom-control-input" type="radio" id="fan-value2" name="fan-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label fan-label" for="fan-value2">2 m</label>
-                            </div>
-                        </div>
-
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-radio">
-                                <input class="custom-control-input" type="radio" id="fan-value3" name="fan-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label fan-label" for="fan-value3">4 m</label>
-                            </div>
-                        </div>
-
-                        <div class="col d-flex align-items-center justify-content-center p-3">
-                            <div class="custom-control custom-radio">
-                                <input class="custom-control-input" type="radio" id="fan-value4" name="fan-radio"
-                                       onchange="setChanges()">
-                                <label class="custom-control-label fan-label" for="fan-value4">8 m</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-
-            <div class="card mb-5">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col d-flex justify-content-center align-items-center">
-                            <h2>Компрессор</h2>
-                        </div>
-                        <div class="col">
-                            <div class="row d-flex justify-content-center p-3">
-                                <div class="switch">
-                                    <input type="checkbox" id="compressor-switch" class="switch-check"
-                                           onchange="setChanges()">
-                                    <label for="compressor-switch" class="switch-label">
-                                        <span class="switch-slider switch-slider-on"></span>
-                                        <span class="switch-slider switch-slider-off"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+        <div class="card-footer">
+          <div class="row">
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-control custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="lamp-value1"
+                  name="lamp-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label" for="lamp-value1"
+                  >18/6</label
+                >
+              </div>
+            </div>
+
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-control-lg custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="lamp-value2"
+                  name="lamp-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label" for="lamp-value2"
+                  >12/12</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-5">
+        <div class="card-body">
+          <div class="row">
+            <div class="col d-flex justify-content-center align-items-center">
+              <h2>Вентилятор</h2>
+            </div>
+            <div class="col">
+              <div class="row d-flex justify-content-center p-3">
+                <div class="switch">
+                  <input
+                    type="checkbox"
+                    id="fan-switch"
+                    class="switch-check"
+                    onchange="setChanges()"
+                  />
+                  <label for="fan-switch" class="switch-label">
+                    <span class="switch-slider switch-slider-on"></span>
+                    <span class="switch-slider switch-slider-off"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="row">
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="fan-value1"
+                  name="fan-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label fan-label" for="fan-value1"
+                  >1 m</label
+                >
+              </div>
+            </div>
+
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="fan-value2"
+                  name="fan-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label fan-label" for="fan-value2"
+                  >2 m</label
+                >
+              </div>
+            </div>
+
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="fan-value3"
+                  name="fan-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label fan-label" for="fan-value3"
+                  >4 m</label
+                >
+              </div>
+            </div>
+
+            <div
+              class="col d-flex align-items-center justify-content-center p-3"
+            >
+              <div class="custom-control custom-radio">
+                <input
+                  class="custom-control-input"
+                  type="radio"
+                  id="fan-value4"
+                  name="fan-radio"
+                  onchange="setChanges()"
+                />
+                <label class="custom-control-label fan-label" for="fan-value4"
+                  >8 m</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-5">
+        <div class="card-body">
+          <div class="row">
+            <div class="col d-flex justify-content-center align-items-center">
+              <h2>Компрессор</h2>
+            </div>
+            <div class="col">
+              <div class="row d-flex justify-content-center p-3">
+                <div class="switch">
+                  <input
+                    type="checkbox"
+                    id="compressor-switch"
+                    class="switch-check"
+                    onchange="setChanges()"
+                  />
+                  <label for="compressor-switch" class="switch-label">
+                    <span class="switch-slider switch-slider-on"></span>
+                    <span class="switch-slider switch-slider-off"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

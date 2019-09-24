@@ -1,40 +1,40 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/teacher_settings.css">
-<link rel="stylesheet" href="/static/css/confirm.css">
-<link rel="stylesheet" href="/static/css/preloader.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/teacher_settings.css" />
+<link rel="stylesheet" href="/static/css/confirm.css" />
+<link rel="stylesheet" href="/static/css/preloader.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/tools/confirm.js"></script>
 <script src="/static/js/tools/request.js" type="module"></script>
 <script src="/static/js/tools/response.js" type="module"></script>
 <script src="/static/js/settings/work_log.js" type="module"></script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-	<div class="row">
-		<div class="col">
-			<button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="download-button" type="button">
-                <p class="h2">Скачать журнал</p>
-            </button>
-        	<button class="btn btn-lg btn-primary btn-block p-3 mt-4" id="extract" type="button">
-		        <p class="h2">Извлечь USB-накопитель</p>
-            </button>
-        </div>
-
-	</div>
-
-    <div class="row py-4 d-flex justify-content-center">
-        <div class="saved-banner" id="msg-box"></div>
+  <div class="row">
+    <div class="col">
+      <button
+        class="btn btn-lg btn-primary btn-block p-3 mt-4"
+        id="download-button"
+        type="button"
+      >
+        <p class="h2">Скачать журнал</p>
+      </button>
+      <button
+        class="btn btn-lg btn-primary btn-block p-3 mt-4"
+        id="extract"
+        type="button"
+      >
+        <p class="h2">Извлечь USB-накопитель</p>
+      </button>
     </div>
+  </div>
 
-    <div class="row py-4 d-flex justify-content-center">
-        <div id="preloader"></div>
-	</div>
+  <div class="row py-4 d-flex justify-content-center">
+    <div class="saved-banner" id="msg-box"></div>
+  </div>
 
+  <div class="row py-4 d-flex justify-content-center">
+    <div id="preloader"></div>
+  </div>
 </div>
 {% endblock %}

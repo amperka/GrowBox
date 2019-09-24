@@ -1,66 +1,61 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/canvas.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/canvas.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/canvas-gauges/gauge.min.js"></script>
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/node_modules/chart.js/dist/Chart.js"></script>
 <script src="/static/js/update_page.js"></script>
 
 <script>
-    const url = "/tds_measure";
-    getReading(url);
+  const url = "/tds_measure";
+  getReading(url);
 </script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <canvas class="canv"
-		            id="tds-canv"
-                    data-type="linear-gauge"
-                    data-width="220"
-                    data-height="700"
-		            data-title="{{label}}"
-                    data-min-value="0"
-                    data-max-value="2000"
-                    data-major-ticks="[0,500,1000,1500,2000]"
-                    data-minor-ticks="5"
-                    data-stroke-ticks="true"
-                    data-ticks-width="15"
-                    data-ticks-width-minor="7.5"
-                    data-highlights='[ {"from": 0, "to": 0, "color": "rgba(0,0, 255, .3)"},
+  <div class="row">
+    <div class="col">
+      <canvas
+        class="canv"
+        id="tds-canv"
+        data-type="linear-gauge"
+        data-width="220"
+        data-height="700"
+        data-title="{{label}}"
+        data-min-value="0"
+        data-max-value="2000"
+        data-major-ticks="[0,500,1000,1500,2000]"
+        data-minor-ticks="5"
+        data-stroke-ticks="true"
+        data-ticks-width="15"
+        data-ticks-width-minor="7.5"
+        data-highlights='[ {"from": 0, "to": 0, "color": "rgba(0,0, 255, .3)"},
                       {"from": 0, "to": 2000, "color": "rgba(255, 0, 0, .3)"} ]'
-                    data-color-major-ticks="#ffe66a"
-                    data-color-minor-ticks="#ffe66a"
-                    data-color-title="#eee"
-                    data-color-units="#ccc"
-                    data-color-numbers="#eee"
-                    data-color-plate="#009a40"
-                    data-color-plate-end="#009a40"
-                    data-border-shadow-width="0"
-                    data-borders="true"
-                    data-border-radius="20"
-                    data-needle-type="arrow"
-                    data-needle-width="3"
-                    data-animation-duration="500"
-                    data-animation-rule="linear"
-                    data-color-needle="#222"
-                    data-color-needle-end=""
-                    data-color-bar-progress="#410000"
-                    data-color-bar="#f5f5f5"
-                    data-bar-stroke="0"
-                    data-bar-width="15"
-                    data-bar-begin-circle="false"
-                    data-units="ppm"
-                    data-value=0
-            >
-            </canvas>
-        </div>
+        data-color-major-ticks="#ffe66a"
+        data-color-minor-ticks="#ffe66a"
+        data-color-title="#eee"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-plate="#009a40"
+        data-color-plate-end="#009a40"
+        data-border-shadow-width="0"
+        data-borders="true"
+        data-border-radius="20"
+        data-needle-type="arrow"
+        data-needle-width="3"
+        data-animation-duration="500"
+        data-animation-rule="linear"
+        data-color-needle="#222"
+        data-color-needle-end=""
+        data-color-bar-progress="#410000"
+        data-color-bar="#f5f5f5"
+        data-bar-stroke="0"
+        data-bar-width="15"
+        data-bar-begin-circle="false"
+        data-units="ppm"
+        data-value="0"
+      >
+      </canvas>
     </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,37 +1,43 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
-<link rel="stylesheet" href="/static/css/teacher_settings.css">
-<link rel="stylesheet" href="/static/css/keyboard.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link
+  rel="stylesheet"
+  href="/static/js/node_modules/simple-keyboard/build/css/index.css"
+/>
+<link rel="stylesheet" href="/static/css/teacher_settings.css" />
+<link rel="stylesheet" href="/static/css/keyboard.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
 <script src="/static/js/tools/keyboards/numkeyboard.js"></script>
 <script src="/static/js/settings/login.js"></script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <form onsubmit="sendPasswd(); return false;">
-                <div class="form-group">
-                    <input type="password" maxlength="25" name="passwd" class="form-control form-control-lg mt-5" id="password" placeholder="Введите ПИН-код">
-                </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
-                    <p class="h2">Войти</p>
-                </button>
-            </form>
-            <div class="row my-3 mx-2" id="banner">
-                <div id="wrong-passwd" class="saved-banner">Введён неправильный ПИН-код</div>
-            </div>
-            <div class="row my-4 mx-5" id="keyboard">
-                <div class="simple-keyboard"></div>
-            </div>
+  <div class="row">
+    <div class="col">
+      <form onsubmit="sendPasswd(); return false;">
+        <div class="form-group">
+          <input
+            type="password"
+            maxlength="25"
+            name="passwd"
+            class="form-control form-control-lg mt-5"
+            id="password"
+            placeholder="Введите ПИН-код"
+          />
         </div>
+        <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+          <p class="h2">Войти</p>
+        </button>
+      </form>
+      <div class="row my-3 mx-2" id="banner">
+        <div id="wrong-passwd" class="saved-banner">
+          Введён неправильный ПИН-код
+        </div>
+      </div>
+      <div class="row my-4 mx-5" id="keyboard">
+        <div class="simple-keyboard"></div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

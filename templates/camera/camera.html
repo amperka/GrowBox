@@ -1,23 +1,29 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="row py-2">
-                <!-- Видео -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/camera/video" role="button">
-                    <p class="h2">Видео</p>
-                </a>
-            </div>
+  <div class="row">
+    <div class="col">
+      <div class="row py-2">
+        <!-- Видео -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/camera/video"
+          role="button"
+        >
+          <p class="h2">Видео</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!-- Фото -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/camera/photo" role="button">
-                    <p class="h2">Фото</p>
-                </a>
-            </div>
-
-        </div>
+      <div class="row py-2">
+        <!-- Фото -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/camera/photo"
+          role="button"
+        >
+          <p class="h2">Фото</p>
+        </a>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

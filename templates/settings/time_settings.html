@@ -1,43 +1,55 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/teacher_settings.css">
-<link rel="stylesheet" href="/static/js/node_modules/datetimepicker/dist/DateTimePicker.css">
-<link rel="stylesheet" href="/static/css/time_settings.css">
-<link rel="stylesheet" href="/static/css/confirm.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/teacher_settings.css" />
+<link
+  rel="stylesheet"
+  href="/static/js/node_modules/datetimepicker/dist/DateTimePicker.css"
+/>
+<link rel="stylesheet" href="/static/css/time_settings.css" />
+<link rel="stylesheet" href="/static/css/confirm.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/node_modules/datetimepicker/dist/DateTimePicker.js"></script>
 <script src="/static/js/settings/time_settings.js"></script>
 <script src="/static/js/tools/confirm.js"></script>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
-	<div class="row">
-		<div class="col">
-			<form id="time-form" onsubmit="setTime(); return false;">
-                <div class="form-group">
-                    <label for="time" class="col-form-label col-form-label-lg">Время</label>
-                    <input class="form-control form-control-lg" type="time" name="set-time" id="time" data-format="hh:mm">
-                </div>
+  <div class="row">
+    <div class="col">
+      <form id="time-form" onsubmit="setTime(); return false;">
+        <div class="form-group">
+          <label for="time" class="col-form-label col-form-label-lg"
+            >Время</label
+          >
+          <input
+            class="form-control form-control-lg"
+            type="time"
+            name="set-time"
+            id="time"
+            data-format="hh:mm"
+          />
+        </div>
 
-                <div class="form-group">
-                    <label for="date" class="col-form-label col-form-label-lg">Дата</label>
-                    <input class="form-control form-control-lg" type="date" name="set-date" id="date" data-format="dd-MMM-yyyy">
-                </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
-                    <p class="h2">OK</p>
-                </button>
-            </form>
-            <div class="saved-banner" id="time-saved">
-                Время установлено
-            </div>
-            <div id="dtBox"></div>
-		</div>
-	</div>
+        <div class="form-group">
+          <label for="date" class="col-form-label col-form-label-lg"
+            >Дата</label
+          >
+          <input
+            class="form-control form-control-lg"
+            type="date"
+            name="set-date"
+            id="date"
+            data-format="dd-MMM-yyyy"
+          />
+        </div>
+        <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+          <p class="h2">OK</p>
+        </button>
+      </form>
+      <div class="saved-banner" id="time-saved">
+        Время установлено
+      </div>
+      <div id="dtBox"></div>
+    </div>
+  </div>
 </div>
 {% endblock %}
-
