@@ -1,70 +1,69 @@
 <html>
-<head>
+  <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
     <title>{{title}}</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
     <!-- Other CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/teacher_settings.css">
-    <link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
-    <link rel="stylesheet" href="/static/css/disablehover.css">
-    <link rel="stylesheet" href="/static/css/lock.css">
-    <link rel="stylesheet" href="/static/css/keyboard.css">
-</head>
-<body>
-<div class="container mt-4">
-    <div class="row">
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/teacher_settings.css" />
+    <link
+      rel="stylesheet"
+      href="/static/js/node_modules/simple-keyboard/build/css/index.css"
+    />
+    <link rel="stylesheet" href="/static/css/disablehover.css" />
+    <link rel="stylesheet" href="/static/css/lock.css" />
+    <link rel="stylesheet" href="/static/css/keyboard.css" />
+  </head>
+  <body>
+    <div class="container mt-4">
+      <div class="row">
         <div class="col">
-            <img src="/static/img/Amperka_logo.png" class="rounded mx-auto my-5 py-4 d-block">
-            <div class="d-flex">
-                <input type="password" maxlength="25" class="form-control form-control-lg mr-2 textsize" id="pincode" placeholder="ПИН-код" onclick="openKeyboard();">
-                <button type="button" class="btn btn-lg btn-primary textsize" onclick="sendPasswd();">▶</button>
+          <img
+            src="/static/img/Amperka_logo.png"
+            class="rounded mx-auto my-5 py-4 d-block"
+          />
+          <div class="d-flex">
+            <input
+              type="password"
+              maxlength="25"
+              class="form-control form-control-lg mr-2 textsize"
+              id="pincode"
+              placeholder="ПИН-код"
+            />
+            <button
+              type="button"
+              class="btn btn-lg btn-primary textsize"
+              id="send-btn"
+            >
+              ▶
+            </button>
+          </div>
+          <div class="row my-3 mx-2" id="banner">
+            <div id="wrong-passwd" class="saved-banner">
+              Введён неправильный пароль
             </div>
-            <div class="row my-3 mx-2" id="banner">
-                <div id="wrong-passwd" class="saved-banner">Введён неправильный пароль</div>
-            </div>
-            <div class="row my-4 mx-5" id="keyboard">
-                <div class="simple-keyboard"></div>
-            </div>
+          </div>
+          <div class="row my-4 mx-5" id="keyboard">
+            <div class="simple-keyboard"></div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<script src="/static/js/jquery-3.3.1.slim.min.js"></script>
-<script src="/static/js/popper.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
-<script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
-<script src="/static/js/numkeyboard.js"></script>
-<script>
-    function sendPasswd() {
-        var passwd = $('#pincode').val();
-        console.log(passwd);
-            $.ajax({
-                    url: "/teacher_settings",
-                    type: "POST",
-                    data: JSON.stringify({"passwd" : passwd}),
-                    contentType: "application/json; charset=utf8",
-                    dataType: "json",
-            })
-            .fail(function() {
-                    $("#wrong-passwd").fadeIn();
-                        setTimeout(function() {
-                            $("#wrong-passwd").fadeOut();
-                        }, 3000);
-            })
-            .done(function() {
-                window.location.href="/index";
-            });
-    }
-    createNumKeyboard("#pincode", "light");
-</script>
-
-</body>
+    <script src="/static/js/jquery-3.3.1.slim.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
+    <script src="/static/js/tools/keyboards/numkeyboard.js"></script>
+    <script src="/static/js/lock.js"></script>
+  </body>
 </html>
-

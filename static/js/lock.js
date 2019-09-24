@@ -1,5 +1,6 @@
 function sendPasswd() {
-  var passwd = document.getElementsByName('passwd')[0].value;
+  let passwd = $('#pincode').val();
+  console.log(passwd);
   $.ajax({
     url: '/teacher_settings',
     type: 'POST',
@@ -14,12 +15,16 @@ function sendPasswd() {
       }, 3000);
     })
     .done(function() {
-      window.location.href = '/teacher_page';
+      window.location.href = '/index';
     });
 }
 
-numKeyboardModule.createKeyboard('#password', 'dark');
+numKeyboardModule.createKeyboard('#pincode', 'light');
 
-$('#password').click(function() {
+$('#pincode').click(function() {
   numKeyboardModule.openKeyboard();
+});
+
+$('#send-btn').click(function() {
+  sendPasswd();
 });

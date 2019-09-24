@@ -1,50 +1,70 @@
-{% extends "base.html" %}
-
-{% block stylesSection %}
-<link rel="stylesheet" href="/static/css/teacher_settings.css">
-<link rel="stylesheet" href="/static/css/confirm.css">
-<link rel="stylesheet" href="/static/js/node_modules/simple-keyboard/build/css/index.css">
-<link rel="stylesheet" href="/static/css/keyboard.css">
-<link rel="stylesheet" href="/static/css/preloader.css">
-{% endblock %}
-
-{% block scriptsSection %}
+{% extends "base.html" %} {% block stylesSection %}
+<link rel="stylesheet" href="/static/css/teacher_settings.css" />
+<link rel="stylesheet" href="/static/css/confirm.css" />
+<link
+  rel="stylesheet"
+  href="/static/js/node_modules/simple-keyboard/build/css/index.css"
+/>
+<link rel="stylesheet" href="/static/css/keyboard.css" />
+<link rel="stylesheet" href="/static/css/preloader.css" />
+{% endblock %} {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="/static/js/confirm.js"></script>
-<script src="/static/js/request.js"></script>
+<script src="/static/js/tools/confirm.js"></script>
+<script src="/static/js/tools/request.js" type="module"></script>
+<script src="/static/js/tools/response.js" type="module"></script>
 <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
-<script src="/static/js/keyboard.js"></script>
-<script src="/static/js/settings/net_settings.js"></script>
-{% endblock %}
-
-{% block content %}
+<script src="/static/js/tools/keyboards/keyboard.js"></script>
+<script src="/static/js/settings/net_settings.js" type="module"></script>
+{% endblock %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <form onsubmit="connectToNet(); return false;">
-                <div class="form-group">
-                    <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"
-                           aria-describedby="emailHelp" placeholder="Введите имя сети">
-                </div>
-                <div class="form-group">
-                    <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg input"
-                           id="netPassword" placeholder="Введите пароль">
-                </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
-                    <p class="h2">Подключиться</p>
-                </button>
-            </form>
-	        <button class="btn btn-lg btn-primary btn-block p-3 mt-4" value="Обновить ПО" type="button" id="update-button">
-                <p class="h2">Обновить ПО</p>
-            </button>
+  <div class="row">
+    <div class="col">
+      <form>
+        <div class="form-group">
+          <input
+            type="text"
+            maxlength="25"
+            name="login"
+            class="form-control form-control-lg input"
+            id="netName"
+            aria-describedby="emailHelp"
+            placeholder="Введите имя сети"
+          />
         </div>
+        <div class="form-group">
+          <input
+            type="text"
+            maxlength="25"
+            name="passwd"
+            class="form-control form-control-lg input"
+            id="netPassword"
+            placeholder="Введите пароль"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-lg btn-primary btn-block p-3 mt-4"
+          id="connect-button"
+        >
+          <p class="h2">Подключиться</p>
+        </button>
+      </form>
+      <button
+        class="btn btn-lg btn-primary btn-block p-3 mt-4"
+        value="Обновить ПО"
+        type="button"
+        id="update-button"
+      >
+        <p class="h2">Обновить ПО</p>
+      </button>
     </div>
+  </div>
+  <div class="row py-4 d-flex justify-content-center">
+    <div id="preloader"></div>
+  </div>
 </div>
 <div class="row my-5 mx-2" id="keyboard">
-    <div class="simple-keyboard"></div>
-</div>
-<div class="row py-4 d-flex justify-content-center">
-        <div id="preloader"></div>
+  <div class="simple-keyboard"></div>
 </div>
 
 {% endblock %}

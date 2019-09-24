@@ -1,41 +1,69 @@
-function downloadLogs() {
-    let downloadMsg = {
-        msgYes: "Журнал успешно скачан.",
-        msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
-        msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер",
-        callback: function(msg) {
-            addMsgToDiv(msg);
-        },
-    };
-    request("/download/log", downloadMsg, true);
-}
+import Response from '/static/js/tools/response.js';
+import getRequest from '/static/js/tools/request.js';
 
-function extractUsb() {
-    let extractMsg = {
-        msgYes: "USB-устройство может быть извлечено.",
-        msgNo: "USB-устройство не обнаружено. Проверьте подключение.",
-        msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер",
-        callback: function(msg) {
-            addMsgToDiv(msg);
-        },
-    };
-    request("/extract_usb", extractMsg, false);
-}
+const requestFuncs = (function() {
+  const downloadResp = new Response({
+    msgYes: 'Журнал успешно скачан.',
+    msgNo: 'USB-устройство не обнаружено. Проверьте подключение.',
+    msgError: 'Возникла ошибка системы. Перезагрузите гроукомпьютер.',
+    preloader: true,
+  });
 
-function addMsgToDiv(msg) {
-	let div = document.getElementById("msg-box");
-	div.innerHTML = msg;
-	$("#msg-box").fadeIn();
-	setTimeout(function() {
-		$("#msg-box").fadeOut();
-	}, 4000);
-}
+  const extractResp = new Response({
+    msgYes: 'USB-устройство может быть извлечено.',
+    msgNo: 'USB-устройство не обнаружено. Проверьте подключение.',
+    msgError: 'Возникла ошибка системы. Перезагрузите гроукомпьютер.',
+  });
 
-$("#download-button").click(function() {
-    Confirm("Скачать журнал", "Вы действительно хотите скачать журнал?", "Да", "Нет", downloadLogs);
+  let arrOfResp = [downloadResp, extractResp];
+
+  arrOfResp.forEach(obj => {
+    if (typeof obj.msgYes !== 'undefined') {
+      obj.success = function() {
+        addMsgToDiv('#msg-box', this.msgYes);
+      };
+    }
+    if (typeof obj.msgNo !== 'undefined') {
+      obj.fail = function() {
+        addMsgToDiv('#msg-box', this.msgNo);
+      };
+    }
+    if (typeof obj.msgError !== 'undefined') {
+      obj.error = function() {
+        Alert('Ошибка!', this.msgError);
+      };
+    }
+    if (typeof obj.msgNotFound !== 'undefined') {
+      obj.notFound = function() {
+        addMsgToDiv('#msg-box', this.msgNotFound);
+      };
+    }
+  });
+
+  return {
+    downloadLogs: () => getRequest('/download/log', downloadResp, true),
+    extractUsb: () => getRequest('/extract_usb', extractResp, true),
+  };
+})();
+
+$(function() {
+  $('#download-button').click(function() {
+    Confirm(
+      'Скачать журнал',
+      'Вы действительно хотите скачать журнал?',
+      'Да',
+      'Нет',
+      requestFuncs.downloadLogs
+    );
+  });
+
+  $('#extract').click(function() {
+    Confirm(
+      'Извлечь накопитель',
+      'Вы действительно хотите извлечь накопитель?',
+      'Да',
+      'Нет',
+      requestFuncs.extractUsb
+    );
+  });
 });
-
-$("#extract").click(function() {
-    Confirm("Извлечь накопитель", "Вы действительно хотите извлечь накопитель?", "Да", "Нет", extractUsb);
-});
-

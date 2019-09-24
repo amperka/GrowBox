@@ -1,52 +1,74 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="row py-2">
-                <!-- Сеть и обновления -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/net_settings" role="button">
-                    <p class="h2">Сеть и обновления</p>
-                </a>
-            </div>
+  <div class="row">
+    <div class="col">
+      <div class="row py-2">
+        <!-- Сеть и обновления -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/net_settings"
+          role="button"
+        >
+          <p class="h2">Сеть и обновления</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!-- Время и дата -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/time_settings" role="button">
-                    <p class="h2">Время и дата</p>
-                </a>
-            </div>
+      <div class="row py-2">
+        <!-- Время и дата -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/time_settings"
+          role="button"
+        >
+          <p class="h2">Время и дата</p>
+        </a>
+      </div>
 
-	        <div class="row py-2">
-                <!--Калибровка датчика pH -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/calibration_page" role="button">
-                    <p class="h2">Калибровка датчика pH</p>
-                </a>
-            </div>
+      <div class="row py-2">
+        <!--Калибровка датчика pH -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/calibration_page"
+          role="button"
+        >
+          <p class="h2">Калибровка датчика pH</p>
+        </a>
+      </div>
 
-	        <div class="row py-2">
-                <!--Камера -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/camera_settings" role="button">
-                    <p class="h2">Камера</p>
-                </a>
-            </div>
+      <div class="row py-2">
+        <!--Камера -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/camera_settings"
+          role="button"
+        >
+          <p class="h2">Камера</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!--Журнал работы программы-->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/work_log" role="button">
-                    <p class="h2">Журнал работы</p>
-                </a>
-            </div>
+      <div class="row py-2">
+        <!--Журнал работы программы-->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/work_log"
+          role="button"
+        >
+          <p class="h2">Журнал работы</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!-- Перезагрузка системы -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/teacher_page/shutdown_page" role="button">
-                    <p class="h2">Завершение работы</p>
-                </a>
-            </div>
-
-        </div>
+      <div class="row py-2">
+        <!-- Перезагрузка системы -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/teacher_page/shutdown_page"
+          role="button"
+        >
+          <p class="h2">Завершение работы</p>
+        </a>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}

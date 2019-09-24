@@ -1,69 +1,86 @@
-function startRecord() {
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "/start_record", true);
-	xhr.send();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState != 4) return;
-		if (xhr.status == 200) {
-			$("#recButton").removeClass("notRec");
-            $("#recButton").addClass("Rec");
-            $("#recMess").html("Остановить запись");
-		} else if (xhr.status == 403) {
-			Alert("Предупреждение!","Камера недоступна. Проверьте подключение камеры!");
-		} else {
-			alert(xhr.status + ': ' + xhr.statusText);
-		}
-	}
-}
+import Response from '/static/js/tools/response.js';
+import getRequest from '/static/js/tools/request.js';
 
-function finishRecord() {
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "/finish_record", true);
-	xhr.send();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState != 4) return;
-		if (xhr.status == 200) {
-			$("#recButton").removeClass("Rec");
-            $("#recButton").addClass("notRec");
-            $("#recMess").html("Включить запись");
-		} else if (xhr.status == 403) {
-				//addMsgToDiv("Запись не ведётся. Включите запись!");
-		} else {
-			alert(xhr.status + ': ' + xhr.statusText);
-		}
-	}
-}
+const requestFuncs = (function() {
+  const startRecResp = new Response({
+    msgNo: 'Камера недоступна. Проверьте подключение камеры!',
+    msgError: 'Перезагрузите гроукомпьютер.',
+    preloader: false,
+  });
+  startRecResp.success = function() {
+    $('#recButton').removeClass('notRec');
+    $('#recButton').addClass('Rec');
+    $('#recMess').html('Остановить запись');
+  };
+  startRecResp.fail = function() {
+    Alert('Предупреждение!', this.msgNo);
+  };
+  startRecResp.error = function() {
+    Alert('Ошибка!', this.msgError);
+  };
 
-function makeVideo() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/make_video', true);
-	xhr.send();
-	$("#preloader").fadeIn();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState != 4) return;
-		if (xhr.status == 200) {
-			watchVideo();
-			$("#preloader").fadeOut();
-		} else if (xhr.status == 403) {
-            $("#preloader").fadeOut('slow', function() {
-                Alert("Ошибка!", "Отсутствуют кадры для видео");
-            });
-		} else {
-			alert(xhr.status + ': ' + xhr.statusText);
-		}
-	}
-}
+  const finishRecResp = new Response({
+    msgError: 'Перезагрузите гроукомпьютер.',
+    msgNo: 'Запись не ведется. Включите запись.',
+    preloader: false,
+  });
+  finishRecResp.success = function() {
+    $('#recButton').removeClass('Rec');
+    $('#recButton').addClass('notRec');
+    $('#recMess').html('Включить запись');
+  };
+  finishRecResp.fail = function() {
+    Alert('Предупреждение!', this.msgNo);
+  };
+  finishRecResp.error = function() {
+    Alert('Ошибка!', this.msgError);
+  };
+
+  const makeVideoResp = new Response({
+    msgNo: 'Отсутствуют кадры для создания видео.',
+    msgError: 'Перезагрузите гроукомпьютер.',
+    preloader: true,
+  });
+  makeVideoResp.success = function() {
+    watchVideo();
+  };
+  makeVideoResp.fail = function() {
+    Alert('Предупреждение!', this.msgNo);
+  };
+  makeVideoResp.error = function() {
+    Alert('Ошибка!', this.msgError);
+  };
+
+  return {
+    startRecord: () => getRequest('/start_record', startRecResp, false),
+    finishRecord: () => getRequest('/finish_record', finishRecResp, false),
+    makeVideo: () => getRequest('/make_video', makeVideoResp, true),
+  };
+})();
 
 function watchVideo() {
-    $('#image-place').empty();
-	var video = document.createElement("video");
-    var videoPath = "/static/img/timelapse.mp4?" + Math.random();
-	video.setAttribute("src", videoPath);
-	video.setAttribute("width", "480");
-    video.setAttribute("height", "320");
-    video.controls = true;
-    video.disablePictureInPicture = true;
-    video.setAttribute("controlsList", "nodownload noremoteplayback");
-	document.getElementById("image-place").appendChild(video);
+  $('#image-place').empty();
+  var video = document.createElement('video');
+  var videoPath = '/static/img/timelapse.mp4?' + Math.random();
+  video.setAttribute('src', videoPath);
+  video.setAttribute('width', '480');
+  video.setAttribute('height', '320');
+  video.controls = true;
+  video.disablePictureInPicture = true;
+  video.setAttribute('controlsList', 'nodownload noremoteplayback');
+  document.getElementById('image-place').appendChild(video);
 }
 
+$(function() {
+  $('#recButton').click(function() {
+    if ($('#recButton').hasClass('notRec')) {
+      requestFuncs.startRecord();
+    } else {
+      requestFuncs.finishRecord();
+    }
+  });
+
+  $('#make-button').click(function() {
+    requestFuncs.makeVideo();
+  });
+});

@@ -158,8 +158,15 @@ def make_photo(img):
 
 @app.route("/clear_photo")
 def clear_photo():
-    os.system("rm -f ./static/img/img*")
-    return make_response("", 200)
+    command = "rm -f ./static/img/img*"
+    try:
+        subprocess.run(command, shell=True, check=True)
+    except subprocess.CalledProcessError as err:
+        logger.error("clear_photo: Delete error", err)
+        return make_response("", 500)
+    else:
+        logger.info("clear_photo: Frames successfully deleted")
+        return make_response("", 200)
 
 
 @app.route("/camera/video")
@@ -196,7 +203,7 @@ def start_record():
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
-            return make_response("", 403)
+            return make_response("", 500)
     curr_dir = os.getcwd()
     command = curr_dir + "/usb_camera.py"
     job = my_cron.new(command=command, comment="Growbox")
@@ -400,7 +407,7 @@ def update_system():
         logger.info("System update")
         return make_response("", 200)
     else:
-        return make_response("", 403)
+        return make_response("", 500)
 
 
 @app.route("/apply_time", methods=["POST"])
@@ -489,14 +496,15 @@ def shutdown(param):
     stop_ser_thread()
     shutdown_server = request.environ.get("werkzeug.server.shutdown")
     if shutdown_server is None:
-        raise RuntimeError("Shutdown server is not available")
+        logger.error("Shutdown server is not available")
+        return make_response("", 500)
     else:
         shutdown_server()
         if param == "reboot":
-            os.system("sleep 20 && sudo reboot &")
+            os.system("sleep 10 && sudo reboot &")
             return make_response("", 200)
         elif param == "shutdown":
-            os.system("sleep 20 && sudo shutdown -h now &")
+            os.system("sleep 10 && sudo shutdown -h now &")
             return make_response("", 200)
 
 
@@ -508,29 +516,23 @@ def charts():
 
 
 @app.route("/charts/<param>")
-def temp_chart(param):
+def chart_page(param):
     if param == "temp":
-        template_data = {"label": "Температура", "banner": "температуры"}
-        title = "Журнал температуры"
+        template_data = {"label": "Температура", "title": "Журнал температуры"}
     if param == "acidity":
-        template_data = {
-            "label": "Уровень кислотности pH",
-            "banner": "уровня кислотности pH",
-        }
-        title = "Журнал уровня кислотности"
+        template_data = {"label": "Уровень pH", "title": "Журнал уровня pH"}
     if param == "saline":
-        template_data = {"label": "Уровень солей", "banner": "уровня солей"}
-        title = "Журнал уровня солей"
+        template_data = {
+            "label": "Уровень солей",
+            "title": "Журнал уровня солей",
+        }
     if param == "carbon":
-        template_data = {"label": "Уровень CO2", "banner": "уровня CO2"}
-        title = "Журнал концентрации углекислого газа"
-    return render_template(
-        "charts/month_chart.html",
-        param=param,
-        title=title,
-        goback="/charts",
-        **template_data
-    )
+        template_data = {
+            "label": "Уровень CO2",
+            "title": "Журнал концентрации углекислого газа",
+        }
+    template_data.update({"param": param, "goback": "/charts"})
+    return render_template("charts/month_chart.html", **template_data)
 
 
 @app.route("/charts/draw_chart", methods=["POST"])
@@ -577,13 +579,10 @@ def select_plant(plant):
         title = "Фасоль"
     elif plant == "oats":
         title = "Oвёс"
+    elif plant == "basil":
+        title = "Базилик"
     template_data = {"title": title, "goback": "/info"}
     return render_template(ret_val, **template_data)
-
-
-@app.route("/dynamicCharts")
-def dynamic_temp():
-    return render_template("dynamicCharts.html")
 
 
 def month_data(param):
