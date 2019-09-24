@@ -86,7 +86,7 @@
 .switch-check:focus + .switch-label .switch-slider-off:after {
     background: #D5D5D5;
     background: -webkit-linear-gradient(#D0D0D0, #FDFDFD);
-    background: -moz-linear-gradient(#D0D0D0), #FDFDFD);
+    background: -moz-linear-gradient(#D0D0D0, #FDFDFD);
     background: -o-linear-gradient(#D0D0D0, #FDFDFD);
     background: linear-gradient(#D0D0D0, #FDFDFD);
 }
