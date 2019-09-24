@@ -163,7 +163,7 @@ def clear_photo():
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as err:
         logger.error("clear_photo: Delete error", err)
-        return make_response("", 403)
+        return make_response("", 500)
     else:
         logger.info("clear_photo: Frames successfully deleted")
         return make_response("", 200)
@@ -203,7 +203,7 @@ def start_record():
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
-            return make_response("", 403)
+            return make_response("", 500)
     curr_dir = os.getcwd()
     command = curr_dir + "/usb_camera.py"
     job = my_cron.new(command=command, comment="Growbox")
@@ -407,7 +407,7 @@ def update_system():
         logger.info("System update")
         return make_response("", 200)
     else:
-        return make_response("", 403)
+        return make_response("", 500)
 
 
 @app.route("/apply_time", methods=["POST"])

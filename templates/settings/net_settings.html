@@ -11,17 +11,18 @@
 {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/tools/confirm.js"></script>
-<script src="/static/js/tools/request.js"></script>
+<script src="/static/js/tools/request.js" type="module"></script>
+<script src="/static/js/tools/response.js" type="module"></script>
 <script src="/static/js/node_modules/simple-keyboard/build/index.js"></script>
 <script src="/static/js/tools/keyboards/keyboard.js"></script>
-<script src="/static/js/settings/net_settings.js"></script>
+<script src="/static/js/settings/net_settings.js" type="module"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col">
-            <form onsubmit="connectToNet(); return false;">
+            <form>
                 <div class="form-group">
                     <input type="text" maxlength="25" name="login" class="form-control form-control-lg input" id="netName"
                            aria-describedby="emailHelp" placeholder="Введите имя сети">
@@ -30,7 +31,7 @@
                     <input type="text" maxlength="25" name="passwd" class="form-control form-control-lg input"
                            id="netPassword" placeholder="Введите пароль">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block p-3 mt-4">
+                <button type="button" class="btn btn-lg btn-primary btn-block p-3 mt-4" id="connect-button">
                     <p class="h2">Подключиться</p>
                 </button>
             </form>
@@ -39,12 +40,15 @@
             </button>
         </div>
     </div>
+    <div class="row py-4 d-flex justify-content-center">
+        <div id="preloader"></div>
+    </div>
 </div>
 <div class="row my-5 mx-2" id="keyboard">
     <div class="simple-keyboard"></div>
 </div>
-<div class="row py-4 d-flex justify-content-center">
-        <div id="preloader"></div>
-</div>
+<!-- <div class="row py-4 d-flex justify-content-center"> -->
+        <!-- <div id="preloader"></div> -->
+<!-- </div> -->
 
 {% endblock %}

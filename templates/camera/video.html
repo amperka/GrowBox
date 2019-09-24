@@ -9,25 +9,15 @@
 {% block scriptsSection %}
 <script src="/static/js/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/static/js/tools/confirm.js"></script>
-<script src="/static/js/camera/video.js"></script>
+<script src="/static/js/camera/video.js" type="module"></script>
+<script src="/static/js/tools/request.js" type="module"></script>
+<script src="/static/js/tools/response.js" type="module"></script>
 <script>
-    $(function() {
-        {% if recStatus %}
-            $('#recButton').addClass("Rec");
-        {% else %}
-            $('#recButton').addClass("notRec");
-        {% endif %}
-        $('#recButton').click(function(){
-	        if($('#recButton').hasClass('notRec')){
-		        startRecord();
-    	    } else {
-		        finishRecord();
-	        }
-        });
-        $('#make-button').click(function() {
-            makeVideo();
-        });
-    });
+    {% if recStatus %}
+        $('#recButton').addClass("Rec");
+    {% else %}
+        $('#recButton').addClass("notRec");
+    {% endif %}
 </script>
 {% endblock %}
 

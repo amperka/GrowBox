@@ -1,23 +1,32 @@
-function updateSystem() {
-    var updateMsg = {
+import Response from "/static/js/tools/response.js";
+import getRequest from "/static/js/tools/request.js";
+
+const requestFuncs = (function() {
+    const updateResp = new Response({
         msgYes: "Обновление системы завершено. Чтобы завершить обновление, требуется перезагрузка.",
         msgNo: "Ошибка при обновлении. Проверьте подключение к сети.",
         msgError: "Возникла ошибка системы. Перезагрузите гроукомпьютер.",
-        callback: function(msg) {
-            Alert("Обновление системы", msg);
-        },
+        preloader: true,
+    });
+    updateResp.success = function() {
+        Alert("Обновление системы.", this.msgYes);
     };
-    request("/update_system", updateMsg, true);
-}
+    updateResp.fail = function() {
+        Alert("Обновление системы.", this.msgNo);
+    };
+    updateResp.error = function() {
+        Alert("Ошибка!", this.msgError);
+    };
 
-function connectToNet() {
-    var login = $("input[name=login]").val();
-    var passwd = $("input[name=passwd]").val();
-    if ((login === "") || (passwd === "")) {
-        Alert("Подключение к сети", "Введите имя сети и пароль");
-        return;
-    }
-    $("#preloader").fadeIn();
+    const updateSystem = () => getRequest("/update_system", updateResp, true);
+    const connectToNet = () => {
+        let login = $("input[name=login]").val();
+        let passwd = $("input[name=passwd]").val();
+        if ((login === "") || (passwd === "")) {
+            Alert("Подключение к сети.", "Введите имя сети и пароль.");
+            return;
+        }
+        $("#preloader").fadeIn();
         $.ajax({
             url:  "/apply_net_settings",
             type: "POST",
@@ -26,24 +35,42 @@ function connectToNet() {
             dataType: "json",
         })
         .done(function () {
-            Alert("Подключение к сети", "Подключение к сети " + login + " завершено");
-            $("#preloader").fadeOut();
+            $("#preloader").fadeOut("slow", function(){
+                Alert("Подключение к сети.", "Подключение к сети " + login + " завершено.");
+            });
         })
         .fail(function () {
-            Alert("Подключение к сети", "Не удалось подключиться к сети " + login);
-            $("#preloader").fadeOut();
+            $("#preloader").fadeOut("slow", function() {
+                Alert("Подключение к сети.", "Не удалось подключиться к сети " + login + ". Проверьте имя сети и пароль.");
+            });
         });
-}
+    };
+    return {
+        updateSystem,
+        connectToNet,
+    };
+})();
 
-$('#update-button').click(function () {
-	Confirm('Обновить систему', 'Вы действительно хотите обновить систему?', 'Да', 'Нет', updateSystem);
+$(function() {
+    $('#update-button').click(function() {
+        Confirm(
+            "Обновить систему",
+            "Вы действительно хотите обновить систему?",
+            "Да",
+            "Нет",
+            requestFuncs.updateSystem
+        );
+    });
+
+    $("#connect-button").click(function () {
+        requestFuncs.connectToNet();
+    });
+
+    $("#netName").click(function() {
+        keyboardModule.openKeyboard();
+    });
+
+    $("#netPassword").click(function() {
+        keyboardModule.openKeyboard();
+    });
 });
-
-$("#netName").click(function() {
-    keyboardModule.openKeyboard();
-});
-
-$("#netPassword").click(function() {
-    keyboardModule.openKeyboard();
-});
-
