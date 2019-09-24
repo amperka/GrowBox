@@ -578,6 +578,8 @@ def select_plant(plant):
         title = "Фасоль"
     elif plant == "oats":
         title = "Oвёс"
+    elif plant == "basil":
+        title = "Базилик"
     template_data = {"title": title, "goback": "/info"}
     return render_template(ret_val, **template_data)
 
