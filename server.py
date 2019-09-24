@@ -496,14 +496,15 @@ def shutdown(param):
     stop_ser_thread()
     shutdown_server = request.environ.get("werkzeug.server.shutdown")
     if shutdown_server is None:
-        raise RuntimeError("Shutdown server is not available")
+        logger.error("Shutdown server is not available")
+        return make_response("", 500)
     else:
         shutdown_server()
         if param == "reboot":
-            os.system("sleep 20 && sudo reboot &")
+            os.system("sleep 10 && sudo reboot &")
             return make_response("", 200)
         elif param == "shutdown":
-            os.system("sleep 20 && sudo shutdown -h now &")
+            os.system("sleep 10 && sudo shutdown -h now &")
             return make_response("", 200)
 
 

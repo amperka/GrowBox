@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 
 {% block stylesSection %}
-<!-- <link rel="stylesheet" href="../../static/css/teacher_settings.css"> -->
+<link rel="stylesheet" href="/static/css/teacher_settings.css">
 <link rel="stylesheet" href="/static/css/confirm.css">
-
 {% endblock %}
 
 {% block scriptsSection %}
@@ -25,5 +24,8 @@
             </button>
         </div>
 	</div>
+   <div class="row py-4 d-flex justify-content-center">
+        <div class="saved-banner" id="shutdown-msg"></div>
+   </div>
 </div>
 {% endblock %}
