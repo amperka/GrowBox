@@ -209,7 +209,7 @@ def start_record():
         if job.comment == "Growbox":
             return make_response("", 500)
     curr_dir = os.getcwd()
-    command = curr_dir + "/usb_camera.py"
+    command = curr_dir + "/growbox/usb_camera.py"
     job = my_cron.new(command=command, comment="Growbox")
     job.every(1).hours()
     my_cron.write()
