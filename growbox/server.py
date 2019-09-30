@@ -15,18 +15,23 @@ import logging
 from datetime import datetime
 
 # Third party imports
-from flask import Flask, render_template, make_response, request, Markup
+from flask import render_template, make_response, request, Markup
 import requests
 from requests.exceptions import HTTPError
 from crontab import CronTab
 
 # Local application imports
-import usb_camera
-import serial_port
-import sqlite
+from growbox import app
+from growbox import usb_camera
+from growbox import serial_port
+from growbox import sql
 
+temp, ph, tds, co2, lvl = ("0", "0", "0", "0", "0")
+input_queue = queue.Queue(1)
 
-app = Flask(__name__)
+ARRAY_LEN = 600
+circular_array = [0] * ARRAY_LEN
+array_pivot = 0
 
 
 # Return index page
@@ -731,18 +736,24 @@ def read_arduino():
                 logger.info(
                     "Reconnection limit. Please restart your computer."
                 )
-                sys.exit(1)
+                return
             time.sleep(10)
             arduino_path = auto_detect_serial()
             if arduino_path is not None:
                 sp = serial_port.SerialPort(arduino_path)
             else:
                 logger.error("Arduino not connected")
-                sys.exit(1)
-            if sp.open():
+                return
+            try:
+                sp.open()
                 empty_loop_count = 0
                 logger.info("Connection succeful")
+                row = sql.select_activity()
+                current_state = Markup(row[0][0])
                 input_queue.put(current_state)
+            except OSError as err:
+                logger.error(err)
+                return
 
         with lock:
             temp = data["temp"]
@@ -783,19 +794,10 @@ def sigint_handler(signum, frame):
     sys.exit(1)
 
 
-if __name__ == "__main__":
-
-    temp, ph, tds, co2, lvl = ("0", "0", "0", "0", "0")
-    input_queue = queue.Queue(1)
-
-    ARRAY_LEN = 600
-    circular_array = [0] * ARRAY_LEN
-    array_pivot = 0
-
+def create_logger():
     # Create own logger
     logger = logging.getLogger("server")
     logger.setLevel(logging.DEBUG)
-
     # Create logging file handler
     file_handler = logging.FileHandler("growbox.log")
     date_format = "%Y-%m-%d %H:%M:%S"
@@ -803,26 +805,26 @@ if __name__ == "__main__":
     formatter = logging.Formatter(message_format, date_format)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+    return logger
 
-    logger.info("Server started")
 
-    # Create database for sensors and activities
-    sql = sqlite.Sqlite("./sensorsData.db")
-    # Create sensors and activity tables in database
-    sql.create_sensors()
-    sql.create_activity()
+# Initial settings.
+def init_actuators_state():
     row = sql.select_activity()
     current_state = Markup(row[0][0])
     input_queue.put(current_state)
 
-    # Create mutex for sensors data
-    lock = threading.Lock()
 
-    # Create and run Arduino thread
-    arduino_thread = threading.Thread(target=read_arduino)
-    arduino_thread.daemon = True
-    arduino_thread.start()
+# Create own logger
+logger = create_logger()
 
-    signal.signal(signal.SIGINT, sigint_handler)
+init_actuators_state()
 
-    app.run(host="0.0.0.0", debug=False, threaded=True)
+# Create mutex for sensors data.
+lock = threading.Lock()
+
+# Create Arduino thread.
+arduino_thread = threading.Thread(target=read_arduino)
+arduino_thread.daemon = True
+# Set signal handler for stopping app by pressing Ctrl+c.
+signal.signal(signal.SIGINT, sigint_handler)
