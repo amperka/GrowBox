@@ -1,3 +1,3 @@
 #!/bin/bash
 
-black --line-length=79 *.py
+black --line-length=79 growbox/*.py run.py
