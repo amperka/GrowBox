@@ -16,7 +16,7 @@ function setTime() {
   let newDate = document.getElementsByName('set-date')[0].value;
 
   if (newTime === '' || newDate === '') {
-    return Alert('Предупреждение!', 'Введите корректное значение.');
+    return Alert('Предупреждение!', 'Введите корректные значения.');
   }
 
   $.ajax({
@@ -25,13 +25,16 @@ function setTime() {
     data: JSON.stringify({ 'set-time': newTime, 'set-date': newDate }),
     contentType: 'application/json; charset=utf8',
     dataType: 'json',
-    success: function() {
+  })
+    .done(function() {
       $('#time-saved').fadeIn();
       setTimeout(function() {
         $('#time-saved').fadeOut(1000);
       }, 3000);
-    },
-  });
+    })
+    .fail(function() {
+      Alert('Ошибка!', 'Введены некорректные значения.');
+    });
 }
 
 $('#dtBox').DateTimePicker({

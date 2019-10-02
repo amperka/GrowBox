@@ -416,7 +416,15 @@ def apply_time():
     # Reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
     date = "-".join(date.split("-")[::-1])
     datetime_set = date + " " + time
-    systime_settings.set_systime(datetime_set)
+    try:
+        systime_settings.set_systime(datetime_set)
+    except subprocess.CalledProcessError:
+        views_logger.error("Error setting the system time")
+        return (
+            json.dumps({"success": False}),
+            500,
+            {"ContentType": "application/json"},
+        )
 
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime": datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}

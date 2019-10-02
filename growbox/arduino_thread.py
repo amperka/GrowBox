@@ -1,3 +1,4 @@
+import subprocess
 import queue
 import json
 from datetime import datetime
@@ -61,6 +62,11 @@ def read_arduino(db):
             empty_loop_count += 1
             if empty_loop_count > 10:
                 raise RuntimeError("Time is over")
+        # Exception from set_systime
+        except subprocess.CalledProcessError:
+            sp.close()
+            arduino_logger.error("Error setting the system time")
+            return
         except (RuntimeError, OSError):
             sp.close()
             arduino_logger.error("Serial port disconnect")
