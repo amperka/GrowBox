@@ -67,6 +67,12 @@ def read_arduino(db):
             sp.close()
             arduino_logger.error("Error setting the system time")
             return
+        # Exception when faulty data from Arduino
+        except json.JSONDecodeError as err:
+            sp.close()
+            arduino_logger.error(err)
+            arduino_logger.error("Error in Arduino firmware")
+            return
         except (RuntimeError, OSError):
             sp.close()
             arduino_logger.error("Serial port disconnect")
@@ -88,9 +94,7 @@ def read_arduino(db):
                 sp.open()
                 empty_loop_count = 0
                 arduino_logger.info("Connection succeful")
-                row = db.select_activity()
-                current_state = Markup(row[0][0])
-                input_queue.put(current_state)
+                init_actuators_state(db)
             except OSError as err:
                 arduino_logger.error(err)
                 return
