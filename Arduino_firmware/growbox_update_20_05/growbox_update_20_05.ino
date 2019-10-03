@@ -86,10 +86,19 @@ boolean fanState = true;         // Current fan state
 unsigned long lastFanTime = 0;
 String commandStr = "";          // Raw command string from RPi
 
-
 void setup(void) {
-  EEPROM.get(EEPROM_ADDR, aCoeff);       // read current pH sensor's "a" coefficient
-  EEPROM.get(EEPROM_ADDR + 50, bCoeff);  // read current pH sensor's "b" coefficient
+  long res1 = 0, res2 = 0;
+  // Read current pH sensor's "a" and "b" coefficients in temporary variables
+  EEPROM.get(EEPROM_ADDR, res1);
+  EEPROM.get(EEPROM_ADDR + 50, res2);
+  // If res1 and res2 are equal to 0xFFFFFFFF
+  if (res1 == -1 || res2 == -1) {
+    aCoeff = 0;
+    bCoeff = 0;
+  } else {
+    EEPROM.get(EEPROM_ADDR, aCoeff);       // Read current pH sensor's "a" coefficient
+    EEPROM.get(EEPROM_ADDR + 50, bCoeff);  // Read current pH sensor's "b" coefficient
+  }
   Serial.begin(9600);
   pinMode(TDS_PIN, INPUT);
   tempSensor.begin();
@@ -157,6 +166,11 @@ void loop(void) {
     }
     pHVoltage = trimmedMean(pHArray, PH_ARR_LEN) * (float)VREF / 1023.0;
     pHValue = aCoeff * pHVoltage + bCoeff;
+    if (pHValue > 14.0) {
+      pHValue = 14.0;
+    } else if (pHValue < 0) {
+      pHValue = 0;
+    }
     // TDS read the analog value and store into the buffer
     tdsBuffer[tdsBufferIndex] = analogRead(TDS_PIN);
     tdsBufferIndex++;
