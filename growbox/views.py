@@ -397,14 +397,15 @@ def apply_net_settings():
 def update_system():
     if not is_connected():
         return make_response("", 403)
-    ret = os.system("echo Update")  # Testing
-    time.sleep(5)  # Testing
-    # ret = os.system("git pull origin master") # Uncomment to update
-    if ret == 0:
-        views_logger.info("System update")
-        return make_response("", 200)
-    else:
+    command = ["git", "pull", "origin", "stable"]
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError:
+        views_logger.error("Error updating application")
         return make_response("", 500)
+    else:
+        views_logger.info("The application has been updated")
+        return make_response("", 200)
 
 
 @main.route("/apply_time", methods=["POST"])
