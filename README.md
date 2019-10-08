@@ -1,8 +1,10 @@
 # GrowBox
-GrowBox is a hydroponic plant growing system.
 
+GrowBox is a hydroponic plant growing system.
 This repository contains the source code of Raspberry Pi and Arduino Leonardo, which connects a set of sensors and actuators to maintain the microclimate in the growbox.
-## License:
+
+## License
+
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
