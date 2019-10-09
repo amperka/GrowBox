@@ -184,8 +184,8 @@ void loop(void) {
         clock.read();
         clock.getTimeStamp(time, date, weekDay);
 
-        // Lamp ON at 6:00 and OFF at 00:00 or at 18:00
-        if ((clock.getHour() > LAMP_ON_TIME) && (clock.getHour() < (LAMP_ON_TIME + lampState)) && lampOn) {
+        // Lamp ON at 5:00 and OFF at 23:00 or at 17:00
+        if ((clock.getHour() >= LAMP_ON_TIME) && (clock.getHour() < (LAMP_ON_TIME + lampState)) && lampOn) {
             digitalWrite(LAMP_PIN, HIGH);
         } else {
             digitalWrite(LAMP_PIN, LOW);
