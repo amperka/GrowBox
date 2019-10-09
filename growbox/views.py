@@ -2,50 +2,47 @@
 # -*- coding: utf-8 -*-
 # Standard library imports
 import os
-import sys
-import signal
 import subprocess
 import shutil
-import threading
-import queue
 import random
 import json
 import time
 import logging
+import signal
 from datetime import datetime
 
 # Third party imports
-from flask import Flask, render_template, make_response, request, Markup
+from flask import render_template, make_response, request, Markup, Blueprint
 import requests
 from requests.exceptions import HTTPError
 from crontab import CronTab
 
 # Local application imports
-import usb_camera
-import serial_port
-import sqlite
+from growbox import usb_camera, systime_settings
+from growbox.arduino_thread import input_queue, ARRAY_LEN, lock, sensors_dict
+from growbox.database import get_db
 
-os.chdir("/home/pi/Projects/Test1/GrowBox/")  # For autostart change path
+main = Blueprint("main", __name__)
 
-app = Flask(__name__)
+views_logger = logging.getLogger(__name__)
 
 
 # Return index page
-@app.route("/")
-@app.route("/index")
+@main.route("/")
+@main.route("/index")
 def index():
     return render_template("index.html", title="Главное меню", lock="/lock")
 
 
 # Return measurements page
-@app.route("/measurements")
+@main.route("/measurements")
 def measurements():
     template_data = {"title": "Измерения", "goback": "/index"}
     return render_template("measurements/measurements.html", **template_data)
 
 
 # Return a specific sensor measurement
-@app.route("/measurements/<param>")
+@main.route("/measurements/<param>")
 def spec_measurements(param):
     if param == "temp":
         title = "Температура"
@@ -64,42 +61,42 @@ def spec_measurements(param):
 
 
 # Return dynamic measurements
-@app.route("/temp_measure")
+@main.route("/temp_measure")
 def temp_meas():
     with lock:
-        ret_val = str(temp)
+        ret_val = str(sensors_dict["temp"])
     return ret_val
 
 
-@app.route("/ph_measure")
+@main.route("/ph_measure")
 def ph_meas():
     with lock:
-        ret_val = str(ph)
+        ret_val = str(sensors_dict["ph"])
     return ret_val
 
 
-@app.route("/tds_measure")
+@main.route("/tds_measure")
 def tds_meas():
     with lock:
-        ret_val = str(tds)
+        ret_val = str(sensors_dict["tds"])
     return ret_val
 
 
-@app.route("/co2_measure")
+@main.route("/co2_measure")
 def co2_meas():
     with lock:
-        ret_val = str(co2)
+        ret_val = str(sensors_dict["co2"])
     return ret_val
 
 
 # Camera control
-@app.route("/camera")
+@main.route("/camera")
 def camera():
     template_data = {"title": "Камера", "goback": "/index"}
     return render_template("camera/camera.html", **template_data)
 
 
-@app.route("/camera/photo")
+@main.route("/camera/photo")
 def photo():
     img1_exist = os.path.isfile("./static/img/img1.jpg")
     img2_exist = os.path.isfile("./static/img/img2.jpg")
@@ -137,7 +134,7 @@ def photo():
     return render_template("camera/photo.html", **template_data)
 
 
-@app.route("/make_photo/<img>")
+@main.route("/make_photo/<img>")
 def make_photo(img):
     camera = usb_camera.PiCamera(0)
     if img == "img1":
@@ -147,22 +144,29 @@ def make_photo(img):
     try:
         camera.capture("./static/img/" + name, resize=(480, 320))
     except RuntimeError:
-        logger.error("Photo is not created")
+        views_logger.error("Photo is not created")
         return make_response("", 403)
     else:
         return make_response("", 200)
     finally:
-        logger.debug("Camera close")
+        views_logger.debug("Camera close")
         camera.close()
 
 
-@app.route("/clear_photo")
+@main.route("/clear_photo")
 def clear_photo():
-    os.system("rm -f ./static/img/img*")
-    return make_response("", 200)
+    command = "rm -f ./static/img/img*"
+    try:
+        subprocess.run(command, shell=True, check=True)
+    except subprocess.CalledProcessError as err:
+        views_logger.error("clear_photo: Delete error", err)
+        return make_response("", 500)
+    else:
+        views_logger.info("clear_photo: Frames successfully deleted")
+        return make_response("", 200)
 
 
-@app.route("/camera/video")
+@main.route("/camera/video")
 def video():
     record_status = check_videorecord()
     if record_status:
@@ -182,30 +186,30 @@ def video():
     return render_template("camera/video.html", **template_data)
 
 
-@app.route("/start_record")
+@main.route("/start_record")
 def start_record():
     try:
         camera = usb_camera.PiCamera(0)
         if not camera.check_connection():
             raise RuntimeError
     except RuntimeError:
-        logger.error("Camera is not connected")
+        views_logger.error("Camera is not connected")
         return make_response("", 403)
     finally:
         camera.close()
     my_cron = CronTab(user="pi")
     for job in my_cron:
         if job.comment == "Growbox":
-            return make_response("", 403)
+            return make_response("", 500)
     curr_dir = os.getcwd()
-    command = curr_dir + "/usb_camera.py"
+    command = curr_dir + "/growbox/usb_camera.py"
     job = my_cron.new(command=command, comment="Growbox")
     job.every(1).hours()
     my_cron.write()
     return make_response("", 200)
 
 
-@app.route("/finish_record")
+@main.route("/finish_record")
 def finish_record():
     my_cron = CronTab(user="pi")
     for job in my_cron:
@@ -216,39 +220,39 @@ def finish_record():
     return make_response("", 403)
 
 
-@app.route("/remove_frames")
+@main.route("/remove_frames")
 def remove_frames():
     if len(os.listdir("/home/pi/Pictures")) == 0:
-        logger.debug("Pictures directory is empty")
+        views_logger.debug("Pictures directory is empty")
         return make_response("", 403)
     try:
         command = "rm -f /home/pi/Pictures/*"
         subprocess.run(command, shell=True, check=True)
     except subprocess.CalledProcessError as err:
-        logger.error("remove_frames: Delete error", err)
+        views_logger.error("remove_frames: Delete error", err)
         return make_response("", 500)
     else:
-        logger.info("remove_frames: Frames successfully deleted")
+        views_logger.info("remove_frames: Frames successfully deleted")
         return make_response("", 200)
 
 
-@app.route("/remove_video")
+@main.route("/remove_video")
 def remove_video():
     if os.path.exists("./static/img/timelapse.mp4"):
         try:
             command = ["rm", "-f", "./static/img/timelapse.mp4"]
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
-            logger.error("remove_video: Delete error", err)
+            views_logger.error("remove_video: Delete error", err)
             return make_response("", 500)
         else:
-            logger.info("remove_video: Video successfully deleted")
+            views_logger.info("remove_video: Video successfully deleted")
             return make_response("", 200)
-    logger.warning("remove_video: Video not exist, nothing to delete")
+    views_logger.warning("remove_video: Video not exist, nothing to delete")
     return make_response("", 404)
 
 
-@app.route("/make_video")
+@main.route("/make_video")
 def make_video():
     if len(os.listdir("/home/pi/Pictures")) != 0:
         command = [
@@ -269,18 +273,18 @@ def make_video():
         try:
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as err:
-            logger.error("make_video: Video creating error", err)
+            views_logger.error("make_video: Video creating error", err)
             return make_response("", 500)
         else:
-            logger.info("make_video: Video is created")
+            views_logger.info("make_video: Video is created")
             return make_response("", 200)
     return make_response("", 403)
 
 
 # GrowBox settings
-@app.route("/settings")
+@main.route("/settings")
 def settings():
-    row = sql.select_activity()
+    row = get_db().select_activity()
     data = Markup(row[0][0])
     return render_template(
         "/settings/settings.html",
@@ -290,11 +294,11 @@ def settings():
     )
 
 
-@app.route("/accept_settings", methods=["POST"])
+@main.route("/accept_settings", methods=["POST"])
 def accept_setting():
     content = request.json
     input_queue.put(str(content))
-    sql.update_activity(str(content))
+    get_db().update_activity(str(content))
     return (
         json.dumps({"success": True}),
         200,
@@ -303,18 +307,18 @@ def accept_setting():
 
 
 # Teacher settings
-@app.route("/login")
+@main.route("/login")
 def secret_page():
     template_data = {"title": "Регистрация", "goback": "/index"}
     return render_template("/settings/login.html", **template_data)
 
 
-@app.route("/lock")
+@main.route("/lock")
 def lock_page():
     return render_template("/lock.html")
 
 
-@app.route("/teacher_settings", methods=["POST"])
+@main.route("/teacher_settings", methods=["POST"])
 def log_in():
     content = request.json
     passwd = content["passwd"]
@@ -327,13 +331,13 @@ def log_in():
     return make_response("", 403)
 
 
-@app.route("/teacher_page")
+@main.route("/teacher_page")
 def teacher_page():
     template_data = {"title": "Настройки", "goback": "/index"}
     return render_template("/settings/teacher_settings.html", **template_data)
 
 
-@app.route("/teacher_page/<settings>")
+@main.route("/teacher_page/<settings>")
 def teacher_settings(settings):
     ret_val = "/settings/" + settings + ".html"
     if settings == "time_settings":
@@ -352,7 +356,7 @@ def teacher_settings(settings):
     return render_template(ret_val, **template_data)
 
 
-@app.route("/apply_net_settings", methods=["POST"])
+@main.route("/apply_net_settings", methods=["POST"])
 def apply_net_settings():
     content = request.json
     login = content["login"]
@@ -389,21 +393,22 @@ def apply_net_settings():
         )
 
 
-@app.route("/update_system")
+@main.route("/update_system")
 def update_system():
     if not is_connected():
         return make_response("", 403)
-    ret = os.system("echo Update")  # Testing
-    time.sleep(5)  # Testing
-    # ret = os.system("git pull origin master") # Uncomment to update
-    if ret == 0:
-        logger.info("System update")
-        return make_response("", 200)
+    command = ["git", "pull", "origin", "stable"]
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError:
+        views_logger.error("Error updating application")
+        return make_response("", 500)
     else:
-        return make_response("", 403)
+        views_logger.info("The application has been updated")
+        return make_response("", 200)
 
 
-@app.route("/apply_time", methods=["POST"])
+@main.route("/apply_time", methods=["POST"])
 def apply_time():
     content = request.json
     date = content["set-date"]
@@ -412,7 +417,15 @@ def apply_time():
     # Reverse string from %dd-%mm-%yyyy to %yyyy-%mm-%dd
     date = "-".join(date.split("-")[::-1])
     datetime_set = date + " " + time
-    set_systime(datetime_set)
+    try:
+        systime_settings.set_systime(datetime_set)
+    except subprocess.CalledProcessError:
+        views_logger.error("Error setting the system time")
+        return (
+            json.dumps({"success": False}),
+            500,
+            {"ContentType": "application/json"},
+        )
 
     datetime_obj = datetime.strptime(datetime_set, "%Y-%m-%d %H:%M")
     fmt_datetime = {"setTime": datetime_obj.strftime("%a %b %d %H:%M:%S %Y")}
@@ -425,7 +438,7 @@ def apply_time():
     )
 
 
-@app.route("/calibration/<param>")
+@main.route("/calibration/<param>")
 def calibration(param):
     if param == "four":
         command = json.dumps({"calibrate": 4})
@@ -440,19 +453,19 @@ def calibration(param):
     )
 
 
-@app.route("/download/<param>")
+@main.route("/download/<param>")
 def download(param):
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
-        logger.error("download/" + param + ": USB-device not found")
+        views_logger.error("download/" + param + ": USB-device not found")
         return make_response("", 403)
     usb_path = "/media/pi/" + media_dir[0]
     if param == "log":
         try:
             shutil.copy("./growbox.log", usb_path)
         except Exception as err:
-            logger.error("download/" + param + ": Copy error")
-            logger.error(err)
+            views_logger.error("download/" + param + ": Copy error")
+            views_logger.error(err)
             return make_response("", 500)
         return make_response("", 200)
     elif param == "video":
@@ -460,80 +473,77 @@ def download(param):
             try:
                 shutil.copy("./static/img/timelapse.mp4", usb_path)
             except Exception as err:
-                logger.error("download/" + param + ": Copy error")
-                logger.error(err)
+                views_logger.error("download/" + param + ": Copy error")
+                views_logger.error(err)
                 return make_response("", 500)
             return make_response("", 200)
         else:
-            logger.error("download/" + param + ": Video not exist")
+            views_logger.error("download/" + param + ": Video not exist")
             return make_response("", 404)
 
 
-@app.route("/extract_usb")
+@main.route("/extract_usb")
 def extract_usb():
     media_dir = os.listdir("/media/pi")
     if len(media_dir) == 0:
-        logger.error("extract_usb: USB-device not found")
+        views_logger.error("extract_usb: USB-device not found")
         return make_response("", 403)
     command = ["sudo", "umount", "/dev/sda1"]
     try:
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as err:
-        logger.error("extract_usb: umount error", err)
+        views_logger.error("extract_usb: umount error", err)
         return make_response("", 500)
     return make_response("", 200)
 
 
-@app.route("/shutdown/<param>")
+@main.route("/shutdown/<param>")
 def shutdown(param):
-    stop_ser_thread()
+    os.kill(os.getpid(), signal.SIGTERM)
     shutdown_server = request.environ.get("werkzeug.server.shutdown")
     if shutdown_server is None:
-        raise RuntimeError("Shutdown server is not available")
+        views_logger.error("Shutdown server is not available")
+        return make_response("", 500)
     else:
         shutdown_server()
         if param == "reboot":
-            os.system("sleep 20 && sudo reboot &")
+            views_logger.debug("System reboot")
+            os.system("sleep 10 && sudo reboot &")
             return make_response("", 200)
         elif param == "shutdown":
-            os.system("sleep 20 && sudo shutdown -h now &")
+            views_logger.debug("System shutdown")
+            os.system("sleep 10 && sudo shutdown -h now &")
             return make_response("", 200)
 
 
 # Charts pages
-@app.route("/charts")
+@main.route("/charts")
 def charts():
     template_data = {"title": "Журнал", "goback": "/index"}
     return render_template("charts/charts.html", **template_data)
 
 
-@app.route("/charts/<param>")
-def temp_chart(param):
+@main.route("/charts/<param>")
+def chart_page(param):
     if param == "temp":
-        template_data = {"label": "Температура", "banner": "температуры"}
-        title = "Журнал температуры"
+        template_data = {"label": "Температура", "title": "Журнал температуры"}
     if param == "acidity":
-        template_data = {
-            "label": "Уровень кислотности pH",
-            "banner": "уровня кислотности pH",
-        }
-        title = "Журнал уровня кислотности"
+        template_data = {"label": "Уровень pH", "title": "Журнал уровня pH"}
     if param == "saline":
-        template_data = {"label": "Уровень солей", "banner": "уровня солей"}
-        title = "Журнал уровня солей"
+        template_data = {
+            "label": "Уровень солей",
+            "title": "Журнал уровня солей",
+        }
     if param == "carbon":
-        template_data = {"label": "Уровень CO2", "banner": "уровня CO2"}
-        title = "Журнал концентрации углекислого газа"
-    return render_template(
-        "charts/month_chart.html",
-        param=param,
-        title=title,
-        goback="/charts",
-        **template_data
-    )
+        template_data = {
+            "label": "Уровень CO2",
+            "title": "Журнал концентрации углекислого газа",
+        }
+    template_data.update({"param": param, "goback": "/charts"})
+    return render_template("charts/month_chart.html", **template_data)
 
 
-@app.route("/charts/draw_chart", methods=["POST"])
+@main.route("/charts/draw_chart", methods=["POST"])
 def draw_chart():
     if request.json:
         param = request.json["param"]
@@ -562,13 +572,13 @@ def draw_chart():
 
 
 # About plants
-@app.route("/info")
+@main.route("/info")
 def info():
     template_data = {"title": "Справка", "goback": "/index"}
     return render_template("/info/info.html", **template_data)
 
 
-@app.route("/info/<plant>")
+@main.route("/info/<plant>")
 def select_plant(plant):
     ret_val = "/info/" + plant + ".html"
     if plant == "salad":
@@ -577,13 +587,10 @@ def select_plant(plant):
         title = "Фасоль"
     elif plant == "oats":
         title = "Oвёс"
+    elif plant == "basil":
+        title = "Базилик"
     template_data = {"title": title, "goback": "/info"}
     return render_template(ret_val, **template_data)
-
-
-@app.route("/dynamicCharts")
-def dynamic_temp():
-    return render_template("dynamicCharts.html")
 
 
 def month_data(param):
@@ -627,7 +634,7 @@ def hour_data(param):
 
 
 def prepare_data(param, from_time, to_time, limit):
-    data = sql.select_sensors(
+    data = get_db().select_sensors(
         param, from_time=from_time, to_time=to_time, limit=limit
     )
 
@@ -641,24 +648,6 @@ def prepare_data(param, from_time, to_time, limit):
         labels = prep[0]
         data = prep[1]
     return error, data, labels
-
-
-def insert_data_into_db(temp, ph, tds, co2, lvl):
-    global array_pivot, circular_array
-
-    circular_array[array_pivot] = (
-        float(temp),
-        float(ph),
-        float(tds),
-        float(co2),
-    )
-    array_pivot += 1
-    if array_pivot == ARRAY_LEN:
-        s = tuple([round(sum(x) / ARRAY_LEN, 2) for x in zip(*circular_array)])
-        sql.insert_sensors(
-            temp=s[0], carbon=s[3], acidity=s[1], saline=s[2], level=lvl
-        )
-        array_pivot = 0
 
 
 def check_videorecord():
@@ -676,156 +665,10 @@ def is_connected():
         # If response not successful, raise exception
         response.raise_for_status()
     except HTTPError as http_err:
-        logger.error("is_connected: HTTP error", http_err)
+        views_logger.error("is_connected: HTTP error", http_err)
         return False
     except Exception as err:
-        logger.error("is_connected: Other error", err)
+        views_logger.error("is_connected: Other error", err)
     else:
-        logger.info("is_connected: Success connection")
+        views_logger.info("is_connected: Success connection")
         return True
-
-
-def read_arduino():
-    global temp, ph, tds, co2, lvl
-
-    arduino_path = auto_detect_serial()
-    if arduino_path is not None:
-        sp = serial_port.SerialPort(arduino_path)
-    else:
-        logger.error("Arduino not connected")
-        sys.exit(1)
-
-    try:
-        sp.open()
-    except OSError as err:
-        logger.error(err)
-        return
-
-    data = {"temp": 0, "carb": 0, "acid": 0, "salin": 0, "level": 0}
-    empty_loop_count = 0
-    reconnect_count = 0
-    first_data_pack_flag = False
-    while True:
-        try:
-            if not input_queue.empty():
-                command_data = input_queue.get()
-                if command_data == "Exit":
-                    break
-                sp.write_serial(command_data.encode())
-                logger.debug("Write data to serial " + command_data)
-
-            while sp.serial_available():
-                empty_loop_count = 0
-                data = json.loads(sp.read_serial())
-                if not first_data_pack_flag:
-                    reconnect_count = 0
-                    current_time = datetime.fromtimestamp(data["time"])
-                    set_systime(str(current_time))
-                    first_data_pack_flag = True
-            empty_loop_count += 1
-            if empty_loop_count > 10:
-                raise RuntimeError("Time is over")
-        except (RuntimeError, OSError):
-            sp.close()
-            logger.error("Serial port disconnect")
-            logger.info("Try to reconnect")
-            reconnect_count += 1
-            if reconnect_count > 3:
-                logger.info(
-                    "Reconnection limit. Please restart your computer."
-                )
-                sys.exit(1)
-            time.sleep(10)
-            arduino_path = auto_detect_serial()
-            if arduino_path is not None:
-                sp = serial_port.SerialPort(arduino_path)
-            else:
-                logger.error("Arduino not connected")
-                sys.exit(1)
-            if sp.open():
-                empty_loop_count = 0
-                logger.info("Connection succeful")
-                input_queue.put(current_state)
-
-        with lock:
-            temp = data["temp"]
-            ph = data["acid"]
-            tds = data["salin"]
-            co2 = data["carb"]
-            lvl = data["level"]
-            insert_data_into_db(temp, ph, tds, co2, lvl)
-
-        time.sleep(1)
-    sp.close()
-    logger.debug("Serial port thread successfully terminated")
-
-
-def auto_detect_serial():
-    import glob
-
-    path = glob.glob("/dev/ttyACM*")
-    if len(path) > 0:
-        return path[0]
-    else:
-        return None
-
-
-def set_systime(date_time):
-    os.system("sudo date --set='" + date_time + "'")
-
-
-def stop_ser_thread():
-    input_queue.put("Exit")
-    arduino_thread.join()
-
-
-def sigint_handler(signum, frame):
-    print("Process was terminated by pressing Ctrl+c")
-    stop_ser_thread()
-    print("Exit application")
-    sys.exit(1)
-
-
-if __name__ == "__main__":
-
-    temp, ph, tds, co2, lvl = ("0", "0", "0", "0", "0")
-    input_queue = queue.Queue(1)
-
-    ARRAY_LEN = 600
-    circular_array = [0] * ARRAY_LEN
-    array_pivot = 0
-
-    # Create own logger
-    logger = logging.getLogger("server")
-    logger.setLevel(logging.DEBUG)
-
-    # Create logging file handler
-    file_handler = logging.FileHandler("growbox.log")
-    date_format = "%Y-%m-%d %H:%M:%S"
-    message_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    formatter = logging.Formatter(message_format, date_format)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-    logger.info("Server started")
-
-    # Create database for sensors and activities
-    sql = sqlite.Sqlite("./sensorsData.db")
-    # Create sensors and activity tables in database
-    sql.create_sensors()
-    sql.create_activity()
-    row = sql.select_activity()
-    current_state = Markup(row[0][0])
-    input_queue.put(current_state)
-
-    # Create mutex for sensors data
-    lock = threading.Lock()
-
-    # Create and run Arduino thread
-    arduino_thread = threading.Thread(target=read_arduino)
-    arduino_thread.daemon = True
-    arduino_thread.start()
-
-    signal.signal(signal.SIGINT, sigint_handler)
-
-    app.run(host="0.0.0.0", debug=False, threaded=True)

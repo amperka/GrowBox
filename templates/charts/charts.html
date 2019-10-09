@@ -1,37 +1,51 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="row py-2">
-                <!-- Температура -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/temp" role="button">
-                    <p class="h2">Температура</p>
-                </a>
+  <div class="row">
+    <div class="col">
+      <div class="row py-2">
+        <!-- Температура -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/charts/temp"
+          role="button"
+        >
+          <p class="h2">Температура</p>
+        </a>
+      </div>
 
-            </div>
+      <div class="row py-2">
+        <!-- Уровень pH -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/charts/acidity"
+          role="button"
+        >
+          <p class="h2">Уровень pH</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!-- Уровень pH -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/acidity" role="button">
-                    <p class="h2">Уровень pH</p>
-                </a>
-            </div>
+      <div class="row py-2">
+        <!-- Уровень солей -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/charts/saline"
+          role="button"
+        >
+          <p class="h2">Солёность</p>
+        </a>
+      </div>
 
-            <div class="row py-2">
-                <!-- Уровень солей -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/saline" role="button">
-                    <p class="h2">Солёность</p>
-                </a>
-            </div>
-
-            <div class="row py-2">
-                <!-- Уровень CO <sub>2</sub> -->
-                <a class="btn btn-success btn-lg btn-block p-3" href="/charts/carbon" role="button">
-                    <p class="h2">Углекислый газ</p>
-                </a>
-            </div>
-        </div>
+      <div class="row py-2">
+        <!-- Уровень CO <sub>2</sub> -->
+        <a
+          class="btn btn-success btn-lg btn-block p-3"
+          href="/charts/carbon"
+          role="button"
+        >
+          <p class="h2">Углекислый газ</p>
+        </a>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

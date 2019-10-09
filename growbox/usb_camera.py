@@ -2,7 +2,7 @@
 import cv2
 import logging
 
-camera_logger = logging.getLogger("server.camera")
+camera_logger = logging.getLogger(__name__)
 
 
 class PiCamera:

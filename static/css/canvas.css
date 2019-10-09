@@ -1,16 +1,18 @@
-#temp-canv, #ph-canv, #tds-canv {
-	position: absolute;
-	top: 800px;
-	bottom: 0;
-	right: 0;
-	left: 0;
-	margin: auto;
+#temp-canv,
+#ph-canv,
+#tds-canv {
+  position: absolute;
+  top: 800px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
 }
 #co2-canv {
-	position: absolute;
-	top: 0px;
-	bottom: 0;
-	right: 0;
-	left: 0;
-	margin: auto;
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
 }
