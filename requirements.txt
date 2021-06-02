@@ -11,5 +11,5 @@ python-crontab==2.3.9
 python-dateutil==2.8.0
 requests==2.22.0
 six==1.12.0
-urllib3==1.25.5
+urllib3==1.26.5
 Werkzeug==0.16.0
