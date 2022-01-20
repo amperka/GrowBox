@@ -33,6 +33,10 @@ Activities:
 #define PH_PIN A3 // pH sensor
 #define TDS_PIN A2 // TDS sensor
 #define ONE_WIRE_BUS 6 // Temperature (ds18b20)
+#define TEST_JUMPER_1_PIN 5 // Jumper 1 to enter the test mode
+#define TEST_JUMPER_2_PIN 4 // Jumper 2 to enter the test mode
+#define LED_PIN 13 // LED to indicate testing mode
+
 // Settings for measurments
 #define PH_ARR_LEN 40 // Number of samples of pH sensor
 #define VREF 5.0 // Analog reference voltage(Volt) of the ADC
@@ -46,6 +50,9 @@ Activities:
 #define LEN_TIME 12 // Size of time array
 #define LEN_DATE 12 // Size of date array
 #define LEN_DOW 12 // Size of day array
+
+// Board testing
+bool itIsTesting = false;
 
 // pH
 int pHArray[PH_ARR_LEN]; // Store the average value of the sensor feedback
@@ -87,6 +94,20 @@ unsigned long lastFanTime = 0;
 String commandStr = ""; // Raw command string from RPi
 
 void setup(void) {
+    Serial.begin(9600);
+    pinMode(TEST_JUMPER_1_PIN, INPUT_PULLUP);
+    pinMode(TEST_JUMPER_2_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+
+    if (!digitalRead(TEST_JUMPER_1_PIN) && !digitalRead(TEST_JUMPER_2_PIN)) {
+        itIsTesting = 1;
+        digitalWrite(LED_PIN, 1);
+        Serial1.begin(9600);
+        Serial1.println("INFO: Testing mode");
+    } else {
+        digitalWrite(LED_PIN, 0);
+    }
+
     long res1 = 0, res2 = 0;
     // Read current pH sensor's "a" and "b" coefficients in temporary variables
     EEPROM.get(EEPROM_ADDR, res1);
@@ -99,18 +120,26 @@ void setup(void) {
         EEPROM.get(EEPROM_ADDR, aCoeff); // Read current pH sensor's "a" coefficient
         EEPROM.get(EEPROM_ADDR + 50, bCoeff); // Read current pH sensor's "b" coefficient
     }
-    Serial.begin(9600);
+
     pinMode(TDS_PIN, INPUT);
-    tempSensor.begin();
-    ccs.begin();
-    while (!ccs.available())
-        ;
-    float temp = ccs.calculateTemperature();
-    ccs.setTempOffset(temp - 25.0);
+
+    if (!itIsTesting) {
+        tempSensor.begin();
+        while (!ccs.begin())
+            ;
+        while (!ccs.available())
+            ;
+
+        float temp = ccs.calculateTemperature();
+        ccs.setTempOffset(temp - 25.0);
+    }
+
     pinMode(LAMP_PIN, OUTPUT);
     pinMode(FAN_PIN, OUTPUT);
     pinMode(COMP_PIN, OUTPUT);
-    clock.begin();
+
+    if (!itIsTesting)
+        clock.begin();
 }
 
 void loop(void) {
@@ -180,6 +209,13 @@ void loop(void) {
 
     // Every 2 seconds, send a data for RPi to Serial port
     if (millis() - printTime > PRINT_TIME) {
+
+        if (itIsTesting) {
+            Serial.println("{ \"temp\" : " + String(0) + ", \"acid\" : " + String(pHValue) + ", \"salin\" : " + String(tdsValue) + ", \"carb\" : " + String(0) + ", \"level\" : " + String(lvlState) + ", \"lmp\" : " + String(lampOn) + ", \"lmpMd\" : " + String(lampState) + ", \"fan\" : " + String(fanOn) + ", \"fanMd\" : " + String(fanTime) + ", \"compr\" : " + String(compressorOn) + ", \"time\" : " + String(0) + " }");
+            printTime = millis();
+            return;
+        }
+
         // Read and save current time, date and day of week
         clock.read();
         clock.getTimeStamp(time, date, weekDay);
@@ -338,3 +374,4 @@ void calibratePH(int calibratePoint) {
         accSeven = 0;
     }
 }
+
