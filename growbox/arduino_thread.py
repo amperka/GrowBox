@@ -56,7 +56,7 @@ def read_arduino(db):
                 data = json.loads(sp.read_serial())
                 if not first_data_pack_flag:
                     reconnect_count = 0
-                    current_time = datetime.fromtimestamp(data["time"])
+                    current_time = datetime.utcfromtimestamp(data["time"])
                     systime_settings.set_systime(str(current_time))
                     first_data_pack_flag = True
             empty_loop_count += 1
